@@ -111,12 +111,14 @@ Recommended flow:
 
 1. OpenTofu creates the Multipass virtual machines.
 2. OpenTofu outputs IP addresses and node metadata.
-3. Ansible consumes the generated inventory.
-4. Ansible runs Productive K3S in `server` mode on the first node.
-5. Ansible retrieves or receives the K3S token.
-6. Ansible runs Productive K3S in `agent` mode on the remaining nodes.
-7. Ansible runs Productive K3S in `stack` mode once the cluster is assembled.
+3. The use case generates a reusable inventory plus cluster metadata files.
+4. `productive-k3s` runs in `server` mode on the first node.
+5. The K3S server token is captured from that node.
+6. `productive-k3s` runs in `agent` mode on the remaining nodes.
+7. `productive-k3s` runs in `stack` mode once the cluster is assembled.
 8. Validation checks confirm node readiness, storage, ingress, and core services.
+
+The first implemented public path for that flow is [`use-cases/multipass`](./use-cases/multipass/README.md).
 
 ## License
 

@@ -1,0 +1,8 @@
+#cloud-config
+package_update: false
+package_upgrade: false
+manage_etc_hosts: true
+write_files:
+  - path: /etc/motd
+    content: |
+      Productive K3S Multipass server node
