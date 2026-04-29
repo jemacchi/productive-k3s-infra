@@ -54,26 +54,6 @@ productive-k3s-infra/
   docs/
 ```
 
-## Open vs. Pro boundary
-
-This public repository should contain the use cases that help adoption and make the project easy to evaluate:
-
-- local Multipass environments
-- basic single-node cloud provisioning
-- basic on-premises provisioning
-- reusable low-level modules and roles
-
-Production-grade compositions such as HA clusters, hardened networking, backup/restore automation, upgrade workflows, and managed customer deployments can live in a private companion repository, for example:
-
-- `productive-k3s-infra-pro`
-
-That repository can consume this one through:
-
-- OpenTofu remote module sources
-- Ansible `requirements.yml`
-
-Submodules are not required for the intended architecture.
-
 ## Implemented Use Cases
 
 The public entry points of this repository live under [use-cases/](./use-cases/README.md).
