@@ -18,6 +18,25 @@ Productive K3S Infra focuses on the surrounding infrastructure:
 
 This repository is intended to provide **pre-assembled solutions**, not toy examples. For that reason, the main entry points are organized as `use-cases/`.
 
+## How This Repository Uses Productive K3S
+
+`productive-k3s-infra` does not reimplement cluster bootstrap logic. It delegates cluster installation to [Productive K3S](https://github.com/jemacchi/productive-k3s), and focuses on everything around it:
+
+- machine provisioning
+- inventory and node metadata
+- networking assumptions between nodes
+- orchestration of bootstrap phases
+- use-case-specific validation
+
+The infrastructure flows in this repository rely on the execution modes exposed by `productive-k3s`, especially:
+
+- `single-node`
+- `server`
+- `agent`
+- `stack`
+
+Those modes are documented and implemented in the `productive-k3s` repository. In this repository, they are treated as the bootstrap interface that each infrastructure use case can orchestrate.
+
 ## Repository structure
 
 ```text
@@ -55,70 +74,34 @@ That repository can consume this one through:
 
 Submodules are not required for the intended architecture.
 
-## Expected Productive K3S modes
+## Implemented Use Cases
 
-To support infrastructure-driven provisioning, Productive K3S should evolve from a single default installer into a small set of explicit modes.
+The public entry points of this repository live under [use-cases/](./use-cases/README.md).
 
-Recommended sequence:
+Current documented paths include:
 
-### 1. `single-node` mode
+- [Multipass](./use-cases/multipass/README.md): local three-node cluster with `1` server, `2` agents, shared stack installation, and validation
+- [AWS single-node](./use-cases/aws-single-node/README.md): basic single-node cloud path
+- [On-prem basic](./use-cases/onprem-basic/README.md): bootstrap existing machines by declaring a `server` IP and optional `agent` IPs over SSH, with public validation on `single-host` and `server + agent` layouts
 
-Default mode. Installs a complete Productive K3S stack on one machine.
+Each use case should describe what is already implemented, how it is executed, and where its environment-specific documentation lives.
 
-This is the current primary use case and should remain the simplest path.
+## Use Case Documentation
 
-### 2. `server` mode
+Operational details live inside each `use-case`, not in this root README.
 
-Installs a K3S server node.
+Use those documents for environment-specific flows, prerequisites, examples, and validation notes:
 
-Responsibilities:
+- [Multipass](./use-cases/multipass/README.md)
+- [On-prem basic](./use-cases/onprem-basic/README.md)
+- [AWS single-node](./use-cases/aws-single-node/README.md)
 
-- initialize or join the control plane
-- expose the K3S token or accept a provided token
-- configure server-specific components
-- avoid installing agent-only assumptions
+## Documentation Map
 
-### 3. `agent` mode
-
-Installs a K3S agent node.
-
-Responsibilities:
-
-- join an existing server
-- receive the server URL and cluster token
-- avoid initializing cluster-wide components
-
-### 4. `stack` mode
-
-Installs or validates the Productive K3S add-on stack after the cluster exists.
-
-This may include:
-
-- cert-manager
-- Longhorn
-- Rancher
-- internal registry
-- ingress configuration
-- validation checks
-
-This mode is useful for multi-node environments where infrastructure creation and cluster joining happen first, and application-level cluster services are installed afterwards.
-
-## Multipass provisioning flow
-
-The first full infrastructure use case should be Multipass because it allows local validation without requiring cloud credentials.
-
-Recommended flow:
-
-1. OpenTofu creates the Multipass virtual machines.
-2. OpenTofu outputs IP addresses and node metadata.
-3. The use case generates a reusable inventory plus cluster metadata files.
-4. `productive-k3s` runs in `server` mode on the first node.
-5. The K3S server token is captured from that node.
-6. `productive-k3s` runs in `agent` mode on the remaining nodes.
-7. `productive-k3s` runs in `stack` mode once the cluster is assembled.
-8. Validation checks confirm node readiness, storage, ingress, and core services.
-
-The first implemented public path for that flow is [`use-cases/multipass`](./use-cases/multipass/README.md).
+- Root overview: [README.md](./README.md)
+- Use case index: [use-cases/README.md](./use-cases/README.md)
+- Multipass details: [use-cases/multipass/README.md](./use-cases/multipass/README.md)
+- Productive K3S bootstrap project: [jemacchi/productive-k3s](https://github.com/jemacchi/productive-k3s)
 
 ## License
 
