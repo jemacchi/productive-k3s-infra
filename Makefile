@@ -2,7 +2,7 @@
 
 USE_CASES := multipass onprem-basic aws-single-node
 TESTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/tests
-export TELEMETRY_ENABLED ?= false
+export TELEMETRY_ENABLED ?=
 export TELEMETRY_ENDPOINT ?=
 export TELEMETRY_MAX_RETRIES ?= 3
 export TELEMETRY_CONNECT_TIMEOUT_SECONDS ?= 5

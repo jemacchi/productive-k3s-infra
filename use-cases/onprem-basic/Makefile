@@ -17,7 +17,7 @@ PRODUCTIVE_K3S_REPO ?= $(abspath $(USE_CASE_DIR)/../../../productive-k3s)
 PRODUCTIVE_K3S_SOURCE ?= local
 PRODUCTIVE_K3S_VERSION ?=
 PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s
-TELEMETRY_ENABLED ?= false
+TELEMETRY_ENABLED ?=
 TELEMETRY_ENDPOINT ?=
 TELEMETRY_MAX_RETRIES ?= 3
 TELEMETRY_CONNECT_TIMEOUT_SECONDS ?= 5
@@ -109,6 +109,8 @@ test-static:
 		fi; \
 	fi
 	$(MAKE) -n up >/dev/null
+	bash $(TESTS_DIR)/test-remote-telemetry-consent.sh
+	bash $(TESTS_DIR)/test-remote-cluster-up-preserves-telemetry.sh
 
 test-contract:
 	$(TESTS_DIR)/contract-check.sh onprem-basic

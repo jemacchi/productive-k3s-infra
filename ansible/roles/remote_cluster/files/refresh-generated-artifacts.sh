@@ -8,9 +8,9 @@ validate_productive_k3s_source
 
 mkdir -p "${GENERATED_DIR}"
 
-if [[ -z "${REMOTE_SERVER_IP}" && -f "${CLUSTER_JSON}" ]]; then
-  REMOTE_SERVER_IP="$(jq -r '.server.ipv4 // empty' "${CLUSTER_JSON}")"
-  REMOTE_AGENT_IPS="$(jq -r '.agents[].ipv4' "${CLUSTER_JSON}" | tr '\n' ' ')"
+if [[ -f "${CLUSTER_JSON}" ]]; then
+  REMOTE_SERVER_IP="${REMOTE_SERVER_IP:-$(jq -r '.server.ipv4 // empty' "${CLUSTER_JSON}")}"
+  REMOTE_AGENT_IPS="${REMOTE_AGENT_IPS:-$(jq -r '.agents[].ipv4' "${CLUSTER_JSON}" | tr '\n' ' ')}"
   REMOTE_CLUSTER_NAME="${REMOTE_CLUSTER_NAME:-$(jq -r '.cluster_name // empty' "${CLUSTER_JSON}")}"
   BASE_DOMAIN="${BASE_DOMAIN:-$(jq -r '.base_domain // empty' "${CLUSTER_JSON}")}"
   RANCHER_HOST="${RANCHER_HOST:-$(jq -r '.rancher_host // empty' "${CLUSTER_JSON}")}"
@@ -28,6 +28,8 @@ if [[ -z "${REMOTE_SERVER_IP}" && -f "${CLUSTER_JSON}" ]]; then
   TELEMETRY_OUTBOX_DIR="${TELEMETRY_OUTBOX_DIR:-$(jq -r '.telemetry.outbox_dir // empty' "${CLUSTER_JSON}")}"
   TELEMETRY_USER_AGENT="${TELEMETRY_USER_AGENT:-$(jq -r '.telemetry.user_agent // empty' "${CLUSTER_JSON}")}"
 fi
+
+resolve_telemetry_enabled
 
 require_node_inputs
 

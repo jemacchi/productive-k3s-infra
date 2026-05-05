@@ -43,6 +43,23 @@ if [[ -z "${cluster_name}" ]]; then
   mapfile -t agent_names < <(${TOFU} -chdir="${OPENTOFU_DIR}" output -json agent_names | jq -r '.[]')
 fi
 
+if [[ -f "${CLUSTER_JSON}" ]]; then
+  if [[ -z "${PRODUCTIVE_K3S_VERSION}" ]]; then
+    PRODUCTIVE_K3S_VERSION="$(jq -r '.productive_k3s.version // empty' "${CLUSTER_JSON}")"
+  fi
+  PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-$(jq -r '.productive_k3s.source // empty' "${CLUSTER_JSON}")}"
+  PRODUCTIVE_K3S_RELEASE_REPO="${PRODUCTIVE_K3S_RELEASE_REPO:-$(jq -r '.productive_k3s.release_repo // empty' "${CLUSTER_JSON}")}"
+  TELEMETRY_ENABLED="${TELEMETRY_ENABLED:-$(jq -r '.telemetry.enabled // false' "${CLUSTER_JSON}")}"
+  TELEMETRY_ENDPOINT="${TELEMETRY_ENDPOINT:-$(jq -r '.telemetry.endpoint // empty' "${CLUSTER_JSON}")}"
+  TELEMETRY_MAX_RETRIES="${TELEMETRY_MAX_RETRIES:-$(jq -r '.telemetry.max_retries // 3' "${CLUSTER_JSON}")}"
+  TELEMETRY_CONNECT_TIMEOUT_SECONDS="${TELEMETRY_CONNECT_TIMEOUT_SECONDS:-$(jq -r '.telemetry.connect_timeout_seconds // 5' "${CLUSTER_JSON}")}"
+  TELEMETRY_REQUEST_TIMEOUT_SECONDS="${TELEMETRY_REQUEST_TIMEOUT_SECONDS:-$(jq -r '.telemetry.request_timeout_seconds // 10' "${CLUSTER_JSON}")}"
+  TELEMETRY_OUTBOX_DIR="${TELEMETRY_OUTBOX_DIR:-$(jq -r '.telemetry.outbox_dir // empty' "${CLUSTER_JSON}")}"
+  TELEMETRY_USER_AGENT="${TELEMETRY_USER_AGENT:-$(jq -r '.telemetry.user_agent // empty' "${CLUSTER_JSON}")}"
+fi
+
+resolve_telemetry_enabled
+
 resolved_source="${PRODUCTIVE_K3S_SOURCE}"
 resolved_version="${PRODUCTIVE_K3S_VERSION}"
 resolved_telemetry_enabled="${TELEMETRY_ENABLED}"

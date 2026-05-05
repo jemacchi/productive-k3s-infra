@@ -11,7 +11,7 @@ export PRODUCTIVE_K3S_REPO ?= $(abspath $(USE_CASE_DIR)/../../../productive-k3s)
 export PRODUCTIVE_K3S_SOURCE ?= local
 export PRODUCTIVE_K3S_VERSION ?=
 export PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s
-export TELEMETRY_ENABLED ?= false
+export TELEMETRY_ENABLED ?=
 export TELEMETRY_ENDPOINT ?=
 export TELEMETRY_MAX_RETRIES ?= 3
 export TELEMETRY_CONNECT_TIMEOUT_SECONDS ?= 5
@@ -78,6 +78,9 @@ test-static: infra-init
 	$(TOFU_BIN) -chdir=$(OPENTOFU_DIR) init -backend=false
 	$(TOFU_BIN) -chdir=$(OPENTOFU_DIR) validate
 	$(MAKE) -n up TOFU_BIN=$(TOFU_BIN) >/dev/null
+	bash $(TESTS_DIR)/test-multipass-telemetry-consent.sh
+	bash $(TESTS_DIR)/test-multipass-telemetry-propagation.sh
+	bash $(TESTS_DIR)/test-multipass-cluster-up-preserves-telemetry.sh
 
 test-contract:
 	$(TESTS_DIR)/contract-check.sh multipass

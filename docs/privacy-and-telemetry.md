@@ -61,7 +61,9 @@ Interpretation of those events belongs on the receiving side, not in the local i
 
 `productive-k3s-infra` is the top-level orchestrator for matrix runs.
 
-- `TELEMETRY_ENABLED=false` is the default.
+- if `TELEMETRY_ENABLED` is set explicitly to `true` or `false`, that value is used as-is.
+- if `TELEMETRY_ENABLED` is unset and the run is interactive, `productive-k3s-infra` prompts once and defaults to `Yes`.
+- if `TELEMETRY_ENABLED` is unset and the run is non-interactive, it resolves to `false`.
 - if the root matrix sets `TELEMETRY_ENABLED=true`, that value is propagated into each use case.
 - each use case then propagates the same telemetry settings into the nested `productive-k3s` bootstrap commands.
 - standalone use-case runs can still override the same variables independently.

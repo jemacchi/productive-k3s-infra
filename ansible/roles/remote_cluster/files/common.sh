@@ -9,7 +9,7 @@ PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${USE_CASE_DIR}/../../../produ
 PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-local}"
 PRODUCTIVE_K3S_VERSION="${PRODUCTIVE_K3S_VERSION:-}"
 PRODUCTIVE_K3S_RELEASE_REPO="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s}"
-TELEMETRY_ENABLED="${TELEMETRY_ENABLED:-false}"
+TELEMETRY_ENABLED="${TELEMETRY_ENABLED:-}"
 TELEMETRY_ENDPOINT="${TELEMETRY_ENDPOINT:-}"
 TELEMETRY_MAX_RETRIES="${TELEMETRY_MAX_RETRIES:-3}"
 TELEMETRY_CONNECT_TIMEOUT_SECONDS="${TELEMETRY_CONNECT_TIMEOUT_SECONDS:-5}"
@@ -102,6 +102,47 @@ ensure_base_requirements() {
 
 ensure_logs_dir() {
   mkdir -p "${LOG_DIR}"
+}
+
+can_use_tty() {
+  [[ -t 0 && -t 1 && -r /dev/tty && -w /dev/tty ]]
+}
+
+prompt_yesno() {
+  local var="$1" default="$2" msg="$3"
+  local val
+  if can_use_tty; then
+    printf '%s [%s] (y/n): ' "${msg}" "${default}" > /dev/tty
+    IFS= read -r val < /dev/tty
+  else
+    printf '%s [%s] (y/n): ' "${msg}" "${default}"
+    IFS= read -r val
+  fi
+  val="${val:-$default}"
+  case "${val}" in
+    y|Y) printf -v "${var}" 'y' ;;
+    n|N) printf -v "${var}" 'n' ;;
+    *) warn "Invalid input, using default: ${default}"; printf -v "${var}" '%s' "${default}" ;;
+  esac
+}
+
+resolve_telemetry_enabled() {
+  if [[ -n "${TELEMETRY_ENABLED:-}" ]]; then
+    return 0
+  fi
+
+  if can_use_tty; then
+    local telemetry_consent="y"
+    prompt_yesno telemetry_consent "y" "Productive K3S Infra can send anonymous telemetry about this use case run to help improve the installation flow. It does not include any sensitive information like hostnames or other environment-specific identifiers. If enabled, this choice will also be propagated to the underlying productive-k3s bootstrap steps. Enable anonymous telemetry for this run?"
+    if [[ "${telemetry_consent}" == "y" ]]; then
+      TELEMETRY_ENABLED="true"
+    else
+      TELEMETRY_ENABLED="false"
+    fi
+    return 0
+  fi
+
+  TELEMETRY_ENABLED="false"
 }
 
 validate_productive_k3s_source() {
@@ -310,6 +351,27 @@ load_cluster_metadata() {
   mapfile -t AGENT_IPS < <(jq -r '.agents[].ipv4' "${CLUSTER_JSON}")
   mapfile -t ALL_NODE_NAMES < <(jq -r '.nodes[].name' "${CLUSTER_JSON}")
   mapfile -t ALL_NODE_IPS < <(jq -r '.nodes[].ipv4' "${CLUSTER_JSON}")
+}
+
+export_resolved_telemetry_env() {
+  export TELEMETRY_ENABLED="${TELEMETRY_ENABLED_RESOLVED}"
+  export TELEMETRY_ENDPOINT="${TELEMETRY_ENDPOINT_RESOLVED}"
+  export TELEMETRY_MAX_RETRIES="${TELEMETRY_MAX_RETRIES_RESOLVED}"
+  export TELEMETRY_CONNECT_TIMEOUT_SECONDS="${TELEMETRY_CONNECT_TIMEOUT_SECONDS_RESOLVED}"
+  export TELEMETRY_REQUEST_TIMEOUT_SECONDS="${TELEMETRY_REQUEST_TIMEOUT_SECONDS_RESOLVED}"
+  export TELEMETRY_OUTBOX_DIR="${TELEMETRY_OUTBOX_DIR_RESOLVED}"
+  export TELEMETRY_USER_AGENT="${TELEMETRY_USER_AGENT_RESOLVED}"
+}
+
+export_resolved_cluster_config_env() {
+  export PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE_RESOLVED}"
+  export PRODUCTIVE_K3S_VERSION="${PRODUCTIVE_K3S_VERSION_RESOLVED}"
+  export PRODUCTIVE_K3S_RELEASE_REPO="${PRODUCTIVE_K3S_RELEASE_REPO_RESOLVED}"
+  export SSH_USER="${SSH_USER_RESOLVED}"
+  export SSH_PORT="${SSH_PORT_RESOLVED}"
+  export SSH_KEY_PATH="${SSH_KEY_PATH_RESOLVED}"
+  export SSH_EXTRA_OPTS="${SSH_EXTRA_OPTS_RESOLVED}"
+  export_resolved_telemetry_env
 }
 
 write_hosts_entry_on_node() {

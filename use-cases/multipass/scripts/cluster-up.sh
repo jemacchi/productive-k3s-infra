@@ -10,6 +10,8 @@ if [[ -f "${CLUSTER_JSON}" ]]; then
   export_resolved_cluster_config_env
 fi
 
+resolve_telemetry_enabled
+
 "${SCRIPT_DIR}/refresh-generated-artifacts.sh"
 "${SCRIPT_DIR}/push-productive-k3s.sh"
 "${SCRIPT_DIR}/bootstrap-server.sh"
