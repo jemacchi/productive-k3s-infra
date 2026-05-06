@@ -21,10 +21,20 @@ need_file() {
   [[ -f "${path}" ]] || fail "missing required file: ${path}"
 }
 
+has_pattern() {
+  local pattern="$1"
+  local path="$2"
+  if command -v rg >/dev/null 2>&1; then
+    rg -q "${pattern}" "${path}"
+  else
+    grep -Eq "${pattern}" "${path}"
+  fi
+}
+
 expect_output() {
   local outputs_file="$1"
   local output_name="$2"
-  rg -q "^output \"${output_name}\"" "${outputs_file}" || fail "missing output '${output_name}' in ${outputs_file}"
+  has_pattern "^output \"${output_name}\"" "${outputs_file}" || fail "missing output '${output_name}' in ${outputs_file}"
 }
 
 expect_ignored_generated() {
@@ -60,7 +70,7 @@ case "${USE_CASE}" in
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/common.sh"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/refresh-generated-artifacts.sh"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/run_remote_bootstrap_session.py"
-    rg -q '^onprem\.env$' "${USE_CASE_DIR}/.gitignore" || fail "onprem.env should be ignored"
+    has_pattern '^onprem\.env$' "${USE_CASE_DIR}/.gitignore" || fail "onprem.env should be ignored"
     ;;
   aws-single-node)
     need_file "${USE_CASE_DIR}/aws.env.example"
@@ -71,7 +81,7 @@ case "${USE_CASE}" in
     for output_name in cluster_name base_domain remote_dir rancher_host registry_host region ssh_user instance_id availability_zone ami_id public_ip private_ip public_dns vpc_id subnet_id security_group_id; do
       expect_output "${USE_CASE_DIR}/opentofu/outputs.tf" "${output_name}"
     done
-    rg -q '^aws\.env$' "${USE_CASE_DIR}/.gitignore" || fail "aws.env should be ignored"
+    has_pattern '^aws\.env$' "${USE_CASE_DIR}/.gitignore" || fail "aws.env should be ignored"
     ;;
   *)
     fail "unsupported use case '${USE_CASE}'"
