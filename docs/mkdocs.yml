@@ -1,0 +1,122 @@
+site_name: Productive K3S Infra
+site_description: Pre-assembled infrastructure use cases for Productive K3S, with bilingual documentation.
+site_author: Productive K3S Infra
+site_url: https://jemacchi.github.io/productive-k3s-infra/
+repo_url: https://github.com/jemacchi/productive-k3s-infra
+repo_name: GitHub
+edit_uri: edit/main/docs/src/
+docs_dir: src
+site_dir: site
+
+theme:
+  name: material
+  custom_dir: src/overrides
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.path
+    - navigation.sections
+    - navigation.expand
+    - navigation.footer
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: white
+      accent: blue
+  font: false
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      title: On this page
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - English:
+      - Home: en/index.md
+      - Product:
+          - en/product/index.md
+          - How to use: en/product/how-to-use.md
+          - Reasons behind: en/product/reasons-behind.md
+          - Open vs Pro: en/product/open-vs-pro.md
+          - Relationship with Productive K3S: en/product/productive-k3s-relationship.md
+      - User docs:
+          - en/user-docs/index.md
+          - Use cases:
+              - Multipass: en/user-docs/multipass.md
+              - On-prem basic: en/user-docs/onprem-basic.md
+              - AWS single-node: en/user-docs/aws-single-node.md
+          - Make targets: en/user-docs/make-targets.md
+          - Productive K3S modes: en/user-docs/productive-k3s-modes.md
+          - Privacy and telemetry: en/user-docs/privacy-and-telemetry.md
+      - Developer docs:
+          - en/developer-docs/index.md
+          - Guides:
+              - en/developer-docs/guides/index.md
+              - Project layout: en/developer-docs/guides/project-layout.md
+              - Ansible layer: en/developer-docs/guides/ansible.md
+              - OpenTofu usage: en/developer-docs/guides/opentofu.md
+              - Testing and matrix: en/developer-docs/guides/testing-and-matrix.md
+              - CI/CD flow: en/developer-docs/guides/github-actions-and-cicd.md
+              - Documentation workflow: en/developer-docs/guides/documentation-workflow.md
+  - Español:
+      - Inicio: es/index.md
+      - Producto:
+          - es/product/index.md
+          - Cómo usar: es/product/how-to-use.md
+          - Razones del diseño: es/product/reasons-behind.md
+          - Open vs Pro: es/product/open-vs-pro.md
+          - Relación con Productive K3S: es/product/productive-k3s-relationship.md
+      - Documentación para usuarios:
+          - es/user-docs/index.md
+          - Casos de uso:
+              - Multipass: es/user-docs/multipass.md
+              - On-prem basic: es/user-docs/onprem-basic.md
+              - AWS single-node: es/user-docs/aws-single-node.md
+          - Targets de Make: es/user-docs/make-targets.md
+          - Modos de Productive K3S: es/user-docs/productive-k3s-modes.md
+          - Privacidad y telemetría: es/user-docs/privacy-and-telemetry.md
+      - Documentación para desarrolladores:
+          - es/developer-docs/index.md
+          - Guías:
+              - es/developer-docs/guides/index.md
+              - Organización del proyecto: es/developer-docs/guides/project-layout.md
+              - Capa de Ansible: es/developer-docs/guides/ansible.md
+              - Uso de OpenTofu: es/developer-docs/guides/opentofu.md
+              - Tests y matriz: es/developer-docs/guides/testing-and-matrix.md
+              - Flujo de CI/CD: es/developer-docs/guides/github-actions-and-cicd.md
+              - Flujo de documentación: es/developer-docs/guides/documentation-workflow.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jemacchi/productive-k3s-infra
