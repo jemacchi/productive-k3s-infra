@@ -78,10 +78,11 @@ Use those documents for environment-specific flows, prerequisites, examples, and
 
 ## Documentation Map
 
-- Root overview: [README.md](./README.md)
+- Documentation workspace: [docs/README.md](./docs/README.md)
+- MkDocs configuration: [docs/mkdocs.yml](./docs/mkdocs.yml)
 - Use case index: [use-cases/README.md](./use-cases/README.md)
 - Multipass details: [use-cases/multipass/README.md](./use-cases/multipass/README.md)
-- Privacy and telemetry contract: [docs/privacy-and-telemetry.md](./docs/privacy-and-telemetry.md)
+- Privacy and telemetry notes: [docs/src/en/reference/privacy-and-telemetry.md](./docs/src/en/reference/privacy-and-telemetry.md)
 - Productive K3S bootstrap project: [jemacchi/productive-k3s](https://github.com/jemacchi/productive-k3s)
 
 ## License
