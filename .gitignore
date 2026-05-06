@@ -1,4 +1,6 @@
 .codex
 __pycache__/
+docs/.venv/
+docs/site/
 use-cases/*/generated/
 test-artifacts/
