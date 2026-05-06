@@ -34,7 +34,8 @@ expect_ignored_generated() {
 
 need_file "${USE_CASE_DIR}/Makefile"
 need_file "${USE_CASE_DIR}/README.md"
-need_file "${ROOT_DIR}/docs/privacy-and-telemetry.md"
+need_file "${ROOT_DIR}/docs/src/en/user-docs/privacy-and-telemetry.md"
+need_file "${ROOT_DIR}/docs/src/es/user-docs/privacy-and-telemetry.md"
 expect_ignored_generated
 
 git -C "${ROOT_DIR}" check-ignore -q "test-artifacts/contract-probe" || fail "test-artifacts/ should be ignored"

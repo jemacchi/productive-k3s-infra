@@ -1,4 +1,4 @@
-.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-static test-contract test-live test-matrix
+.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-static test-contract test-live test-live-gha-onprem test-matrix
 
 USE_CASES := multipass onprem-basic aws-single-node
 TESTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/tests
@@ -27,11 +27,15 @@ docs-clean:
 
 test-static:
 	$(TESTS_DIR)/run-matrix.sh static $(USE_CASES)
+	bash -n $(TESTS_DIR)/live-onprem-basic-github-host.sh
 
 test-contract:
 	$(TESTS_DIR)/run-matrix.sh contract $(USE_CASES)
 
 test-live:
 	$(TESTS_DIR)/run-matrix.sh live $(USE_CASES)
+
+test-live-gha-onprem:
+	$(TESTS_DIR)/live-onprem-basic-github-host.sh
 
 test-matrix: test-static test-contract test-live

@@ -13,6 +13,7 @@
 | `make test-static` | Run static checks across all public use cases |
 | `make test-contract` | Run contract checks across all public use cases |
 | `make test-live` | Run live validations across all public use cases |
+| `make test-live-gha-onprem` | Run the GitHub-hosted single-node `onprem-basic` live validation |
 | `make test-matrix` | Run `static`, `contract`, and `live` in sequence |
 
 ## Multipass targets

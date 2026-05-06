@@ -13,6 +13,7 @@
 | `make test-static` | Ejecutar checks static sobre todos los casos de uso públicos |
 | `make test-contract` | Ejecutar checks contract sobre todos los casos de uso públicos |
 | `make test-live` | Ejecutar validaciones live sobre todos los casos de uso públicos |
+| `make test-live-gha-onprem` | Ejecutar la validación live single-node de `onprem-basic` sobre un runner hospedado por GitHub |
 | `make test-matrix` | Ejecutar `static`, `contract` y `live` en secuencia |
 
 ## Targets de Multipass
