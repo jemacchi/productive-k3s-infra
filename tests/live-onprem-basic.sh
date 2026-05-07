@@ -108,7 +108,7 @@ ONPREM_REGISTRY_HOST=registry.k3s.lab.internal
 PRODUCTIVE_K3S_SOURCE=local
 EOF
 
-make -C "${USE_CASE_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" up
-make -C "${USE_CASE_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" validate
+make -C "${USE_CASE_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" TELEMETRY_ENABLED=false up
+make -C "${USE_CASE_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" TELEMETRY_ENABLED=false validate
 
 printf '[PASS] onprem-basic live test completed\n'

@@ -29,11 +29,31 @@ Most public use cases support two source modes:
 
 If `remote` is used, `PRODUCTIVE_K3S_VERSION` can pin a specific release. If it is omitted, the use case resolves the latest release from `PRODUCTIVE_K3S_RELEASE_REPO`.
 
-## Use the Makefile entry points
+## Use the public entry points
 
-The public operator interface is `make`.
+The public operator interface is:
 
-Typical patterns:
+- the release CLI: `productive-k3s-infra-cli.sh`
+- local `make` shortcuts at the repository root
+- direct `make -C use-cases/...` commands when you want to work inside one use case explicitly
+
+Release CLI examples:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- multipass up
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- onprem preflight
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- aws-single-node validate
+```
+
+Root Makefile shortcuts:
+
+```bash
+make multipass
+make onprem
+make aws-single-node
+```
+
+Typical use-case command patterns:
 
 - infrastructure only: `infra-up`
 - preflight only: `preflight`

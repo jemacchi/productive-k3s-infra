@@ -2,6 +2,12 @@
 
 `make` es la interfaz pública para operar este repositorio.
 
+El artifact público de release expone el mismo contrato de casos de uso mediante:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- <use-case> <command>
+```
+
 ## Targets de nivel raíz
 
 | Target | Propósito |
@@ -15,6 +21,9 @@
 | `make test-live` | Ejecutar validaciones live sobre todos los casos de uso públicos |
 | `make test-live-gha-onprem` | Ejecutar la validación live single-node de `onprem-basic` sobre un runner hospedado por GitHub |
 | `make test-matrix` | Ejecutar `static`, `contract` y `live` en secuencia |
+| `make multipass` | Ejecutar el flujo público default de `multipass` (`up`) |
+| `make onprem` | Ejecutar el flujo público default de `onprem-basic` (`up`) |
+| `make aws-single-node` | Ejecutar el flujo público default de AWS single-node (`up`) |
 
 ## Targets de Multipass
 
@@ -61,6 +70,9 @@
 
 !!! note
     El contrato público es el nombre del target y su comportamiento orientado al operador, no necesariamente el detalle exacto de los scripts internos que invoca.
+
+!!! note
+    El CLI de release usa el mismo modelo público, pero nombra primero el caso de uso, por ejemplo `multipass up` u `onprem preflight`.
 
 !!! note
     `status` es importante en este repositorio porque la metadata generada forma parte del modelo operativo, no sólo de un detalle interno de implementación.

@@ -29,11 +29,31 @@ La mayoría de los casos de uso públicos soportan dos modos fuente:
 
 Si se usa `remote`, `PRODUCTIVE_K3S_VERSION` puede fijar una versión específica. Si se omite, el caso de uso resuelve el último release desde `PRODUCTIVE_K3S_RELEASE_REPO`.
 
-## Usá los entrypoints de Makefile
+## Usá los entrypoints públicos
 
-La interfaz pública para operar el repo es `make`.
+La interfaz pública para operar el repo es:
 
-Patrones habituales:
+- el CLI de release: `productive-k3s-infra-cli.sh`
+- atajos locales de `make` en el root del repositorio
+- comandos directos `make -C use-cases/...` cuando quieras trabajar explícitamente dentro de un caso de uso
+
+Ejemplos con el CLI de release:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- multipass up
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- onprem preflight
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- aws-single-node validate
+```
+
+Atajos del Makefile root:
+
+```bash
+make multipass
+make onprem
+make aws-single-node
+```
+
+Patrones habituales de comandos por caso de uso:
 
 - sólo infraestructura: `infra-up`
 - sólo preflight: `preflight`

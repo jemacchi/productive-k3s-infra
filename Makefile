@@ -1,7 +1,8 @@
-.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-static test-contract test-live test-live-gha-onprem test-matrix
+.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-static test-contract test-live test-live-gha-onprem test-matrix test-productive-k3s-infra-cli multipass onprem aws-single-node
 
 USE_CASES := multipass onprem-basic aws-single-node
 TESTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/tests
+SCRIPTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/scripts
 export TELEMETRY_ENABLED ?=
 export TELEMETRY_ENDPOINT ?=
 export TELEMETRY_MAX_RETRIES ?= 3
@@ -11,31 +12,42 @@ export TELEMETRY_OUTBOX_DIR ?=
 export TELEMETRY_USER_AGENT ?= productive-k3s-infra/matrix
 
 docs-build:
-	./docs/build.sh
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh docs-build
 
 docs-serve:
-	./docs/serve.sh
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh docs-serve
 
 docs-up:
-	./docs/serve.sh --background
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh docs-up
 
 docs-down:
-	./docs/clean.sh
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh docs-down
 
 docs-clean:
-	./docs/clean.sh
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh docs-clean
 
 test-static:
-	$(TESTS_DIR)/run-matrix.sh static $(USE_CASES)
-	bash -n $(TESTS_DIR)/live-onprem-basic-github-host.sh
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-static
 
 test-contract:
-	$(TESTS_DIR)/run-matrix.sh contract $(USE_CASES)
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-contract
 
 test-live:
-	$(TESTS_DIR)/run-matrix.sh live $(USE_CASES)
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-live
 
 test-live-gha-onprem:
-	$(TESTS_DIR)/live-onprem-basic-github-host.sh
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-live-gha-onprem
 
 test-matrix: test-static test-contract test-live
+
+test-productive-k3s-infra-cli:
+	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-productive-k3s-infra-cli
+
+multipass:
+	$(SCRIPTS_DIR)/productive-k3s-infra.sh multipass up
+
+onprem:
+	$(SCRIPTS_DIR)/productive-k3s-infra.sh onprem up
+
+aws-single-node:
+	$(SCRIPTS_DIR)/productive-k3s-infra.sh aws-single-node up

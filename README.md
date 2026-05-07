@@ -16,6 +16,20 @@ The current public scope includes:
 
 The main public entry points are organized as `use-cases/`.
 
+The repository also exposes a public release CLI entrypoint:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- multipass up
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- onprem preflight
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- aws-single-node validate
+```
+
+For local operator convenience, the root `Makefile` now also exposes:
+
+- `make multipass`
+- `make onprem`
+- `make aws-single-node`
+
 ## Documentation
 
 The long-form documentation lives in the published site:

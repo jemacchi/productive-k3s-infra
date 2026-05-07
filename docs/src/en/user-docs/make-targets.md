@@ -2,6 +2,12 @@
 
 `make` is the public operator interface of this repository.
 
+The public release artifact exposes the same use-case contract through:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- <use-case> <command>
+```
+
 ## Root-level targets
 
 | Target | Purpose |
@@ -15,6 +21,9 @@
 | `make test-live` | Run live validations across all public use cases |
 | `make test-live-gha-onprem` | Run the GitHub-hosted single-node `onprem-basic` live validation |
 | `make test-matrix` | Run `static`, `contract`, and `live` in sequence |
+| `make multipass` | Run the default public `multipass` flow (`up`) |
+| `make onprem` | Run the default public `onprem-basic` flow (`up`) |
+| `make aws-single-node` | Run the default public AWS single-node flow (`up`) |
 
 ## Multipass targets
 
@@ -61,6 +70,9 @@
 
 !!! note
     The public contract is the target name and its operator-facing behavior, not necessarily the exact internal scripts it calls.
+
+!!! note
+    The release CLI uses the same public command model, but names the use case first, for example `multipass up` or `onprem preflight`.
 
 !!! note
     `status` is important in this repository because generated metadata is part of the operating model, not just an internal implementation detail.
