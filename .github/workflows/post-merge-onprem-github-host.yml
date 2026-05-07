@@ -1,15 +1,13 @@
 name: Post-merge On-prem GitHub Host
 
 on:
-  pull_request:
-    types:
-      - closed
+  push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   static-and-contract:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout productive-k3s-infra
@@ -50,7 +48,6 @@ jobs:
           if-no-files-found: ignore
 
   live-onprem-github-host:
-    if: github.event.pull_request.merged == true
     needs:
       - static-and-contract
     runs-on: ubuntu-24.04
