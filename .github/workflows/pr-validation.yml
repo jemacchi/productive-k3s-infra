@@ -29,12 +29,12 @@ jobs:
           path: productive-k3s-infra
           fetch-depth: 0
 
-      - name: Checkout productive-k3s
+      - name: Checkout productive-k3s-core
         uses: actions/checkout@v4
         with:
           repository: jemacchi/productive-k3s-core
           ref: main
-          path: productive-k3s
+          path: productive-k3s-core
           fetch-depth: 0
 
       - name: Set up OpenTofu
@@ -73,12 +73,12 @@ jobs:
           path: productive-k3s-infra
           fetch-depth: 0
 
-      - name: Checkout productive-k3s
+      - name: Checkout productive-k3s-core
         uses: actions/checkout@v4
         with:
           repository: jemacchi/productive-k3s-core
           ref: main
-          path: productive-k3s
+          path: productive-k3s-core
           fetch-depth: 0
 
       - name: Run GitHub-host on-prem live test
