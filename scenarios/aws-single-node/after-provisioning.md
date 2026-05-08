@@ -2,7 +2,7 @@
 
 This is an example workflow that shows how to use the `aws-single-node` cluster after `make up` finishes successfully.
 
-It is not a separate guarantee beyond the scenario itself. Its purpose is to demonstrate that the provisioned EC2 instance is usable as a real `productive-k3s` cluster.
+It is not a separate guarantee beyond the scenario itself. Its purpose is to demonstrate that the provisioned EC2 instance is usable as a real `productive-k3s-core` cluster.
 
 ## 1. Resolve The Server IP
 

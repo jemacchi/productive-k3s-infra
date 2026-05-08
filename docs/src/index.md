@@ -4,14 +4,14 @@ template: "home.html"
 hide:
   - navigation
   - toc
-eyebrow: "Infrastructure scenarios for Productive K3S"
-eyebrow_es: "Escenarios de infraestructura para Productive K3S"
+eyebrow: "Infrastructure scenarios for Productive K3S Core"
+eyebrow_es: "Escenarios de infraestructura para Productive K3S Core"
 hero_title: "Productive K3S Infra"
 hero_title_es: "Productive K3S Infra"
-lead: "Productive K3S Infra provides pre-assembled infrastructure flows for running Productive K3S on local virtual machines, basic cloud setups, and existing on-premises hosts."
-lead_es: "Productive K3S Infra ofrece flujos de infraestructura prearmados para ejecutar Productive K3S sobre máquinas virtuales locales, setups cloud básicos y hosts on-premises existentes."
-sublead: "It focuses on provisioning, inventories, networking assumptions, bootstrap orchestration, and validation, while Productive K3S remains the cluster bootstrap layer."
-sublead_es: "Se enfoca en provisioning, inventarios, supuestos de red, orquestación del bootstrap y validación, mientras que Productive K3S sigue siendo la capa de bootstrap del clúster."
+lead: "Productive K3S Infra provides pre-assembled infrastructure flows for running Productive K3S Core on local virtual machines, basic cloud setups, and existing on-premises hosts."
+lead_es: "Productive K3S Infra ofrece flujos de infraestructura prearmados para ejecutar Productive K3S Core sobre máquinas virtuales locales, setups cloud básicos y hosts on-premises existentes."
+sublead: "It focuses on provisioning, inventories, networking assumptions, bootstrap orchestration, and validation, while Productive K3S Core remains the cluster bootstrap layer."
+sublead_es: "Se enfoca en provisioning, inventarios, supuestos de red, orquestación del bootstrap y validación, mientras que Productive K3S Core sigue siendo la capa de bootstrap del clúster."
 primary_label: "View on GitHub"
 primary_label_es: "Ver en GitHub"
 primary_url: "https://github.com/jemacchi/productive-k3s-infra"
@@ -21,11 +21,11 @@ secondary_url: "https://github.com/jemacchi/productive-k3s-infra/blob/main/READM
 card_title: "What it does"
 card_title_es: "Qué hace"
 card_items:
-  - Provisions or targets infrastructure for Productive K3S
+  - Provisions or targets infrastructure for Productive K3S Core
   - Reuses shared OpenTofu and Ansible-based orchestration layers
   - Validates complete scenarios through static, contract, and live checks
 card_items_es:
-  - Provisiona o apunta infraestructura para Productive K3S
+  - Provisiona o apunta infraestructura para Productive K3S Core
   - Reutiliza capas compartidas de orquestación con OpenTofu y Ansible
   - Valida escenarios completos con checks static, contract y live
 why_title: "Why it exists"
@@ -40,14 +40,14 @@ why_options_es:
     text: "Los scripts de infraestructura crudos son flexibles, pero inconsistentes y difíciles de reutilizar."
   - label: "PLATAFORMA COMPLETA"
     text: "Una plataforma completamente productizada puede ser potente, pero demasiado pesada para adopción y evaluación temprana."
-bridge_note: "Productive K3S Infra provides the middle path: repeatable infrastructure flows around Productive K3S."
-bridge_note_es: "Productive K3S Infra ofrece el camino intermedio: flujos repetibles de infraestructura alrededor de Productive K3S."
+bridge_note: "Productive K3S Infra provides the middle path: repeatable infrastructure flows around Productive K3S Core."
+bridge_note_es: "Productive K3S Infra ofrece el camino intermedio: flujos repetibles de infraestructura alrededor de Productive K3S Core."
 bridge_points:
-  - Keep Productive K3S as the bootstrap contract
+  - Keep Productive K3S Core as the bootstrap contract
   - Package real scenarios instead of toy examples
   - Make local, cloud, and SSH-based validation predictable
 bridge_points_es:
-  - Mantener Productive K3S como contrato de bootstrap
+  - Mantener Productive K3S Core como contrato de bootstrap
   - Empaquetar escenarios reales en lugar de ejemplos de juguete
   - Hacer predecible la validación local, cloud y basada en SSH
 scenarios_title: "Target scenarios"
@@ -84,22 +84,22 @@ environments:
   - Multipass on a local development machine
   - Existing Ubuntu or Debian hosts reachable over SSH
   - Basic AWS EC2 single-node setups
-  - Productive K3S source bundles from a local checkout or a published release
+  - Productive K3S Core source bundles from a local checkout or a published release
 environments_es:
   - Multipass en una máquina de desarrollo local
   - Hosts Ubuntu o Debian existentes alcanzables por SSH
   - Setups básicos de nodo único sobre AWS EC2
-  - Bundles de Productive K3S desde un checkout local o un release publicado
+  - Bundles de Productive K3S Core desde un checkout local o un release publicado
 not_title: "What it is not"
 not_title_es: "Qué no es"
 not_items:
-  - Not a replacement for Productive K3S
+  - Not a replacement for Productive K3S Core
   - Not a managed platform or a hardened production framework
   - Not a promise that every public scenario is production-ready as-is
 not_items_es:
-  - No reemplaza a Productive K3S
+  - No reemplaza a Productive K3S Core
   - No es una plataforma administrada ni un framework endurecido para producción
   - No promete que cada escenario público esté listo para producción tal como viene
-not_note: "It is the infrastructure companion layer around Productive K3S."
-not_note_es: "Es la capa compañera de infraestructura alrededor de Productive K3S."
+not_note: "It is the infrastructure companion layer around Productive K3S Core."
+not_note_es: "Es la capa compañera de infraestructura alrededor de Productive K3S Core."
 ---

@@ -16,10 +16,10 @@ TOFU_BIN ?= $(shell if command -v tofu >/dev/null 2>&1; then echo tofu; elif com
 
 -include $(AWS_ENV_FILE)
 
-PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s)
+PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s-core)
 PRODUCTIVE_K3S_SOURCE ?= remote
 PRODUCTIVE_K3S_VERSION ?=
-PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s
+PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s-core
 TELEMETRY_ENABLED ?=
 TELEMETRY_ENDPOINT ?=
 TELEMETRY_MAX_RETRIES ?= 3
@@ -33,7 +33,7 @@ AWS_CLUSTER_NAME ?= productive-k3s-aws
 AWS_BASE_DOMAIN ?= k3s.lab.internal
 AWS_RANCHER_HOST ?= rancher.$(AWS_BASE_DOMAIN)
 AWS_REGISTRY_HOST ?= registry.$(AWS_BASE_DOMAIN)
-AWS_REMOTE_DIR ?= /home/ubuntu/productive-k3s
+AWS_REMOTE_DIR ?= /home/ubuntu/productive-k3s-core
 AWS_SSH_USER ?= ubuntu
 AWS_SSH_PORT ?= 22
 AWS_INSTANCE_TYPE ?= t3a.xlarge
@@ -74,8 +74,8 @@ infra-down: tofu-init
 preflight:
 	$(SCRIPTS_DIR)/refresh-generated-artifacts.sh
 	$(SHARED_SCRIPTS_DIR)/preflight.sh
-	$(SHARED_SCRIPTS_DIR)/push-productive-k3s.sh
-	bash $(SHARED_SCRIPTS_DIR)/preflight-productive-k3s.sh
+	$(SHARED_SCRIPTS_DIR)/push-productive-k3s-core.sh
+	bash $(SHARED_SCRIPTS_DIR)/preflight-productive-k3s-core.sh
 
 cluster-up:
 	$(SHARED_SCRIPTS_DIR)/cluster-up.sh

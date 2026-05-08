@@ -32,7 +32,7 @@ jobs:
       - name: Checkout productive-k3s
         uses: actions/checkout@v4
         with:
-          repository: jemacchi/productive-k3s
+          repository: jemacchi/productive-k3s-core
           ref: main
           path: productive-k3s
           fetch-depth: 0
@@ -76,7 +76,7 @@ jobs:
       - name: Checkout productive-k3s
         uses: actions/checkout@v4
         with:
-          repository: jemacchi/productive-k3s
+          repository: jemacchi/productive-k3s-core
           ref: main
           path: productive-k3s
           fetch-depth: 0

@@ -16,8 +16,8 @@ Consumidores actuales:
 - renderizado de metadata para nodos declarados
 - checks de reachability por SSH
 - validación de plataformas soportadas
-- copia del bundle de Productive K3S desde fuente `local` o `remote`
-- invocación remota opcional del host preflight de Productive K3S antes del bootstrap
+- copia del bundle de Productive K3S Core desde fuente `local` o `remote`
+- invocación remota opcional del host preflight de Productive K3S Core antes del bootstrap
 - orquestación de `server`, `agent` y `stack`
 - sincronización de aliases de hosts
 - validación remota compartida
@@ -25,9 +25,9 @@ Consumidores actuales:
 ## Archivos compartidos clave
 
 - `preflight.sh`
-- `preflight-productive-k3s.sh`
+- `preflight-productive-k3s-core.sh`
 - `cluster-up.sh`
-- `push-productive-k3s.sh`
+- `push-productive-k3s-core.sh`
 - `bootstrap-server.sh`
 - `bootstrap-agents.sh`
 - `bootstrap-stack.sh`

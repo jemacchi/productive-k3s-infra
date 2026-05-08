@@ -1,8 +1,8 @@
 # Productive K3S Infra
 
-**Productive K3S Infra** provides pre-assembled infrastructure scenarios for running [Productive K3S](https://github.com/jemacchi/productive-k3s) in repeatable local, cloud, and on-premises environments.
+**Productive K3S Infra** provides pre-assembled infrastructure scenarios for running [Productive K3S Core](https://github.com/jemacchi/productive-k3s-core) in repeatable local, cloud, and on-premises environments.
 
-It does not replace `productive-k3s`. It acts as the infrastructure companion project: it prepares machines, inventories, networking assumptions, and orchestration flows so that `productive-k3s` can bootstrap a usable K3S environment on top.
+It does not replace `productive-k3s-core`. It acts as the infrastructure companion project: it prepares machines, inventories, networking assumptions, and orchestration flows so that `productive-k3s-core` can bootstrap a usable K3S environment on top.
 
 ## What this repository covers
 
@@ -26,9 +26,9 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 Release tags are composite:
 
 - `X.Y.Z`: version of `productive-k3s-infra`
-- `A.B.C`: bound `productive-k3s` release used by that infra release
+- `A.B.C`: bound `productive-k3s-core` release used by that infra release
 
-When you execute `productive-k3s-infra-cli.sh` from a GitHub Release, it defaults to `PRODUCTIVE_K3S_SOURCE=remote` and enforces the bound `productive-k3s` version from the tag.
+When you execute `productive-k3s-infra-cli.sh` from a GitHub Release, it defaults to `PRODUCTIVE_K3S_SOURCE=remote` and enforces the bound `productive-k3s-core` version from the tag.
 
 For local operator convenience, the root `Makefile` now also exposes:
 
@@ -55,7 +55,7 @@ High-level product framing:
 - [How to use Productive K3S Infra](https://infra.productive-k3s.io/en/product/how-to-use/)
 - [Reasons behind the repository](https://infra.productive-k3s.io/en/product/reasons-behind/)
 - [Open vs Pro](https://infra.productive-k3s.io/en/product/open-vs-pro/)
-- [Relationship with Productive K3S](https://infra.productive-k3s.io/en/product/productive-k3s-relationship/)
+- [Relationship with Productive K3S Core](https://infra.productive-k3s.io/en/product/productive-k3s-relationship/)
 
 ## User Docs
 
@@ -66,7 +66,7 @@ Operational scenarios and user-facing references:
 - [On-prem basic](https://infra.productive-k3s.io/en/user-docs/onprem-basic/)
 - [AWS single-node](https://infra.productive-k3s.io/en/user-docs/aws-single-node/)
 - [Make targets](https://infra.productive-k3s.io/en/user-docs/make-targets/)
-- [Productive K3S modes](https://infra.productive-k3s.io/en/user-docs/productive-k3s-modes/)
+- [Productive K3S Core modes](https://infra.productive-k3s.io/en/user-docs/productive-k3s-modes/)
 - [Privacy and telemetry](https://infra.productive-k3s.io/en/user-docs/privacy-and-telemetry/)
 
 ## Developer Docs

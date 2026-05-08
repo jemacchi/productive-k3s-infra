@@ -10,7 +10,7 @@
 
 ## Understand the execution contract
 
-Each scenario is responsible for the infrastructure around the cluster, while `productive-k3s` remains responsible for the cluster bootstrap itself.
+Each scenario is responsible for the infrastructure around the cluster, while `productive-k3s-core` remains responsible for the cluster bootstrap itself.
 
 In practice that means `productive-k3s-infra` handles:
 
@@ -20,16 +20,16 @@ In practice that means `productive-k3s-infra` handles:
 - orchestration of `server`, `agent`, and `stack` phases when the scenario needs them
 - scenario-specific validation
 
-## Choose the Productive K3S source mode
+## Choose the Productive K3S Core source mode
 
 Most public scenarios support two source modes:
 
-- `PRODUCTIVE_K3S_SOURCE=local`: package a sibling local checkout of `productive-k3s`
+- `PRODUCTIVE_K3S_SOURCE=local`: package a sibling local checkout of `productive-k3s-core`
 - `PRODUCTIVE_K3S_SOURCE=remote`: download a published GitHub Release bundle
 
 If `remote` is used, `PRODUCTIVE_K3S_VERSION` can pin a specific release. If it is omitted, the scenario resolves the latest release from `PRODUCTIVE_K3S_RELEASE_REPO`.
 
-When you use the published `productive-k3s-infra-cli.sh` from a GitHub Release, that release already binds a specific `productive-k3s` release. In that path, the CLI forces:
+When you use the published `productive-k3s-infra-cli.sh` from a GitHub Release, that release already binds a specific `productive-k3s-core` release. In that path, the CLI forces:
 
 - `PRODUCTIVE_K3S_SOURCE=remote`
 - `PRODUCTIVE_K3S_VERSION=A.B.C`

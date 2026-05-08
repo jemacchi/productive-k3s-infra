@@ -37,7 +37,7 @@ They are not meant to capture:
 - if `TELEMETRY_ENABLED` is unset and the run is interactive, the repository prompts once and defaults to `Yes`
 - if `TELEMETRY_ENABLED` is unset and the run is non-interactive, it resolves to `false`
 - root matrix values are propagated into each scenario
-- each scenario propagates the same telemetry values into nested `productive-k3s` bootstrap commands
+- each scenario propagates the same telemetry values into nested `productive-k3s-core` bootstrap commands
 
 ## Supported propagated variables
 

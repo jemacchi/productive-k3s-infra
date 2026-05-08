@@ -136,7 +136,7 @@ write_run_manifest() {
   local output_file="$6"
   local source_mode="${PRODUCTIVE_K3S_SOURCE:-}"
   local source_version="${PRODUCTIVE_K3S_VERSION:-}"
-  local release_repo="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s}"
+  local release_repo="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s-core}"
 
   scenario_metadata "${scenario}" "${LEVEL}"
 

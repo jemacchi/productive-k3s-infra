@@ -16,11 +16,11 @@ cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "telemetry-test",
   "base_domain": "k3s.lab.internal",
-  "remote_dir": "/home/ubuntu/productive-k3s",
+  "remote_dir": "/home/ubuntu/productive-k3s-core",
   "productive_k3s": {
     "source": "remote",
     "version": "v9.9.9",
-    "release_repo": "jemacchi/productive-k3s"
+    "release_repo": "jemacchi/productive-k3s-core"
   },
   "telemetry": {
     "enabled": true,
@@ -86,7 +86,7 @@ jq -n \
 EOF
 chmod +x "${TEST_SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh"
 
-for script_name in push-productive-k3s.sh bootstrap-server.sh bootstrap-agents.sh bootstrap-stack.sh; do
+for script_name in push-productive-k3s-core.sh bootstrap-server.sh bootstrap-agents.sh bootstrap-stack.sh; do
   cat > "${TEST_SCENARIO_DIR}/scripts/${script_name}" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -105,7 +105,7 @@ chmod +x "${TMP_DIR}/bin/multipass"
 export CAPTURE_FILE="${TMP_DIR}/cluster-up-env.json"
 export PATH="${TMP_DIR}/bin:${PATH}"
 export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
-export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s"
+export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s-core"
 export TELEMETRY_ENABLED="false"
 export TELEMETRY_ENDPOINT=""
 export TELEMETRY_MAX_RETRIES="3"

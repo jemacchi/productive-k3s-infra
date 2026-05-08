@@ -1,10 +1,10 @@
 # Razones Del Diseño De `productive-k3s-infra`
 
-`productive-k3s-infra` existe porque `productive-k3s` y la orquestación de infraestructura resuelven problemas distintos.
+`productive-k3s-infra` existe porque `productive-k3s-core` y la orquestación de infraestructura resuelven problemas distintos.
 
-## Por qué no alcanza con `productive-k3s`
+## Por qué no alcanza con `productive-k3s-core`
 
-`productive-k3s` es el contrato de bootstrap para instalar y validar un stack basado en K3S.
+`productive-k3s-core` es el contrato de bootstrap para instalar y validar un stack basado en K3S.
 
 Eso alcanza cuando:
 
@@ -53,7 +53,7 @@ Esa separación hace más fácil evolucionar un camino público sin copiar y peg
 
 ## Por qué importa la separación explícita por modos
 
-Los modos `server`, `agent`, `stack` y `single-node` expuestos por `productive-k3s` son lo que vuelve realista la orquestación de infraestructura.
+Los modos `server`, `agent`, `stack` y `single-node` expuestos por `productive-k3s-core` son lo que vuelve realista la orquestación de infraestructura.
 
 Le permiten a este repositorio:
 
@@ -77,4 +77,4 @@ Apunta a ofrecer:
 
 - [Resumen del producto](index.md)
 - [Cómo usar Productive K3S Infra](how-to-use.md)
-- [Relación con Productive K3S](productive-k3s-relationship.md)
+- [Relación con Productive K3S Core](productive-k3s-relationship.md)

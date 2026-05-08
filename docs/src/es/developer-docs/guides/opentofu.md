@@ -17,7 +17,7 @@
 ## De qué no se hace cargo acá
 
 - orquestación del bootstrap por SSH
-- secuenciación de modos de Productive K3S
+- secuenciación de modos de Productive K3S Core
 - validación del stack final del clúster
 
 Esas responsabilidades quedan en los scripts del escenario o en la capa remota compartida.

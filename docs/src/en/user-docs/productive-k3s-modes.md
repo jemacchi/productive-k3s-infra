@@ -1,6 +1,6 @@
-# Productive K3S Modes
+# Productive K3S Core Modes
 
-`productive-k3s-infra` relies on the explicit installation modes exposed by `productive-k3s`.
+`productive-k3s-infra` relies on the explicit installation modes exposed by `productive-k3s-core`.
 
 ## The modes
 
@@ -28,4 +28,4 @@ That split makes the orchestration model explicit:
 ## Notes
 
 !!! note
-    The more explicit the bootstrap modes are in `productive-k3s`, the easier it is for infrastructure automation to stay understandable and testable.
+    The more explicit the bootstrap modes are in `productive-k3s-core`, the easier it is for infrastructure automation to stay understandable and testable.

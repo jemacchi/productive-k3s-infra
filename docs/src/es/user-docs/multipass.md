@@ -1,6 +1,6 @@
 # Caso De Uso Multipass
 
-`multipass` es el camino preferido para validación local de un entorno multinodo de Productive K3S.
+`multipass` es el camino preferido para validación local de un entorno multinodo de Productive K3S Core.
 
 ## Qué construye
 
@@ -24,7 +24,7 @@ make -C scenarios/multipass clean
 
 1. Lanza las tres VMs con `OpenTofu` y Multipass.
 2. Renderiza metadata generada a partir de las IPs reales de las VMs.
-3. Prepara un bundle de `productive-k3s` desde fuente `local` o `remote`.
+3. Prepara un bundle de `productive-k3s-core` desde fuente `local` o `remote`.
 4. Ejecuta el modo `server` en el primer nodo.
 5. Captura el token de join del servidor.
 6. Ejecuta el modo `agent` en los nodos restantes.

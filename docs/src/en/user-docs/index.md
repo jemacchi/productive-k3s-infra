@@ -13,5 +13,5 @@ This section groups the public scenarios, the main `make` entry points, and the 
 ### Shared references
 
 - [Make targets](make-targets.md)
-- [Productive K3S modes](productive-k3s-modes.md)
+- [Productive K3S Core modes](productive-k3s-modes.md)
 - [Privacy and telemetry](privacy-and-telemetry.md)

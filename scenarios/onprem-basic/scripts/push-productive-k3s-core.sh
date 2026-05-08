@@ -14,10 +14,10 @@ trap 'rm -f "${archive}"' EXIT
 case "${PRODUCTIVE_K3S_SOURCE_RESOLVED}" in
   local)
     [[ -d "${PRODUCTIVE_K3S_REPO}" ]] || {
-      err "productive-k3s repo not found at ${PRODUCTIVE_K3S_REPO}"
+      err "productive-k3s-core repo not found at ${PRODUCTIVE_K3S_REPO}"
       exit 1
     }
-    log "Packing local productive-k3s from ${PRODUCTIVE_K3S_REPO}"
+    log "Packing local productive-k3s-core from ${PRODUCTIVE_K3S_REPO}"
     tar \
       --exclude='.git' \
       --exclude='test-artifacts' \
@@ -35,7 +35,7 @@ case "${PRODUCTIVE_K3S_SOURCE_RESOLVED}" in
       err "could not determine extracted directory from remote archive ${archive}"
       exit 1
     }
-    log "Using remote productive-k3s release ${PRODUCTIVE_K3S_VERSION_RESOLVED} from ${PRODUCTIVE_K3S_RELEASE_REPO_RESOLVED}"
+    log "Using remote productive-k3s-core release ${PRODUCTIVE_K3S_VERSION_RESOLVED} from ${PRODUCTIVE_K3S_RELEASE_REPO_RESOLVED}"
     ;;
 esac
 

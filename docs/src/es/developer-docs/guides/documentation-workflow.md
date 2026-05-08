@@ -41,4 +41,4 @@ Antes de considerar completos los cambios de documentación:
 ## Notas
 
 !!! note
-    Este repositorio sigue intencionalmente el mismo layout de MkDocs y el mismo lenguaje visual que `productive-k3s`, para que ambos proyectos se sientan parte de la misma familia de documentación.
+    Este repositorio sigue intencionalmente el mismo layout de MkDocs y el mismo lenguaje visual que `productive-k3s-core`, para que ambos proyectos se sientan parte de la misma familia de documentación.

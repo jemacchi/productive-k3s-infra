@@ -80,7 +80,7 @@ need_cmd curl
 need_cmd tar
 need_cmd python3
 
-[[ -d "${ROOT_DIR}/../productive-k3s" ]] || fail "expected sibling productive-k3s repo at ${ROOT_DIR}/../productive-k3s"
+[[ -d "${ROOT_DIR}/../productive-k3s-core" ]] || fail "expected sibling productive-k3s-core repo at ${ROOT_DIR}/../productive-k3s-core"
 
 trap cleanup EXIT
 

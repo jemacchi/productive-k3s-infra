@@ -41,7 +41,7 @@ export AWS_CLUSTER_NAME="${AWS_CLUSTER_NAME:-$(jq -r '.cluster_name.value // "pr
 export AWS_BASE_DOMAIN="${AWS_BASE_DOMAIN:-$(jq -r '.base_domain.value // "k3s.lab.internal"' "${TOFU_OUTPUTS_JSON}")}"
 export AWS_RANCHER_HOST="${AWS_RANCHER_HOST:-$(jq -r '.rancher_host.value // empty' "${TOFU_OUTPUTS_JSON}")}"
 export AWS_REGISTRY_HOST="${AWS_REGISTRY_HOST:-$(jq -r '.registry_host.value // empty' "${TOFU_OUTPUTS_JSON}")}"
-export AWS_REMOTE_DIR="${AWS_REMOTE_DIR:-$(jq -r '.remote_dir.value // "/home/ubuntu/productive-k3s"' "${TOFU_OUTPUTS_JSON}")}"
+export AWS_REMOTE_DIR="${AWS_REMOTE_DIR:-$(jq -r '.remote_dir.value // "/home/ubuntu/productive-k3s-core"' "${TOFU_OUTPUTS_JSON}")}"
 
 "${SHARED_DIR}/refresh-generated-artifacts.sh"
 

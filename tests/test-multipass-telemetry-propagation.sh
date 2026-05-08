@@ -15,11 +15,11 @@ cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "telemetry-test",
   "base_domain": "k3s.lab.internal",
-  "remote_dir": "/home/ubuntu/productive-k3s",
+  "remote_dir": "/home/ubuntu/productive-k3s-core",
   "productive_k3s": {
     "source": "local",
     "version": "",
-    "release_repo": "jemacchi/productive-k3s"
+    "release_repo": "jemacchi/productive-k3s-core"
   },
   "telemetry": {
     "enabled": true,
@@ -95,7 +95,7 @@ chmod +x "${TMP_DIR}/bin/multipass"
 export PATH="${TMP_DIR}/bin:${PATH}"
 export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
 export CAPTURE_FILE="${TMP_DIR}/telemetry-env.json"
-export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s"
+export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s-core"
 export TELEMETRY_ENABLED="false"
 export TELEMETRY_ENDPOINT=""
 export TELEMETRY_MAX_RETRIES="3"

@@ -36,7 +36,7 @@ Those artifacts record:
 - result
 - duration
 - topology and environment class
-- selected Productive K3S source details
+- selected Productive K3S Core source details
 - anonymous telemetry-related metadata
 
 ## Development guidance

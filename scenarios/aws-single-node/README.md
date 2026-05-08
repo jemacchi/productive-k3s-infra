@@ -1,6 +1,6 @@
 # AWS Single-Node Scenario
 
-This scenario provisions a basic AWS `EC2` instance with `OpenTofu`, then bootstraps `productive-k3s` onto it over `SSH`.
+This scenario provisions a basic AWS `EC2` instance with `OpenTofu`, then bootstraps `productive-k3s-core` onto it over `SSH`.
 
 It is the public AWS entry point of this repository: one machine, one cluster, one control path. The goal is to make evaluation easy, not to model a hardened production AWS layout.
 
@@ -14,8 +14,8 @@ Its post-provision bootstrap path reuses the same remote cluster layer under [an
 - create a basic security group that exposes `22`, `80`, `443`, and `6443`
 - use either the default `VPC` path or an explicitly provided `VPC/Subnet`
 - resolve a public Ubuntu `24.04` LTS AMI unless an explicit AMI id is provided
-- copy a `productive-k3s` bundle from a local checkout or a published GitHub Release
-- run `productive-k3s` in `server` mode and then `stack` mode on the same node
+- copy a `productive-k3s-core` bundle from a local checkout or a published GitHub Release
+- run `productive-k3s-core` in `server` mode and then `stack` mode on the same node
 - validate that the resulting single-node cluster is reachable and the shared stack is working
 
 ## Structure
@@ -169,10 +169,10 @@ That document is only an example workflow, but it is the practical proof that th
 1. Initialize `OpenTofu` and create the EC2 instance plus security group.
 2. Pull `OpenTofu` outputs into local generated metadata.
 3. Validate `SSH`, `sudo`, `systemd`, and the supported Ubuntu/Debian matrix through the shared remote bootstrap flow.
-4. Copy a `productive-k3s` bundle to the instance.
-5. Run `productive-k3s` in `server` mode on the same node.
+4. Copy a `productive-k3s-core` bundle to the instance.
+5. Run `productive-k3s-core` in `server` mode on the same node.
 6. Synchronize Rancher and registry host aliases locally on the instance.
-7. Run `productive-k3s` in `stack` mode on the same node.
+7. Run `productive-k3s-core` in `stack` mode on the same node.
 8. Validate nodes, shared services, ingress, and default storage.
 
 ## Notes
@@ -181,5 +181,5 @@ That document is only an example workflow, but it is the practical proof that th
 - It creates a single-node cluster only.
 - The security group is deliberately simple and should be narrowed before any non-evaluation use.
 - `AWS_VPC_ID` and `AWS_SUBNET_ID` are optional, but they must be set together.
-- The default AMI path targets Ubuntu `24.04` LTS, which is within the currently supported `productive-k3s` runtime matrix.
+- The default AMI path targets Ubuntu `24.04` LTS, which is within the currently supported `productive-k3s-core` runtime matrix.
 - A real AWS account run still depends on credentials, quotas, and an existing key pair supplied by the operator.

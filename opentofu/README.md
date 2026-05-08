@@ -1,6 +1,6 @@
 # OpenTofu
 
-Reusable OpenTofu modules for creating infrastructure that can host Productive K3S.
+Reusable OpenTofu modules for creating infrastructure that can host Productive K3S Core.
 
 Scenarios should compose these modules rather than duplicating provisioning logic.
 

@@ -15,7 +15,7 @@ cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "preflight-test",
   "base_domain": "k3s.lab.internal",
-  "remote_dir": "/home/ubuntu/productive-k3s",
+  "remote_dir": "/home/ubuntu/productive-k3s-core",
   "ssh": {
     "user": "ubuntu",
     "port": 22,
@@ -25,7 +25,7 @@ cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
   "productive_k3s": {
     "source": "local",
     "version": "local",
-    "release_repo": "jemacchi/productive-k3s"
+    "release_repo": "jemacchi/productive-k3s-core"
   },
   "telemetry": {
     "enabled": false,
@@ -66,7 +66,7 @@ GENERATED_DIR="${SCENARIO_DIR}/generated"
 LOG_DIR="${GENERATED_DIR}/logs"
 CLUSTER_JSON="${GENERATED_DIR}/cluster.json"
 PRECHECK_LOG="${SCENARIO_DIR}/precheck.log"
-REMOTE_DIR="/home/ubuntu/productive-k3s"
+REMOTE_DIR="/home/ubuntu/productive-k3s-core"
 
 log() {
   printf '[INFO] %s\n' "$*"
@@ -104,7 +104,7 @@ remote_exec() {
   local ip="$1"
   local script="$2"
   printf '%s|%s\n' "$ip" "$script" >> "${PRECHECK_LOG}"
-  if [[ "$script" == *"test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'"* ]]; then
+  if [[ "$script" == *"test -x '/home/ubuntu/productive-k3s-core/scripts/preflight-host.sh'"* ]]; then
     return 0
   fi
   if [[ "$script" == *"./scripts/preflight-host.sh --mode single-node"* ]]; then
@@ -117,9 +117,9 @@ EOF
 chmod +x "${TEST_SCENARIO_DIR}/scripts/common.sh"
 
 export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
-bash "${TEST_SCENARIO_DIR}/scripts/preflight-productive-k3s.sh"
+bash "${TEST_SCENARIO_DIR}/scripts/preflight-productive-k3s-core.sh"
 
-grep -q -- "test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'" "${TEST_SCENARIO_DIR}/precheck.log" || {
+grep -q -- "test -x '/home/ubuntu/productive-k3s-core/scripts/preflight-host.sh'" "${TEST_SCENARIO_DIR}/precheck.log" || {
   echo "[FAIL] did not check whether productive-k3s preflight exists remotely" >&2
   exit 1
 }
@@ -139,7 +139,7 @@ GENERATED_DIR="${SCENARIO_DIR}/generated"
 LOG_DIR="${GENERATED_DIR}/logs"
 CLUSTER_JSON="${GENERATED_DIR}/cluster.json"
 PRECHECK_LOG="${SCENARIO_DIR}/precheck.log"
-REMOTE_DIR="/home/ubuntu/productive-k3s"
+REMOTE_DIR="/home/ubuntu/productive-k3s-core"
 
 log() {
   printf '[INFO] %s\n' "$*"
@@ -177,7 +177,7 @@ remote_exec() {
   local ip="$1"
   local script="$2"
   printf '%s|%s\n' "$ip" "$script" >> "${PRECHECK_LOG}"
-  if [[ "$script" == *"test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'"* ]]; then
+  if [[ "$script" == *"test -x '/home/ubuntu/productive-k3s-core/scripts/preflight-host.sh'"* ]]; then
     return 1
   fi
   return 0
@@ -186,9 +186,9 @@ EOF
 chmod +x "${TEST_SCENARIO_DIR}/scripts/common.sh"
 rm -f "${TEST_SCENARIO_DIR}/precheck.log"
 
-bash "${TEST_SCENARIO_DIR}/scripts/preflight-productive-k3s.sh"
+bash "${TEST_SCENARIO_DIR}/scripts/preflight-productive-k3s-core.sh"
 
-grep -q -- "test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'" "${TEST_SCENARIO_DIR}/precheck.log" || {
+grep -q -- "test -x '/home/ubuntu/productive-k3s-core/scripts/preflight-host.sh'" "${TEST_SCENARIO_DIR}/precheck.log" || {
   echo "[FAIL] missing-script scenario did not probe the remote preflight helper" >&2
   exit 1
 }
@@ -198,4 +198,4 @@ if grep -q -- "./scripts/preflight-host.sh --mode" "${TEST_SCENARIO_DIR}/prechec
   exit 1
 fi
 
-echo "[PASS] remote productive-k3s preflight invokes supported modes and skips gracefully when unavailable"
+echo "[PASS] remote productive-k3s-core preflight invokes supported modes and skips gracefully when unavailable"

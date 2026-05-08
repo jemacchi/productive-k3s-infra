@@ -1,10 +1,10 @@
 # Reasons Behind `productive-k3s-infra`
 
-`productive-k3s-infra` exists because `productive-k3s` and infrastructure orchestration solve different problems.
+`productive-k3s-infra` exists because `productive-k3s-core` and infrastructure orchestration solve different problems.
 
-## Why not stop at `productive-k3s`
+## Why not stop at `productive-k3s-core`
 
-`productive-k3s` is the bootstrap contract for installing and validating a K3S-based stack.
+`productive-k3s-core` is the bootstrap contract for installing and validating a K3S-based stack.
 
 That is enough when:
 
@@ -53,7 +53,7 @@ That split makes it easier to evolve one public path without copy-pasting everyt
 
 ## Why the explicit mode split matters
 
-The `server`, `agent`, `stack`, and `single-node` modes exposed by `productive-k3s` are what make infrastructure orchestration realistic.
+The `server`, `agent`, `stack`, and `single-node` modes exposed by `productive-k3s-core` are what make infrastructure orchestration realistic.
 
 They let this repository:
 
@@ -77,4 +77,4 @@ It aims to provide:
 
 - [Product overview](index.md)
 - [How to use Productive K3S Infra](how-to-use.md)
-- [Relationship with Productive K3S](productive-k3s-relationship.md)
+- [Relationship with Productive K3S Core](productive-k3s-relationship.md)

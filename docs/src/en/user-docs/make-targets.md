@@ -51,7 +51,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 
 | Target | Purpose |
 | --- | --- |
-| `preflight` | Validate remote reachability and runtime support, copy the bundle, and run the remote Productive K3S host preflight when available |
+| `preflight` | Validate remote reachability and runtime support, copy the bundle, and run the remote Productive K3S Core host preflight when available |
 | `cluster-up` | Run remote bootstrap across the declared nodes |
 | `stack-up` | Re-run the shared stack installation |
 | `validate` | Run remote validation |
@@ -66,7 +66,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `tofu-init` | Initialize the `OpenTofu` working directory |
 | `infra-up` | Create the AWS infrastructure and refresh metadata |
 | `infra-down` | Destroy the AWS infrastructure |
-| `preflight` | Validate the provisioned instance over `SSH`, copy the bundle, and run the remote Productive K3S host preflight when available |
+| `preflight` | Validate the provisioned instance over `SSH`, copy the bundle, and run the remote Productive K3S Core host preflight when available |
 | `cluster-up` | Run the shared remote bootstrap flow |
 | `stack-up` | Re-run the shared stack installation |
 | `validate` | Run remote validation |

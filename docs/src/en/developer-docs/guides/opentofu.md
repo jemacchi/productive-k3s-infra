@@ -17,7 +17,7 @@
 ## What OpenTofu is not responsible for here
 
 - SSH-side bootstrap orchestration
-- Productive K3S mode sequencing
+- Productive K3S Core mode sequencing
 - validation of the final cluster stack
 
 Those concerns stay in the scenario scripts or in the shared remote layer.

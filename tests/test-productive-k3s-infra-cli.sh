@@ -112,7 +112,7 @@ PK3S_INFRA_ENGINE=opentofu
 TF_VAR_cluster_name=productive-k3s-mp
 TF_VAR_image=24.04
 TF_VAR_base_domain=k3s.lab.internal
-TF_VAR_remote_dir=/home/ubuntu/productive-k3s
+TF_VAR_remote_dir=/home/ubuntu/productive-k3s-core
 TF_VAR_server_cpus=4
 TF_VAR_server_memory=8G
 TF_VAR_server_disk=40G
@@ -189,7 +189,7 @@ PK3S_CORE_SEMVER=4.5.6
 PK3S_INFRA_IS_RELEASE=true
 PRODUCTIVE_K3S_SOURCE=remote
 PRODUCTIVE_K3S_VERSION=4.5.6
-PRODUCTIVE_K3S_RELEASE_REPO=jemacchi/productive-k3s
+PRODUCTIVE_K3S_RELEASE_REPO=jemacchi/productive-k3s-core
 EOF
 
 OUTPUT_FILE="${TMP_DIR}/release-bound.out"

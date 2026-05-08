@@ -1,6 +1,6 @@
 # Multipass Scenario
 
-This scenario provisions a local three-node Productive K3S cluster on top of Multipass:
+This scenario provisions a local three-node Productive K3S Core cluster on top of Multipass:
 
 - `1` server VM
 - `2` agent VMs
@@ -9,7 +9,7 @@ This scenario provisions a local three-node Productive K3S cluster on top of Mul
 The implementation is intentionally split in two layers:
 
 1. `OpenTofu` creates and destroys the VMs.
-2. `make` orchestrates `productive-k3s` across those VMs using the `server`, `agent`, and `stack` modes.
+2. `make` orchestrates `productive-k3s-core` across those VMs using the `server`, `agent`, and `stack` modes.
 
 ## Architecture
 
@@ -55,7 +55,7 @@ Required on the control machine:
 
 Required locally in the workspace:
 
-- sibling checkout of `productive-k3s`
+- sibling checkout of `productive-k3s-core`
 
 Default expected layout:
 
@@ -65,7 +65,7 @@ productive-k3s-env/
   productive-k3s-infra/
 ```
 
-If `productive-k3s` lives elsewhere, export `PRODUCTIVE_K3S_REPO=/path/to/productive-k3s`.
+If `productive-k3s-core` lives elsewhere, export `PRODUCTIVE_K3S_REPO=/path/to/productive-k3s`.
 
 Source selection:
 
@@ -143,12 +143,12 @@ That document is only an example workflow, but it is a practical way to confirm 
 
 1. `OpenTofu` launches the server and two agents in Multipass.
 2. Generated metadata records the live VM IP addresses.
-3. A `productive-k3s` source bundle is prepared from either the local checkout or a remote GitHub Release and copied into each VM.
-4. `productive-k3s` runs in `server` mode on the first node.
+3. A `productive-k3s-core` source bundle is prepared from either the local checkout or a remote GitHub Release and copied into each VM.
+4. `productive-k3s-core` runs in `server` mode on the first node.
 5. The server node token is captured from `/var/lib/rancher/k3s/server/node-token`.
-6. `productive-k3s` runs in `agent` mode on the remaining nodes.
+6. `productive-k3s-core` runs in `agent` mode on the remaining nodes.
 7. Host aliases for Rancher and registry are synchronized into each VM.
-8. `productive-k3s` runs in `stack` mode on the server.
+8. `productive-k3s-core` runs in `stack` mode on the server.
 9. A scenario-specific validation confirms node readiness, core namespaces, ingress reachability, and default storage.
 
 ## Notes

@@ -10,7 +10,7 @@
 
 ## Entendé el contrato de ejecución
 
-Cada escenario se hace cargo de la infraestructura alrededor del clúster, mientras que `productive-k3s` sigue siendo responsable del bootstrap del clúster en sí.
+Cada escenario se hace cargo de la infraestructura alrededor del clúster, mientras que `productive-k3s-core` sigue siendo responsable del bootstrap del clúster en sí.
 
 En la práctica eso significa que `productive-k3s-infra` maneja:
 
@@ -20,16 +20,16 @@ En la práctica eso significa que `productive-k3s-infra` maneja:
 - orquestación de las fases `server`, `agent` y `stack` cuando el escenario lo necesita
 - validación específica del escenario
 
-## Elegí el modo fuente de Productive K3S
+## Elegí el modo fuente de Productive K3S Core
 
 La mayoría de los escenarios públicos soportan dos modos fuente:
 
-- `PRODUCTIVE_K3S_SOURCE=local`: empaqueta un checkout local hermano de `productive-k3s`
+- `PRODUCTIVE_K3S_SOURCE=local`: empaqueta un checkout local hermano de `productive-k3s-core`
 - `PRODUCTIVE_K3S_SOURCE=remote`: descarga un bundle desde un GitHub Release publicado
 
 Si se usa `remote`, `PRODUCTIVE_K3S_VERSION` puede fijar una versión específica. Si se omite, el escenario resuelve el último release desde `PRODUCTIVE_K3S_RELEASE_REPO`.
 
-Cuando usás el `productive-k3s-infra-cli.sh` publicado desde un GitHub Release, ese release ya viene atado a una versión concreta de `productive-k3s`. En ese camino, el CLI fuerza:
+Cuando usás el `productive-k3s-infra-cli.sh` publicado desde un GitHub Release, ese release ya viene atado a una versión concreta de `productive-k3s-core`. En ese camino, el CLI fuerza:
 
 - `PRODUCTIVE_K3S_SOURCE=remote`
 - `PRODUCTIVE_K3S_VERSION=A.B.C`

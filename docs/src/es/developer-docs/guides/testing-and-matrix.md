@@ -36,7 +36,7 @@ Esos artefactos registran:
 - resultado
 - duración
 - topología y clase de entorno
-- detalles seleccionados de la fuente de Productive K3S
+- detalles seleccionados de la fuente de Productive K3S Core
 - metadata anónima relacionada con telemetría
 
 ## Guía de desarrollo

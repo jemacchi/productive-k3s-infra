@@ -1,6 +1,6 @@
 # On-Premises Basic Scenario
 
-This scenario bootstraps `productive-k3s` onto machines that already exist and are reachable over SSH.
+This scenario bootstraps `productive-k3s-core` onto machines that already exist and are reachable over SSH.
 
 Unlike `multipass`, this path does not provision infrastructure. The user provides the machine IPs, chooses which node is the `server`, and optionally provides one or more `agent` IPs.
 
@@ -11,10 +11,10 @@ Internally, `onprem-basic` now consumes the reusable remote bootstrap layer unde
 `onprem-basic` is meant for a simple lab or early on-prem validation flow:
 
 - validate SSH reachability to the provided machine IPs
-- validate that each target is in the supported `productive-k3s` OS matrix
+- validate that each target is in the supported `productive-k3s-core` OS matrix
 - validate that passwordless `sudo` is available
-- copy a `productive-k3s` bundle to the targets from either a local checkout or a published GitHub Release
-- run the remote `productive-k3s` host preflight when the copied bundle exposes `scripts/preflight-host.sh`
+- copy a `productive-k3s-core` bundle to the targets from either a local checkout or a published GitHub Release
+- run the remote `productive-k3s-core` host preflight when the copied bundle exposes `scripts/preflight-host.sh`
 - run `server`, `agent`, and `stack` bootstrap phases
 - validate that the resulting cluster is up and the shared stack is working
 
@@ -25,7 +25,7 @@ Validated layouts in this repository now include:
 
 ## Supported Runtime Matrix
 
-This scenario validates target machines against the currently supported `productive-k3s` runtime matrix:
+This scenario validates target machines against the currently supported `productive-k3s-core` runtime matrix:
 
 - Ubuntu `24.04` LTS
 - Ubuntu `22.04` LTS
@@ -190,13 +190,13 @@ That document is only an example workflow, but it is a practical way to confirm 
 
 1. Refresh local metadata from the declared `server` and `agent` IPs.
 2. Validate SSH access, `sudo`, `systemd`, and the supported Ubuntu/Debian matrix.
-3. Copy a `productive-k3s` bundle to each target machine.
-4. Run the remote `productive-k3s` host preflight when the copied bundle exposes `scripts/preflight-host.sh`.
-5. Run `productive-k3s` in `server` mode on `ONPREM_SERVER_IP`.
+3. Copy a `productive-k3s-core` bundle to each target machine.
+4. Run the remote `productive-k3s-core` host preflight when the copied bundle exposes `scripts/preflight-host.sh`.
+5. Run `productive-k3s-core` in `server` mode on `ONPREM_SERVER_IP`.
 6. Capture the K3S node token from the `server`.
-7. Run `productive-k3s` in `agent` mode on each IP listed in `ONPREM_AGENT_IPS`.
+7. Run `productive-k3s-core` in `agent` mode on each IP listed in `ONPREM_AGENT_IPS`.
 8. Synchronize Rancher and registry host aliases across all nodes.
-9. Run `productive-k3s` in `stack` mode on the `server`.
+9. Run `productive-k3s-core` in `stack` mode on the `server`.
 10. Validate nodes, shared services, ingress, and default storage.
 
 ## Notes
@@ -205,6 +205,6 @@ That document is only an example workflow, but it is a practical way to confirm 
 - It assumes the target machines are already provisioned and reachable.
 - It assumes passwordless `sudo`; it does not automate interactive sudo password entry.
 - The generated metadata is reusable across `preflight`, `status`, `stack-up`, and `validate`.
-- If the copied `productive-k3s` bundle does not yet expose `scripts/preflight-host.sh`, the scenario logs a warning and continues with the infrastructure-side preflight only.
+- If the copied `productive-k3s-core` bundle does not yet expose `scripts/preflight-host.sh`, the scenario logs a warning and continues with the infrastructure-side preflight only.
 - As in the other scenarios, the first `Rancher` install can spend extra time in `ContainerCreating` while images are pulled on cold nodes.
 - The current public validation evidence for this scenario includes both `single-host` and `server + agent` layouts using Ubuntu `24.04` targets over SSH.

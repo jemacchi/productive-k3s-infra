@@ -13,5 +13,5 @@ Esta sección agrupa los escenarios públicos, los principales entrypoints de `m
 ### Referencias compartidas
 
 - [Targets de Make](make-targets.md)
-- [Modos de Productive K3S](productive-k3s-modes.md)
+- [Modos de Productive K3S Core](productive-k3s-modes.md)
 - [Privacidad y telemetría](privacy-and-telemetry.md)

@@ -19,7 +19,7 @@ variable "base_domain" {
 variable "remote_dir" {
   description = "Path inside the VMs where productive-k3s will be copied."
   type        = string
-  default     = "/home/ubuntu/productive-k3s"
+  default     = "/home/ubuntu/productive-k3s-core"
 }
 
 variable "server_cpus" {

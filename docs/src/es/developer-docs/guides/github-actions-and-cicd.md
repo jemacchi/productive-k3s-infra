@@ -17,9 +17,9 @@ Los releases publicados deben usar tags compuestos:
 
 - `X.Y.Z-A.B.C`
 - `X.Y.Z`: versión de `productive-k3s-infra`
-- `A.B.C`: release atado de `productive-k3s`
+- `A.B.C`: release atado de `productive-k3s-core`
 
-El workflow de release valida ese formato y publica un bundle de infra cuyo CLI público ya queda ligado a esa versión de `productive-k3s`.
+El workflow de release valida ese formato y publica un bundle de infra cuyo CLI público ya queda ligado a esa versión de `productive-k3s-core`.
 
 ## Modelo práctico de CI/CD
 
@@ -47,12 +47,12 @@ Ese workflow corre cuando un pull request apuntando a `main` se cierra en estado
 
 1. ejecuta `make test-static`
 2. ejecuta `make test-contract`
-3. hace checkout del repo hermano `productive-k3s`
+3. hace checkout del repo hermano `productive-k3s-core`
 4. ejecuta `make test-live-gha-onprem`
 
 El job live prepara `openssh-server` sobre el runner hospedado por GitHub y luego ejercita `scenarios/onprem-basic` contra `127.0.0.1` como host remoto single-node.
 
-Cuando la revisión checkout del repo hermano `productive-k3s` ya incluye `scripts/preflight-host.sh`, ese mismo camino hosted también ejercita el host preflight remoto de Productive K3S antes de que empiece el bootstrap.
+Cuando la revisión checkout del repo hermano `productive-k3s-core` ya incluye `scripts/preflight-host.sh`, ese mismo camino hosted también ejercita el host preflight remoto de Productive K3S Core antes de que empiece el bootstrap.
 
 ## Notas
 

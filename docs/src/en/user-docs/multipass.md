@@ -1,6 +1,6 @@
 # Multipass Scenario
 
-`multipass` is the preferred local validation path for a multi-node Productive K3S environment.
+`multipass` is the preferred local validation path for a multi-node Productive K3S Core environment.
 
 ## What it builds
 
@@ -24,7 +24,7 @@ make -C scenarios/multipass clean
 
 1. Launches the three VMs through `OpenTofu` and Multipass.
 2. Renders generated metadata from the live VM IPs.
-3. Prepares a `productive-k3s` bundle from `local` or `remote` source.
+3. Prepares a `productive-k3s-core` bundle from `local` or `remote` source.
 4. Runs `server` mode on the first node.
 5. Captures the server join token.
 6. Runs `agent` mode on the remaining nodes.

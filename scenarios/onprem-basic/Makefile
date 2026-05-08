@@ -13,10 +13,10 @@ ONPREM_ENV_FILE ?= $(SCENARIO_DIR)/onprem.env
 
 -include $(ONPREM_ENV_FILE)
 
-PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s)
+PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s-core)
 PRODUCTIVE_K3S_SOURCE ?= local
 PRODUCTIVE_K3S_VERSION ?=
-PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s
+PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s-core
 TELEMETRY_ENABLED ?=
 TELEMETRY_ENDPOINT ?=
 TELEMETRY_MAX_RETRIES ?= 3
@@ -34,8 +34,8 @@ ONPREM_SSH_PORT ?= 22
 preflight:
 	$(SCRIPTS_DIR)/refresh-generated-artifacts.sh
 	$(SCRIPTS_DIR)/preflight.sh
-	$(SCRIPTS_DIR)/push-productive-k3s.sh
-	bash $(SCRIPTS_DIR)/preflight-productive-k3s.sh
+	$(SCRIPTS_DIR)/push-productive-k3s-core.sh
+	bash $(SCRIPTS_DIR)/preflight-productive-k3s-core.sh
 
 cluster-up:
 	$(SCRIPTS_DIR)/cluster-up.sh

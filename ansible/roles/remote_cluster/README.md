@@ -13,7 +13,7 @@ What this reusable layer covers:
 
 - metadata rendering for declared nodes
 - SSH reachability and supported-platform preflight
-- Productive K3S bundle copy from `local` or `remote` source
+- Productive K3S Core bundle copy from `local` or `remote` source
 - `server`, `agent`, and `stack` bootstrap orchestration
 - host alias synchronization
 - shared cluster validation

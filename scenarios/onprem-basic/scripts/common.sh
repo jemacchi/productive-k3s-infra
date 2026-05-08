@@ -5,10 +5,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 GENERATED_DIR="${SCENARIO_DIR}/generated"
 LOG_DIR="${GENERATED_DIR}/logs"
-PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../productive-k3s" && pwd)}"
+PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../productive-k3s-core" && pwd)}"
 PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-local}"
 PRODUCTIVE_K3S_VERSION="${PRODUCTIVE_K3S_VERSION:-}"
-PRODUCTIVE_K3S_RELEASE_REPO="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s}"
+PRODUCTIVE_K3S_RELEASE_REPO="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s-core}"
 TELEMETRY_ENABLED="${TELEMETRY_ENABLED:-}"
 TELEMETRY_ENDPOINT="${TELEMETRY_ENDPOINT:-}"
 TELEMETRY_MAX_RETRIES="${TELEMETRY_MAX_RETRIES:-3}"
@@ -299,7 +299,7 @@ download_productive_k3s_release_bundle() {
 
   version="$(normalize_release_version "${version}")"
   release_json="$(productive_k3s_release_json "${version}")"
-  archive_name="productive-k3s-v${version}.tar.gz"
+  archive_name="productive-k3s-core-${version}.tar.gz"
   sha_name="${archive_name}.sha256"
   archive_url="$(printf '%s' "${release_json}" | jq -r --arg name "${archive_name}" '.assets[] | select(.name == $name) | .browser_download_url')"
   sha_url="$(printf '%s' "${release_json}" | jq -r --arg name "${sha_name}" '.assets[] | select(.name == $name) | .browser_download_url')"
@@ -313,7 +313,7 @@ download_productive_k3s_release_bundle() {
     exit 1
   }
 
-  log "Downloading productive-k3s release ${version} from ${PRODUCTIVE_K3S_RELEASE_REPO}"
+  log "Downloading productive-k3s-core release ${version} from ${PRODUCTIVE_K3S_RELEASE_REPO}"
   curl -fsSL "${archive_url}" -o "${destination}"
   curl -fsSL "${sha_url}" -o "${destination}.sha256"
   expected_sha="$(cut -d' ' -f1 < "${destination}.sha256")"

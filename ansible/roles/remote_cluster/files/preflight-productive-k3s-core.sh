@@ -18,16 +18,16 @@ run_remote_productive_k3s_preflight() {
   local remote_script
   remote_script="$(remote_preflight_script_path)"
 
-  log "Running productive-k3s host preflight for ${node_name} (${node_ip}) in mode ${mode}"
+  log "Running productive-k3s-core host preflight for ${node_name} (${node_ip}) in mode ${mode}"
 
   if ! remote_exec "${node_ip}" "test -x '${remote_script}'" >/dev/null 2>&1; then
-    warn "Skipping productive-k3s host preflight on ${node_name} (${node_ip}) because ${remote_script} is not available in the copied bundle"
+    warn "Skipping productive-k3s-core host preflight on ${node_name} (${node_ip}) because ${remote_script} is not available in the copied bundle"
     return 0
   fi
 
   local log_file="${LOG_DIR}/preflight-productive-k3s-${node_name}-${mode}.log"
   if ! remote_exec "${node_ip}" "cd '${REMOTE_DIR}' && ./scripts/preflight-host.sh --mode ${mode}" 2>&1 | tee "${log_file}"; then
-    err "productive-k3s host preflight failed on ${node_name} (${node_ip}) in mode ${mode}"
+    err "productive-k3s-core host preflight failed on ${node_name} (${node_ip}) in mode ${mode}"
     exit 1
   fi
 }
@@ -42,4 +42,4 @@ else
   run_remote_productive_k3s_preflight "${SERVER_NAME}" "${SERVER_IP}" "stack"
 fi
 
-log "Remote productive-k3s host preflight completed"
+log "Remote productive-k3s-core host preflight completed"

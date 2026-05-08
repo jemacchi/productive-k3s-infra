@@ -37,7 +37,7 @@ No están pensados para capturar:
 - si `TELEMETRY_ENABLED` no está definido y la corrida es interactiva, el repositorio pregunta una vez y el default es `Yes`
 - si `TELEMETRY_ENABLED` no está definido y la corrida es no interactiva, resuelve a `false`
 - los valores definidos en la matriz raíz se propagan hacia cada escenario
-- cada escenario propaga esos mismos valores hacia los comandos nested de bootstrap de `productive-k3s`
+- cada escenario propaga esos mismos valores hacia los comandos nested de bootstrap de `productive-k3s-core`
 
 ## Variables soportadas para propagación
 
