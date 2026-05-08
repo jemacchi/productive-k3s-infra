@@ -29,12 +29,12 @@ jobs:
           path: productive-k3s-infra
           fetch-depth: 0
 
-      - name: Checkout productive-k3s
+      - name: Checkout productive-k3s-core
         uses: actions/checkout@v4
         with:
-          repository: jemacchi/productive-k3s
+          repository: jemacchi/productive-k3s-core
           ref: main
-          path: productive-k3s
+          path: productive-k3s-core
           fetch-depth: 0
 
       - name: Set up OpenTofu
@@ -57,7 +57,7 @@ jobs:
           name: pr-validation-artifacts
           path: |
             productive-k3s-infra/test-artifacts
-            productive-k3s-infra/use-cases/*/generated
+            productive-k3s-infra/scenarios/*/generated
           if-no-files-found: ignore
 
   live-onprem-github-host:
@@ -73,12 +73,12 @@ jobs:
           path: productive-k3s-infra
           fetch-depth: 0
 
-      - name: Checkout productive-k3s
+      - name: Checkout productive-k3s-core
         uses: actions/checkout@v4
         with:
-          repository: jemacchi/productive-k3s
+          repository: jemacchi/productive-k3s-core
           ref: main
-          path: productive-k3s
+          path: productive-k3s-core
           fetch-depth: 0
 
       - name: Run GitHub-host on-prem live test
@@ -94,5 +94,5 @@ jobs:
           name: pr-validation-live-onprem-github-host-artifacts
           path: |
             productive-k3s-infra/test-artifacts
-            productive-k3s-infra/use-cases/onprem-basic/generated
+            productive-k3s-infra/scenarios/onprem-basic/generated
           if-no-files-found: ignore

@@ -4,8 +4,8 @@
 
 ## Dónde se usa hoy
 
-- `use-cases/multipass/opentofu/`: crea la topología local de VMs usada por el flujo de Multipass
-- `use-cases/aws-single-node/opentofu/`: provisiona la infraestructura pública de AWS para el flujo single-node
+- `scenarios/multipass/opentofu/`: crea la topología local de VMs usada por el flujo de Multipass
+- `scenarios/aws-single-node/opentofu/`: provisiona la infraestructura pública de AWS para el flujo single-node
 
 ## De qué se hace cargo OpenTofu
 
@@ -17,10 +17,10 @@
 ## De qué no se hace cargo acá
 
 - orquestación del bootstrap por SSH
-- secuenciación de modos de Productive K3S
+- secuenciación de modos de Productive K3S Core
 - validación del stack final del clúster
 
-Esas responsabilidades quedan en los scripts del caso de uso o en la capa remota compartida.
+Esas responsabilidades quedan en los scripts del escenario o en la capa remota compartida.
 
 ## Espacio de módulos a nivel repositorio
 
@@ -29,12 +29,12 @@ El directorio top-level `opentofu/modules/` está reservado para bloques reutili
 Las notas actuales del repositorio ya explicitan la distinción:
 
 - la lógica pública reutilizable de bootstrap remoto ya existe bajo `ansible/roles/remote_cluster`
-- los módulos reutilizables top-level de OpenTofu siguen siendo más un espacio a futuro que el principal camino de reutilización de los casos de uso públicos implementados hoy
+- los módulos reutilizables top-level de OpenTofu siguen siendo más un espacio a futuro que el principal camino de reutilización de los escenarios públicos implementados hoy
 
 ## Guía de desarrollo
 
-Cuando edites un caso de uso respaldado por OpenTofu:
+Cuando edites un escenario respaldado por OpenTofu:
 
 - mantené alineados los outputs con lo que esperan los scripts de refresh
 - preservá la forma de la metadata generada usada por `status`, los tests y los scripts posteriores
-- dejá la lógica específica del provider dentro del caso de uso salvo que claramente pertenezca a un módulo compartido
+- dejá la lógica específica del provider dentro del escenario salvo que claramente pertenezca a un módulo compartido

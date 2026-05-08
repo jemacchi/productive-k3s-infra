@@ -1,39 +1,67 @@
 # How To Use Productive K3S Infra
 
-`productive-k3s-infra` is organized around complete use cases under `use-cases/`, not around isolated snippets.
+`productive-k3s-infra` is now organized around profiles as the public entrypoint, with complete scenario implementations still living under `scenarios/`.
 
-## Choose the matching use case
+## Choose the matching profile
 
-- `multipass`: local three-node cluster on top of Multipass VMs
-- `onprem-basic`: bootstrap existing hosts over `SSH`
-- `aws-single-node`: provision one `EC2` instance with `OpenTofu` and bootstrap it remotely
+- `profiles/multipass/...`: local three-node cluster on top of Multipass VMs
+- `profiles/on-prem/...`: bootstrap existing hosts over `SSH`
+- `profiles/aws-single-node/...`: provision one `EC2` instance with `OpenTofu` and bootstrap it remotely
 
 ## Understand the execution contract
 
-Each use case is responsible for the infrastructure around the cluster, while `productive-k3s` remains responsible for the cluster bootstrap itself.
+Each scenario is responsible for the infrastructure around the cluster, while `productive-k3s-core` remains responsible for the cluster bootstrap itself.
 
 In practice that means `productive-k3s-infra` handles:
 
 - host creation or host targeting
 - generated inventories and cluster metadata
 - bundle copy from a local checkout or a remote release
-- orchestration of `server`, `agent`, and `stack` phases when the use case needs them
-- use-case-specific validation
+- orchestration of `server`, `agent`, and `stack` phases when the scenario needs them
+- scenario-specific validation
 
-## Choose the Productive K3S source mode
+## Choose the Productive K3S Core source mode
 
-Most public use cases support two source modes:
+Most public scenarios support two source modes:
 
-- `PRODUCTIVE_K3S_SOURCE=local`: package a sibling local checkout of `productive-k3s`
+- `PRODUCTIVE_K3S_SOURCE=local`: package a sibling local checkout of `productive-k3s-core`
 - `PRODUCTIVE_K3S_SOURCE=remote`: download a published GitHub Release bundle
 
-If `remote` is used, `PRODUCTIVE_K3S_VERSION` can pin a specific release. If it is omitted, the use case resolves the latest release from `PRODUCTIVE_K3S_RELEASE_REPO`.
+If `remote` is used, `PRODUCTIVE_K3S_VERSION` can pin a specific release. If it is omitted, the scenario resolves the latest release from `PRODUCTIVE_K3S_RELEASE_REPO`.
 
-## Use the Makefile entry points
+When you use the published `productive-k3s-infra-cli.sh` from a GitHub Release, that release already binds a specific `productive-k3s-core` release. In that path, the CLI forces:
 
-The public operator interface is `make`.
+- `PRODUCTIVE_K3S_SOURCE=remote`
+- `PRODUCTIVE_K3S_VERSION=A.B.C`
 
-Typical patterns:
+The `A.B.C` segment comes from the infra release tag `X.Y.Z-A.B.C`.
+
+## Use the public entry points
+
+The public operator interface is:
+
+- the release CLI: `productive-k3s-infra-cli.sh`
+- local `make infra-*` shortcuts at the repository root
+- direct `make -C scenarios/...` commands when you want to work inside one scenario explicitly
+
+Release CLI examples:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate --profile ./profiles/on-prem/basic.env
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- plan --profile ./profiles/multipass/1-server-2-agents.env
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/aws-single-node/basic.env
+```
+
+Root Makefile shortcuts:
+
+```bash
+make infra-list-profiles
+make infra-validate PROFILE=profiles/on-prem/basic.env
+make infra-plan PROFILE=profiles/multipass/1-server-2-agents.env
+make infra-apply PROFILE=profiles/aws-single-node/basic.env
+```
+
+Typical scenario command patterns:
 
 - infrastructure only: `infra-up`
 - preflight only: `preflight`
@@ -47,7 +75,7 @@ See [Make targets](../user-docs/make-targets.md) for the detailed matrix.
 ## Notes
 
 !!! note
-    These public use cases are intentionally pragmatic. They are meant to be evaluable, reusable, and explainable. They are not presented as fully hardened production blueprints.
+    These public scenarios are intentionally pragmatic. They are meant to be evaluable, reusable, and explainable. They are not presented as fully hardened production blueprints.
 
 !!! note
-    Generated artifacts under each use case are part of the public workflow. They make infrastructure decisions, bootstrap inputs, and validation state easier to inspect.
+    Generated artifacts under each scenario are part of the public workflow. They make infrastructure decisions, bootstrap inputs, and validation state easier to inspect.

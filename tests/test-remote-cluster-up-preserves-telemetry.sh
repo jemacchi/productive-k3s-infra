@@ -6,16 +6,16 @@ SOURCE_DIR="${ROOT_DIR}/ansible/roles/remote_cluster/files"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
-TEST_USE_CASE_DIR="${TMP_DIR}/remote-cluster"
-mkdir -p "${TEST_USE_CASE_DIR}"
-cp -R "${SOURCE_DIR}" "${TEST_USE_CASE_DIR}/scripts"
-mkdir -p "${TEST_USE_CASE_DIR}/generated/logs"
+TEST_SCENARIO_DIR="${TMP_DIR}/remote-cluster"
+mkdir -p "${TEST_SCENARIO_DIR}"
+cp -R "${SOURCE_DIR}" "${TEST_SCENARIO_DIR}/scripts"
+mkdir -p "${TEST_SCENARIO_DIR}/generated/logs"
 
-cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "telemetry-test",
   "base_domain": "k3s.lab.internal",
-  "remote_dir": "/home/ubuntu/productive-k3s",
+  "remote_dir": "/home/ubuntu/productive-k3s-core",
   "ssh": {
     "user": "ubuntu",
     "port": 22,
@@ -25,7 +25,7 @@ cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
   "productive_k3s": {
     "source": "remote",
     "version": "v9.9.9",
-    "release_repo": "jemacchi/productive-k3s"
+    "release_repo": "jemacchi/productive-k3s-core"
   },
   "telemetry": {
     "enabled": true,
@@ -64,7 +64,7 @@ cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
 }
 EOF
 
-cat > "${TEST_USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 jq -n \
@@ -89,21 +89,21 @@ jq -n \
     productive_k3s_version: $productive_k3s_version
   }' > "${CAPTURE_FILE}"
 EOF
-chmod +x "${TEST_USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh"
+chmod +x "${TEST_SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh"
 
-for script_name in preflight.sh push-productive-k3s.sh preflight-productive-k3s.sh bootstrap-server.sh bootstrap-agents.sh bootstrap-stack.sh; do
-  cat > "${TEST_USE_CASE_DIR}/scripts/${script_name}" <<'EOF'
+for script_name in preflight.sh push-productive-k3s-core.sh preflight-productive-k3s-core.sh bootstrap-server.sh bootstrap-agents.sh bootstrap-stack.sh; do
+  cat > "${TEST_SCENARIO_DIR}/scripts/${script_name}" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 exit 0
 EOF
-  chmod +x "${TEST_USE_CASE_DIR}/scripts/${script_name}"
+  chmod +x "${TEST_SCENARIO_DIR}/scripts/${script_name}"
 done
 
-export USE_CASE_DIR="${TEST_USE_CASE_DIR}"
-export REMOTE_CLUSTER_REFRESH_SCRIPT="${TEST_USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh"
+export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
+export REMOTE_CLUSTER_REFRESH_SCRIPT="${TEST_SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh"
 export CAPTURE_FILE="${TMP_DIR}/remote-cluster-up-env.json"
-export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s"
+export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s-core"
 export TELEMETRY_ENABLED=""
 export TELEMETRY_ENDPOINT=""
 export TELEMETRY_MAX_RETRIES="3"
@@ -114,7 +114,7 @@ export TELEMETRY_USER_AGENT="productive-k3s-infra/default"
 export PRODUCTIVE_K3S_SOURCE="local"
 export PRODUCTIVE_K3S_VERSION=""
 
-bash "${TEST_USE_CASE_DIR}/scripts/cluster-up.sh"
+bash "${TEST_SCENARIO_DIR}/scripts/cluster-up.sh"
 
 jq -e '
   .telemetry_enabled == "true" and

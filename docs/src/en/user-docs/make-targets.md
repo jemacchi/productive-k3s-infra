@@ -2,6 +2,12 @@
 
 `make` is the public operator interface of this repository.
 
+The public release artifact now exposes the profile-driven contract through:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- <command> --profile <file>
+```
+
 ## Root-level targets
 
 | Target | Purpose |
@@ -10,11 +16,22 @@
 | `make docs-serve` | Serve the docs locally |
 | `make docs-up` | Run the docs server in the background |
 | `make docs-down` | Stop the docs server and clean docs artifacts |
-| `make test-static` | Run static checks across all public use cases |
-| `make test-contract` | Run contract checks across all public use cases |
-| `make test-live` | Run live validations across all public use cases |
+| `make test-static` | Run static checks across all public scenarios |
+| `make test-contract` | Run contract checks across all public scenarios |
+| `make test-live` | Run live validations across all public scenarios |
 | `make test-live-gha-onprem` | Run the GitHub-hosted single-node `onprem-basic` live validation |
 | `make test-matrix` | Run `static`, `contract`, and `live` in sequence |
+| `make infra-help` | Show the public profile-driven CLI usage |
+| `make infra-doctor` | Run basic local checks for the profile-driven CLI |
+| `make infra-list-profiles` | List the versioned example profiles |
+| `make infra-validate PROFILE=...` | Validate the selected profile and delegate to the matching scenario |
+| `make infra-plan PROFILE=...` | Show the current plan for the selected profile |
+| `make infra-apply PROFILE=...` | Apply the selected profile by delegating to the matching scenario |
+| `make infra-destroy PROFILE=...` | Destroy or tear down the selected profile when supported |
+| `make infra-status PROFILE=...` | Print the generated status for the selected profile |
+| `make multipass` | Run the default public `multipass` flow (`up`) |
+| `make onprem` | Run the default public `onprem-basic` flow (`up`) |
+| `make aws-single-node` | Run the default public AWS single-node flow (`up`) |
 
 ## Multipass targets
 
@@ -24,7 +41,7 @@
 | `infra-up` | Create the VMs and refresh generated metadata |
 | `cluster-up` | Run the multi-node bootstrap flow |
 | `stack-up` | Re-run the shared stack installation on the server |
-| `validate` | Run use-case validation |
+| `validate` | Run scenario validation |
 | `up` | `infra-up + cluster-up + validate` |
 | `down` | Destroy the VMs |
 | `clean` | Remove generated artifacts and local `OpenTofu` state |
@@ -34,7 +51,7 @@
 
 | Target | Purpose |
 | --- | --- |
-| `preflight` | Validate remote reachability and runtime support, copy the bundle, and run the remote Productive K3S host preflight when available |
+| `preflight` | Validate remote reachability and runtime support, copy the bundle, and run the remote Productive K3S Core host preflight when available |
 | `cluster-up` | Run remote bootstrap across the declared nodes |
 | `stack-up` | Re-run the shared stack installation |
 | `validate` | Run remote validation |
@@ -49,7 +66,7 @@
 | `tofu-init` | Initialize the `OpenTofu` working directory |
 | `infra-up` | Create the AWS infrastructure and refresh metadata |
 | `infra-down` | Destroy the AWS infrastructure |
-| `preflight` | Validate the provisioned instance over `SSH`, copy the bundle, and run the remote Productive K3S host preflight when available |
+| `preflight` | Validate the provisioned instance over `SSH`, copy the bundle, and run the remote Productive K3S Core host preflight when available |
 | `cluster-up` | Run the shared remote bootstrap flow |
 | `stack-up` | Re-run the shared stack installation |
 | `validate` | Run remote validation |
@@ -61,6 +78,9 @@
 
 !!! note
     The public contract is the target name and its operator-facing behavior, not necessarily the exact internal scripts it calls.
+
+!!! note
+    The release CLI uses `command --profile <file>` as the main public contract.
 
 !!! note
     `status` is important in this repository because generated metadata is part of the operating model, not just an internal implementation detail.

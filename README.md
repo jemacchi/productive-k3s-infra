@@ -1,8 +1,8 @@
 # Productive K3S Infra
 
-**Productive K3S Infra** provides pre-assembled infrastructure use cases for running [Productive K3S](https://github.com/jemacchi/productive-k3s) in repeatable local, cloud, and on-premises environments.
+**Productive K3S Infra** provides pre-assembled infrastructure scenarios for running [Productive K3S Core](https://github.com/jemacchi/productive-k3s-core) in repeatable local, cloud, and on-premises environments.
 
-It does not replace `productive-k3s`. It acts as the infrastructure companion project: it prepares machines, inventories, networking assumptions, and orchestration flows so that `productive-k3s` can bootstrap a usable K3S environment on top.
+It does not replace `productive-k3s-core`. It acts as the infrastructure companion project: it prepares machines, inventories, networking assumptions, and orchestration flows so that `productive-k3s-core` can bootstrap a usable K3S environment on top.
 
 ## What this repository covers
 
@@ -14,7 +14,28 @@ The current public scope includes:
 - reusable OpenTofu modules
 - reusable Ansible-side bootstrap assets
 
-The main public entry points are organized as `use-cases/`.
+The main implementation units are still organized as `scenarios/`, but user-facing configuration can now be expressed through versioned profiles under `profiles/`.
+
+The repository also exposes a public release CLI entrypoint:
+
+```bash
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate --profile ./profiles/on-prem/basic.env
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/multipass/1-server-2-agents.env
+```
+
+Release tags are composite:
+
+- `X.Y.Z`: version of `productive-k3s-infra`
+- `A.B.C`: bound `productive-k3s-core` release used by that infra release
+
+When you execute `productive-k3s-infra-cli.sh` from a GitHub Release, it defaults to `PRODUCTIVE_K3S_SOURCE=remote` and enforces the bound `productive-k3s-core` version from the tag.
+
+For local operator convenience, the root `Makefile` now also exposes:
+
+- `make infra-list-profiles`
+- `make infra-validate PROFILE=profiles/on-prem/basic.env`
+- `make infra-apply PROFILE=profiles/multipass/1-server-2-agents.env`
+- scenario shortcuts such as `make multipass`, `make onprem`, and `make aws-single-node` for direct scenario-oriented workflows
 
 ## Documentation
 
@@ -34,18 +55,18 @@ High-level product framing:
 - [How to use Productive K3S Infra](https://infra.productive-k3s.io/en/product/how-to-use/)
 - [Reasons behind the repository](https://infra.productive-k3s.io/en/product/reasons-behind/)
 - [Open vs Pro](https://infra.productive-k3s.io/en/product/open-vs-pro/)
-- [Relationship with Productive K3S](https://infra.productive-k3s.io/en/product/productive-k3s-relationship/)
+- [Relationship with Productive K3S Core](https://infra.productive-k3s.io/en/product/productive-k3s-relationship/)
 
 ## User Docs
 
-Operational use cases and user-facing references:
+Operational scenarios and user-facing references:
 
 - [User docs index](https://infra.productive-k3s.io/en/user-docs/)
 - [Multipass](https://infra.productive-k3s.io/en/user-docs/multipass/)
 - [On-prem basic](https://infra.productive-k3s.io/en/user-docs/onprem-basic/)
 - [AWS single-node](https://infra.productive-k3s.io/en/user-docs/aws-single-node/)
 - [Make targets](https://infra.productive-k3s.io/en/user-docs/make-targets/)
-- [Productive K3S modes](https://infra.productive-k3s.io/en/user-docs/productive-k3s-modes/)
+- [Productive K3S Core modes](https://infra.productive-k3s.io/en/user-docs/productive-k3s-modes/)
 - [Privacy and telemetry](https://infra.productive-k3s.io/en/user-docs/privacy-and-telemetry/)
 
 ## Developer Docs

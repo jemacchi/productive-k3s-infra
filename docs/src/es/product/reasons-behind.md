@@ -1,10 +1,10 @@
 # Razones Del Diseño De `productive-k3s-infra`
 
-`productive-k3s-infra` existe porque `productive-k3s` y la orquestación de infraestructura resuelven problemas distintos.
+`productive-k3s-infra` existe porque `productive-k3s-core` y la orquestación de infraestructura resuelven problemas distintos.
 
-## Por qué no alcanza con `productive-k3s`
+## Por qué no alcanza con `productive-k3s-core`
 
-`productive-k3s` es el contrato de bootstrap para instalar y validar un stack basado en K3S.
+`productive-k3s-core` es el contrato de bootstrap para instalar y validar un stack basado en K3S.
 
 Eso alcanza cuando:
 
@@ -20,9 +20,9 @@ No alcanza cuando además necesitás estandarizar:
 - cómo se secuencian los pasos de bootstrap multinodo
 - cómo debería correrse una validación específica de infraestructura
 
-## Por qué los casos de uso son el entrypoint público
+## Por qué los escenarios son el entrypoint público
 
-Este repositorio está centrado intencionalmente en `use-cases/` en lugar de snippets genéricos.
+Este repositorio está centrado intencionalmente en `scenarios/` en lugar de snippets genéricos.
 
 El objetivo de diseño es ofrecer caminos de despliegue que sean:
 
@@ -41,7 +41,7 @@ y no una colección de helpers desconectados.
 
 ## Por qué mantener capas compartidas por debajo
 
-Aun cuando la interfaz pública está orientada a casos de uso, la implementación igual necesita fronteras de reutilización.
+Aun cuando la interfaz pública está orientada a escenarios, la implementación igual necesita fronteras de reutilización.
 
 Por eso el repositorio mantiene lógica compartida en capas como:
 
@@ -53,7 +53,7 @@ Esa separación hace más fácil evolucionar un camino público sin copiar y peg
 
 ## Por qué importa la separación explícita por modos
 
-Los modos `server`, `agent`, `stack` y `single-node` expuestos por `productive-k3s` son lo que vuelve realista la orquestación de infraestructura.
+Los modos `server`, `agent`, `stack` y `single-node` expuestos por `productive-k3s-core` son lo que vuelve realista la orquestación de infraestructura.
 
 Le permiten a este repositorio:
 
@@ -70,11 +70,11 @@ Tomado como conjunto, el repositorio busca ubicarse entre scripting crudo de inf
 Apunta a ofrecer:
 
 - flujos de infraestructura que sigan siendo públicos y entendibles
-- casos de uso más realistas que ejemplos de juguete
+- escenarios más realistas que ejemplos de juguete
 - un puente estable hacia entornos K3S reales, remotos o multinodo
 
 ## Ver también
 
 - [Resumen del producto](index.md)
 - [Cómo usar Productive K3S Infra](how-to-use.md)
-- [Relación con Productive K3S](productive-k3s-relationship.md)
+- [Relación con Productive K3S Core](productive-k3s-relationship.md)

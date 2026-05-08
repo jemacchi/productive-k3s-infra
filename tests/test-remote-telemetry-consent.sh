@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMON_SCRIPT="${ROOT_DIR}/ansible/roles/remote_cluster/files/common.sh"
 
-export USE_CASE_DIR="${ROOT_DIR}/use-cases/onprem-basic"
+export SCENARIO_DIR="${ROOT_DIR}/scenarios/onprem-basic"
 
 # shellcheck disable=SC1090
 source "${COMMON_SCRIPT}"

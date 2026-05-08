@@ -1,10 +1,10 @@
 # Reasons Behind `productive-k3s-infra`
 
-`productive-k3s-infra` exists because `productive-k3s` and infrastructure orchestration solve different problems.
+`productive-k3s-infra` exists because `productive-k3s-core` and infrastructure orchestration solve different problems.
 
-## Why not stop at `productive-k3s`
+## Why not stop at `productive-k3s-core`
 
-`productive-k3s` is the bootstrap contract for installing and validating a K3S-based stack.
+`productive-k3s-core` is the bootstrap contract for installing and validating a K3S-based stack.
 
 That is enough when:
 
@@ -20,9 +20,9 @@ It is not enough when you also need to standardize:
 - how multi-node bootstrap steps are sequenced
 - how infrastructure-specific validation should run
 
-## Why use cases are the public entry point
+## Why scenarios are the public entry point
 
-This repository is intentionally centered on `use-cases/` instead of generic snippets.
+This repository is intentionally centered on `scenarios/` instead of generic snippets.
 
 The design goal is to provide deployment paths that are:
 
@@ -41,7 +41,7 @@ instead of a collection of disconnected helper fragments.
 
 ## Why keep shared layers underneath
 
-Even though the public interface is use-case driven, the implementation still needs reuse boundaries.
+Even though the public interface is scenario driven, the implementation still needs reuse boundaries.
 
 The repository therefore keeps shared logic in layers such as:
 
@@ -53,7 +53,7 @@ That split makes it easier to evolve one public path without copy-pasting everyt
 
 ## Why the explicit mode split matters
 
-The `server`, `agent`, `stack`, and `single-node` modes exposed by `productive-k3s` are what make infrastructure orchestration realistic.
+The `server`, `agent`, `stack`, and `single-node` modes exposed by `productive-k3s-core` are what make infrastructure orchestration realistic.
 
 They let this repository:
 
@@ -70,11 +70,11 @@ Taken together, the repository is meant to sit between raw infrastructure script
 It aims to provide:
 
 - infrastructure flows that are still public and understandable
-- use cases that are more realistic than toy examples
+- scenarios that are more realistic than toy examples
 - a stable bridge into real multi-node or remote K3S environments
 
 ## See also
 
 - [Product overview](index.md)
 - [How to use Productive K3S Infra](how-to-use.md)
-- [Relationship with Productive K3S](productive-k3s-relationship.md)
+- [Relationship with Productive K3S Core](productive-k3s-relationship.md)

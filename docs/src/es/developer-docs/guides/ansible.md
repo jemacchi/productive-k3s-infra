@@ -4,20 +4,20 @@ La capa reutilizable del lado de Ansible vive hoy bajo `ansible/roles/remote_clu
 
 ## Qué es
 
-A pesar del nombre del directorio, la interfaz pública actual no es todavía una experiencia playbook-first completa. El role empaqueta principalmente helpers compartidos en shell y Python bajo `files/` para que varios casos de uso consuman la misma lógica de bootstrap remoto.
+A pesar del nombre del directorio, la interfaz pública actual no es todavía una experiencia playbook-first completa. El role empaqueta principalmente helpers compartidos en shell y Python bajo `files/` para que varios escenarios consuman la misma lógica de bootstrap remoto.
 
 Consumidores actuales:
 
-- `use-cases/onprem-basic`
-- `use-cases/aws-single-node`
+- `scenarios/onprem-basic`
+- `scenarios/aws-single-node`
 
 ## Qué cubre
 
 - renderizado de metadata para nodos declarados
 - checks de reachability por SSH
 - validación de plataformas soportadas
-- copia del bundle de Productive K3S desde fuente `local` o `remote`
-- invocación remota opcional del host preflight de Productive K3S antes del bootstrap
+- copia del bundle de Productive K3S Core desde fuente `local` o `remote`
+- invocación remota opcional del host preflight de Productive K3S Core antes del bootstrap
 - orquestación de `server`, `agent` y `stack`
 - sincronización de aliases de hosts
 - validación remota compartida
@@ -25,9 +25,9 @@ Consumidores actuales:
 ## Archivos compartidos clave
 
 - `preflight.sh`
-- `preflight-productive-k3s.sh`
+- `preflight-productive-k3s-core.sh`
 - `cluster-up.sh`
-- `push-productive-k3s.sh`
+- `push-productive-k3s-core.sh`
 - `bootstrap-server.sh`
 - `bootstrap-agents.sh`
 - `bootstrap-stack.sh`
@@ -42,7 +42,7 @@ Cuando cambies la capa remota compartida:
 - asumí que afecta tanto a `onprem-basic` como a `aws-single-node`
 - preservá cuando sea posible el contrato de metadata generada
 - mantené alineada la propagación de telemetría con los tests actuales
-- verificá si también hay que tocar algún wrapper local del caso de uso
+- verificá si también hay que tocar algún wrapper local del escenario
 
 ## Notas
 

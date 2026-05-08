@@ -1,10 +1,10 @@
-# Relationship With Productive K3S
+# Relationship With Productive K3S Core
 
-`productive-k3s-infra` and `productive-k3s` have different responsibilities.
+`productive-k3s-infra` and `productive-k3s-core` have different responsibilities.
 
-## What Productive K3S does
+## What Productive K3S Core does
 
-`productive-k3s` is the cluster bootstrap project. It is responsible for:
+`productive-k3s-core` is the cluster bootstrap project. It is responsible for:
 
 - installing `k3s`
 - assembling the selected cluster mode
@@ -18,23 +18,23 @@
 - create or target the machines
 - derive node roles and service hostnames
 - render generated metadata and inventory-like files
-- move the `productive-k3s` bundle into place
+- move the `productive-k3s-core` bundle into place
 - orchestrate the bootstrap sequence across one or more nodes
 
 ## Shared bootstrap interface
 
-The infrastructure flows in this repository treat the `productive-k3s` execution modes as the public bootstrap interface:
+The infrastructure flows in this repository treat the `productive-k3s-core` execution modes as the public bootstrap interface:
 
 - `single-node`
 - `server`
 - `agent`
 - `stack`
 
-Different use cases consume those modes differently:
+Different scenarios consume those modes differently:
 
 - `multipass`: `server`, `agent`, `stack`
 - `onprem-basic`: `single-node` or `server`, `agent`, `stack` depending on topology
-- `aws-single-node`: operationally one node, but still driven through the shared remote bootstrap layer around `productive-k3s`
+- `aws-single-node`: operationally one node, but still driven through the shared remote bootstrap layer around `productive-k3s-core`
 
 ## Why the split matters
 

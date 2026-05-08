@@ -1,5 +1,5 @@
 site_name: Productive K3S Infra
-site_description: Pre-assembled infrastructure use cases for Productive K3S, with bilingual documentation.
+site_description: Pre-assembled infrastructure scenarios for Productive K3S Core, with bilingual documentation.
 site_author: Productive K3S Infra
 site_url: https://infra.productive-k3s.io/
 repo_url: https://github.com/jemacchi/productive-k3s-infra
@@ -68,15 +68,15 @@ nav:
           - How to use: en/product/how-to-use.md
           - Reasons behind: en/product/reasons-behind.md
           - Open vs Pro: en/product/open-vs-pro.md
-          - Relationship with Productive K3S: en/product/productive-k3s-relationship.md
+          - Relationship with Productive K3S Core: en/product/productive-k3s-relationship.md
       - User docs:
           - en/user-docs/index.md
-          - Use cases:
+          - Scenarios:
               - Multipass: en/user-docs/multipass.md
               - On-prem basic: en/user-docs/onprem-basic.md
               - AWS single-node: en/user-docs/aws-single-node.md
           - Make targets: en/user-docs/make-targets.md
-          - Productive K3S modes: en/user-docs/productive-k3s-modes.md
+          - Productive K3S Core modes: en/user-docs/productive-k3s-modes.md
           - Privacy and telemetry: en/user-docs/privacy-and-telemetry.md
       - Developer docs:
           - en/developer-docs/index.md
@@ -95,15 +95,15 @@ nav:
           - Cómo usar: es/product/how-to-use.md
           - Razones del diseño: es/product/reasons-behind.md
           - Open vs Pro: es/product/open-vs-pro.md
-          - Relación con Productive K3S: es/product/productive-k3s-relationship.md
+          - Relación con Productive K3S Core: es/product/productive-k3s-relationship.md
       - Documentación para usuarios:
           - es/user-docs/index.md
-          - Casos de uso:
+          - Escenarios:
               - Multipass: es/user-docs/multipass.md
               - On-prem basic: es/user-docs/onprem-basic.md
               - AWS single-node: es/user-docs/aws-single-node.md
           - Targets de Make: es/user-docs/make-targets.md
-          - Modos de Productive K3S: es/user-docs/productive-k3s-modes.md
+          - Modos de Productive K3S Core: es/user-docs/productive-k3s-modes.md
           - Privacidad y telemetría: es/user-docs/privacy-and-telemetry.md
       - Documentación para desarrolladores:
           - es/developer-docs/index.md

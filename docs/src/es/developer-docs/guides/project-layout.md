@@ -1,12 +1,13 @@
 # Organización Del Proyecto
 
-El repositorio está organizado alrededor de casos de uso públicos más capas compartidas de infraestructura.
+El repositorio está organizado alrededor de profiles versionados como entrypoint público de configuración, más implementaciones de escenarios y capas compartidas de infraestructura.
 
 ## Estructura de alto nivel
 
 ```text
 productive-k3s-infra/
-  use-cases/
+  profiles/
+  scenarios/
     multipass/
     onprem-basic/
     aws-single-node/
@@ -21,7 +22,8 @@ productive-k3s-infra/
 
 ## División de responsabilidades
 
-- `use-cases/`: entrypoints públicos y flujos orientados a operadores
+- `profiles/`: ejemplos versionados de configuración pública para el CLI orientado a profiles
+- `scenarios/`: implementaciones de escenarios y flujos orientados a operadores
 - `ansible/roles/remote_cluster`: assets compartidos para bootstrap remoto y validación
 - `opentofu/`: bloques reutilizables de infraestructura y espacio de módulos a futuro
 - `tests/`: entrypoints de validación static, contract y live
@@ -29,16 +31,16 @@ productive-k3s-infra/
 
 ## Artefactos generados
 
-Cada caso de uso escribe metadata generada bajo su propio directorio `generated/`, normalmente incluyendo:
+Cada escenario escribe metadata generada bajo su propio directorio `generated/`, normalmente incluyendo:
 
 - `cluster.json`
 - `hosts.yml`
 - `server-token.txt`
 - logs u outputs específicos del provider cuando corresponde
 
-Estos artefactos son parte del flujo porque exponen la vista resuelta en runtime del caso de uso.
+Estos artefactos son parte del flujo porque exponen la vista resuelta en runtime del escenario.
 
 ## Notas
 
 !!! note
-    El repositorio está centrado intencionalmente en `use-cases/`, no en helpers de bajo nivel. Los usuarios públicos deberían arrancar por un camino de despliegue, no por un detalle interno de implementación.
+    Los usuarios públicos deberían arrancar hoy desde `profiles/` y el CLI orientado a profiles. `scenarios/` queda como la capa de implementación detrás de esos entrypoints.

@@ -10,7 +10,7 @@ RUN_TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 MATRIX_RUN_ID="${RUN_TIMESTAMP}-${LEVEL}-$$"
 
 if [[ -z "${LEVEL}" || "$#" -eq 0 ]]; then
-  printf 'usage: %s <static|contract|live> <use-case> [use-case...]\n' "$0" >&2
+  printf 'usage: %s <static|contract|live> <scenario> [scenario...]\n' "$0" >&2
   exit 2
 fi
 
@@ -85,10 +85,10 @@ json_array_from_values() {
   printf ']'
 }
 
-use_case_metadata() {
-  local use_case="$1"
+scenario_metadata() {
+  local scenario="$1"
   local level="$2"
-  case "${use_case}:${level}" in
+  case "${scenario}:${level}" in
     multipass:*)
       ENVIRONMENT="vm"
       TOPOLOGY="three-node"
@@ -128,7 +128,7 @@ use_case_metadata() {
 }
 
 write_run_manifest() {
-  local use_case="$1"
+  local scenario="$1"
   local result="$2"
   local started_at="$3"
   local finished_at="$4"
@@ -136,17 +136,17 @@ write_run_manifest() {
   local output_file="$6"
   local source_mode="${PRODUCTIVE_K3S_SOURCE:-}"
   local source_version="${PRODUCTIVE_K3S_VERSION:-}"
-  local release_repo="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s}"
+  local release_repo="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s-core}"
 
-  use_case_metadata "${use_case}" "${LEVEL}"
+  scenario_metadata "${scenario}" "${LEVEL}"
 
   mkdir -p "${RUNS_DIR}"
   {
     printf '{\n'
     printf '  "schema_version": "1",\n'
     printf '  "repository": "productive-k3s-infra",\n'
-    printf '  "run_id": "%s",\n' "$(json_escape "${MATRIX_RUN_ID}-${use_case}")"
-    printf '  "use_case": "%s",\n' "$(json_escape "${use_case}")"
+    printf '  "run_id": "%s",\n' "$(json_escape "${MATRIX_RUN_ID}-${scenario}")"
+    printf '  "scenario": "%s",\n' "$(json_escape "${scenario}")"
     printf '  "execution_kind": "%s",\n' "$(json_escape "$(execution_kind)")"
     printf '  "test_level": "%s",\n' "$(json_escape "${LEVEL}")"
     printf '  "result": "%s",\n' "$(json_escape "${result}")"
@@ -189,25 +189,25 @@ write_run_manifest() {
   } > "${output_file}"
 }
 
-for use_case in "$@"; do
+for scenario in "$@"; do
   target="test-${LEVEL}"
-  use_case_dir="${ROOT_DIR}/use-cases/${use_case}"
+  scenario_dir="${ROOT_DIR}/scenarios/${scenario}"
   log_file="$(mktemp)"
-  manifest_file="${RUNS_DIR}/${MATRIX_RUN_ID}-${use_case}.json"
+  manifest_file="${RUNS_DIR}/${MATRIX_RUN_ID}-${scenario}.json"
   started_at="$(date -Iseconds)"
   started_epoch="$(date +%s)"
 
-  printf '\n==> [%s] %s\n' "${LEVEL}" "${use_case}"
+  printf '\n==> [%s] %s\n' "${LEVEL}" "${scenario}"
   rc=0
   if [[ "${LEVEL}" == "live" ]]; then
     set +e
-    script -qefc "make -C \"${use_case_dir}\" \"${target}\"" /dev/null \
+    script -qefc "make -C \"${scenario_dir}\" \"${target}\"" /dev/null \
       | tr -d '\000' \
       | tee "${log_file}"
     rc=${PIPESTATUS[0]}
     set -e
   else
-    if make -C "${use_case_dir}" "${target}" >"${log_file}" 2>&1; then
+    if make -C "${scenario_dir}" "${target}" >"${log_file}" 2>&1; then
       rc=0
     else
       rc=$?
@@ -218,24 +218,24 @@ for use_case in "$@"; do
   duration_seconds="$((finished_epoch - started_epoch))"
 
   if [[ "${rc}" == "0" ]]; then
-    passes+=("${use_case}")
-    write_run_manifest "${use_case}" "pass" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
-    printf '[PASS] %s %s\n' "${use_case}" "${target}"
+    passes+=("${scenario}")
+    write_run_manifest "${scenario}" "pass" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
+    printf '[PASS] %s %s\n' "${scenario}" "${target}"
     if [[ "${LEVEL}" != "live" ]]; then
       cat "${log_file}"
     fi
   else
     if [[ "${rc}" == "3" ]] || grep -q '^\[SKIP\]' "${log_file}"; then
-      skips+=("${use_case}")
-      write_run_manifest "${use_case}" "skip" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
-      printf '[SKIP] %s %s\n' "${use_case}" "${target}"
+      skips+=("${scenario}")
+      write_run_manifest "${scenario}" "skip" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
+      printf '[SKIP] %s %s\n' "${scenario}" "${target}"
       if [[ "${LEVEL}" != "live" ]]; then
         cat "${log_file}"
       fi
     else
-      fails+=("${use_case}")
-      write_run_manifest "${use_case}" "fail" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
-      printf '[FAIL] %s %s\n' "${use_case}" "${target}" >&2
+      fails+=("${scenario}")
+      write_run_manifest "${scenario}" "fail" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
+      printf '[FAIL] %s %s\n' "${scenario}" "${target}" >&2
       if [[ "${LEVEL}" != "live" ]]; then
         cat "${log_file}" >&2
       fi

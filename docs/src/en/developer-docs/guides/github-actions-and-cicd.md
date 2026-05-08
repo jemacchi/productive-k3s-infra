@@ -9,6 +9,17 @@ This repository has a CI-friendly validation model and now includes a post-merge
 - anonymous JSON artifacts under `test-artifacts/` for run evidence
 - a clear split between operator entry points and implementation scripts
 - a dedicated `test-live-gha-onprem` target that treats the GitHub runner as the remote `onprem-basic` host
+- a tag-driven release workflow for `productive-k3s-infra-cli.sh`
+
+## Release tags
+
+Published releases must use composite tags:
+
+- `X.Y.Z-A.B.C`
+- `X.Y.Z`: version of `productive-k3s-infra`
+- `A.B.C`: bound release of `productive-k3s-core`
+
+The release workflow validates that format and publishes an infra bundle whose public CLI is already tied to that `productive-k3s-core` version.
 
 ## Practical CI/CD model
 
@@ -36,12 +47,12 @@ That workflow runs when a pull request targeting `main` is closed in the merged 
 
 1. runs `make test-static`
 2. runs `make test-contract`
-3. checks out sibling `productive-k3s`
+3. checks out sibling `productive-k3s-core`
 4. runs `make test-live-gha-onprem`
 
-The live job prepares `openssh-server` on the GitHub-hosted runner and then exercises `use-cases/onprem-basic` against `127.0.0.1` as a single-node remote host.
+The live job prepares `openssh-server` on the GitHub-hosted runner and then exercises `scenarios/onprem-basic` against `127.0.0.1` as a single-node remote host.
 
-When the checked out sibling `productive-k3s` revision already includes `scripts/preflight-host.sh`, that same hosted path also exercises the remote Productive K3S host preflight before bootstrap starts.
+When the checked out sibling `productive-k3s-core` revision already includes `scripts/preflight-host.sh`, that same hosted path also exercises the remote Productive K3S Core host preflight before bootstrap starts.
 
 ## Notes
 

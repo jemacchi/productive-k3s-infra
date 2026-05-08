@@ -1,6 +1,6 @@
-# Modos De Productive K3S
+# Modos De Productive K3S Core
 
-`productive-k3s-infra` depende de los modos explícitos de instalación expuestos por `productive-k3s`.
+`productive-k3s-infra` depende de los modos explícitos de instalación expuestos por `productive-k3s-core`.
 
 ## Los modos
 
@@ -19,7 +19,7 @@ Esa separación hace explícito el modelo de orquestación:
 2. establecer la forma del clúster después
 3. instalar el stack compartido al final
 
-## Cómo los consumen los casos de uso
+## Cómo los consumen los escenarios
 
 - `multipass`: usa explícitamente `server`, `agent` y `stack`
 - `onprem-basic`: puede ejercitar `single-node` para un host, o `server`, `agent` y `stack` para layouts multinodo
@@ -28,4 +28,4 @@ Esa separación hace explícito el modelo de orquestación:
 ## Notas
 
 !!! note
-    Cuanto más explícitos sean los modos de bootstrap en `productive-k3s`, más fácil es que la automatización de infraestructura siga siendo entendible y testeable.
+    Cuanto más explícitos sean los modos de bootstrap en `productive-k3s-core`, más fácil es que la automatización de infraestructura siga siendo entendible y testeable.

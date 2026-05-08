@@ -2,24 +2,24 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOURCE_DIR="${ROOT_DIR}/use-cases/multipass"
+SOURCE_DIR="${ROOT_DIR}/scenarios/multipass"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
-TEST_USE_CASE_DIR="${TMP_DIR}/multipass"
-mkdir -p "${TEST_USE_CASE_DIR}"
-cp -R "${SOURCE_DIR}/scripts" "${TEST_USE_CASE_DIR}/scripts"
-mkdir -p "${TEST_USE_CASE_DIR}/generated/logs"
+TEST_SCENARIO_DIR="${TMP_DIR}/multipass"
+mkdir -p "${TEST_SCENARIO_DIR}"
+cp -R "${SOURCE_DIR}/scripts" "${TEST_SCENARIO_DIR}/scripts"
+mkdir -p "${TEST_SCENARIO_DIR}/generated/logs"
 
-cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "telemetry-test",
   "base_domain": "k3s.lab.internal",
-  "remote_dir": "/home/ubuntu/productive-k3s",
+  "remote_dir": "/home/ubuntu/productive-k3s-core",
   "productive_k3s": {
     "source": "local",
     "version": "",
-    "release_repo": "jemacchi/productive-k3s"
+    "release_repo": "jemacchi/productive-k3s-core"
   },
   "telemetry": {
     "enabled": true,
@@ -58,7 +58,7 @@ cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
 }
 EOF
 
-cat > "${TEST_USE_CASE_DIR}/scripts/run_bootstrap_session.py" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/scripts/run_bootstrap_session.py" <<'EOF'
 #!/usr/bin/env python3
 import json
 import os
@@ -75,7 +75,7 @@ capture = {
 }
 Path(os.environ["CAPTURE_FILE"]).write_text(json.dumps(capture, indent=2), encoding="utf-8")
 EOF
-chmod +x "${TEST_USE_CASE_DIR}/scripts/run_bootstrap_session.py"
+chmod +x "${TEST_SCENARIO_DIR}/scripts/run_bootstrap_session.py"
 
 mkdir -p "${TMP_DIR}/bin"
 cat > "${TMP_DIR}/bin/multipass" <<'EOF'
@@ -93,8 +93,9 @@ EOF
 chmod +x "${TMP_DIR}/bin/multipass"
 
 export PATH="${TMP_DIR}/bin:${PATH}"
+export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
 export CAPTURE_FILE="${TMP_DIR}/telemetry-env.json"
-export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s"
+export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s-core"
 export TELEMETRY_ENABLED="false"
 export TELEMETRY_ENDPOINT=""
 export TELEMETRY_MAX_RETRIES="3"
@@ -103,7 +104,7 @@ export TELEMETRY_REQUEST_TIMEOUT_SECONDS="10"
 export TELEMETRY_OUTBOX_DIR=""
 export TELEMETRY_USER_AGENT="productive-k3s-infra/default"
 
-bash "${TEST_USE_CASE_DIR}/scripts/bootstrap-server.sh"
+bash "${TEST_SCENARIO_DIR}/scripts/bootstrap-server.sh"
 
 jq -e '
   .TELEMETRY_ENABLED == "true" and

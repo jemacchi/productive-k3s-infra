@@ -1,12 +1,13 @@
 # Project Layout
 
-The repository is organized around public use cases plus shared infrastructure layers.
+The repository is organized around versioned profiles as the public configuration entrypoint, plus scenario implementations and shared infrastructure layers.
 
 ## Top-level structure
 
 ```text
 productive-k3s-infra/
-  use-cases/
+  profiles/
+  scenarios/
     multipass/
     onprem-basic/
     aws-single-node/
@@ -21,7 +22,8 @@ productive-k3s-infra/
 
 ## Responsibility split
 
-- `use-cases/`: public entry points and operator-facing workflows
+- `profiles/`: versioned public configuration examples for the profile-driven CLI
+- `scenarios/`: scenario implementations and operator-facing workflows
 - `ansible/roles/remote_cluster`: shared remote bootstrap and validation assets
 - `opentofu/`: shared infrastructure building blocks and forward-looking module space
 - `tests/`: static, contract, and live validation entry points
@@ -29,16 +31,16 @@ productive-k3s-infra/
 
 ## Generated artifacts
 
-Each use case writes generated metadata under its own `generated/` directory, typically including:
+Each scenario writes generated metadata under its own `generated/` directory, typically including:
 
 - `cluster.json`
 - `hosts.yml`
 - `server-token.txt`
 - logs or provider-specific outputs when applicable
 
-These artifacts are part of the workflow because they expose the resolved runtime view of the use case.
+These artifacts are part of the workflow because they expose the resolved runtime view of the scenario.
 
 ## Notes
 
 !!! note
-    The repository is intentionally centered on `use-cases/`, not on low-level helpers. Public users should start from a deployment path, not from an implementation detail.
+    Public users should now start from `profiles/` and the profile-driven CLI. `scenarios/` remains the implementation layer behind those entry points.

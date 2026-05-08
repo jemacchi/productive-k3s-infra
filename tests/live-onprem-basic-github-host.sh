@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-USE_CASE_DIR="${ROOT_DIR}/use-cases/onprem-basic"
+SCENARIO_DIR="${ROOT_DIR}/scenarios/onprem-basic"
 WORK_DIR="$(mktemp -d "${ROOT_DIR}/.live-onprem-basic-github-host.XXXXXX")"
 ENV_FILE="${WORK_DIR}/onprem.env"
 SSH_KEY_PATH="${WORK_DIR}/id_ed25519"
@@ -80,7 +80,7 @@ need_cmd curl
 need_cmd tar
 need_cmd python3
 
-[[ -d "${ROOT_DIR}/../productive-k3s" ]] || fail "expected sibling productive-k3s repo at ${ROOT_DIR}/../productive-k3s"
+[[ -d "${ROOT_DIR}/../productive-k3s-core" ]] || fail "expected sibling productive-k3s-core repo at ${ROOT_DIR}/../productive-k3s-core"
 
 trap cleanup EXIT
 
@@ -89,8 +89,8 @@ prepare_ssh_key
 wait_for_ssh
 write_env_file
 
-make -C "${USE_CASE_DIR}" clean
-make -C "${USE_CASE_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" up
-make -C "${USE_CASE_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" validate
+make -C "${SCENARIO_DIR}" clean
+make -C "${SCENARIO_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" up
+make -C "${SCENARIO_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" validate
 
 printf '[PASS] onprem-basic GitHub-host live test completed\n'
