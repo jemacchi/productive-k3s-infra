@@ -2,7 +2,7 @@
 
 Generic virtual machine abstraction.
 
-This module should define the common inputs and outputs expected by higher-level use cases, regardless of provider.
+This module should define the common inputs and outputs expected by higher-level scenarios, regardless of provider.
 
 Current status:
 

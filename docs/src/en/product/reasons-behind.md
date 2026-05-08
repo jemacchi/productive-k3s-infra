@@ -20,9 +20,9 @@ It is not enough when you also need to standardize:
 - how multi-node bootstrap steps are sequenced
 - how infrastructure-specific validation should run
 
-## Why use cases are the public entry point
+## Why scenarios are the public entry point
 
-This repository is intentionally centered on `use-cases/` instead of generic snippets.
+This repository is intentionally centered on `scenarios/` instead of generic snippets.
 
 The design goal is to provide deployment paths that are:
 
@@ -41,7 +41,7 @@ instead of a collection of disconnected helper fragments.
 
 ## Why keep shared layers underneath
 
-Even though the public interface is use-case driven, the implementation still needs reuse boundaries.
+Even though the public interface is scenario driven, the implementation still needs reuse boundaries.
 
 The repository therefore keeps shared logic in layers such as:
 
@@ -70,7 +70,7 @@ Taken together, the repository is meant to sit between raw infrastructure script
 It aims to provide:
 
 - infrastructure flows that are still public and understandable
-- use cases that are more realistic than toy examples
+- scenarios that are more realistic than toy examples
 - a stable bridge into real multi-node or remote K3S environments
 
 ## See also

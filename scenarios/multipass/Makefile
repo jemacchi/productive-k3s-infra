@@ -1,13 +1,14 @@
 .PHONY: infra-init infra-up cluster-up stack-up validate up down clean status test-static test-contract test-live
 
-USE_CASE_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-OPENTOFU_DIR := $(USE_CASE_DIR)/opentofu
-GENERATED_DIR := $(USE_CASE_DIR)/generated
-SCRIPTS_DIR := $(USE_CASE_DIR)/scripts
-TESTS_DIR := $(USE_CASE_DIR)/../../tests
+SCENARIO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+export SCENARIO_DIR
+OPENTOFU_DIR := $(SCENARIO_DIR)/opentofu
+GENERATED_DIR := $(SCENARIO_DIR)/generated
+SCRIPTS_DIR := $(SCENARIO_DIR)/scripts
+TESTS_DIR := $(SCENARIO_DIR)/../../tests
 TOFU_BIN ?= $(shell if command -v tofu >/dev/null 2>&1; then echo tofu; elif command -v terraform >/dev/null 2>&1; then echo terraform; fi)
 
-export PRODUCTIVE_K3S_REPO ?= $(abspath $(USE_CASE_DIR)/../../../productive-k3s)
+export PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s)
 export PRODUCTIVE_K3S_SOURCE ?= local
 export PRODUCTIVE_K3S_VERSION ?=
 export PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s

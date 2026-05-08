@@ -19,7 +19,7 @@ Esa separación hace explícito el modelo de orquestación:
 2. establecer la forma del clúster después
 3. instalar el stack compartido al final
 
-## Cómo los consumen los casos de uso
+## Cómo los consumen los escenarios
 
 - `multipass`: usa explícitamente `server`, `agent` y `stack`
 - `onprem-basic`: puede ejercitar `single-node` para un host, o `server`, `agent` y `stack` para layouts multinodo

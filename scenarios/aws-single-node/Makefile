@@ -2,21 +2,21 @@
 
 .EXPORT_ALL_VARIABLES:
 
-USE_CASE_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-export USE_CASE_DIR
+SCENARIO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+export SCENARIO_DIR
 export CASE_PREFIX := AWS
-GENERATED_DIR := $(USE_CASE_DIR)/generated
-SCRIPTS_DIR := $(USE_CASE_DIR)/scripts
-SHARED_SCRIPTS_DIR := $(USE_CASE_DIR)/../../ansible/roles/remote_cluster/files
-TESTS_DIR := $(USE_CASE_DIR)/../../tests
+GENERATED_DIR := $(SCENARIO_DIR)/generated
+SCRIPTS_DIR := $(SCENARIO_DIR)/scripts
+SHARED_SCRIPTS_DIR := $(SCENARIO_DIR)/../../ansible/roles/remote_cluster/files
+TESTS_DIR := $(SCENARIO_DIR)/../../tests
 export REMOTE_CLUSTER_REFRESH_SCRIPT := $(SCRIPTS_DIR)/refresh-generated-artifacts.sh
-OPENTOFU_DIR := $(USE_CASE_DIR)/opentofu
-AWS_ENV_FILE ?= $(USE_CASE_DIR)/aws.env
+OPENTOFU_DIR := $(SCENARIO_DIR)/opentofu
+AWS_ENV_FILE ?= $(SCENARIO_DIR)/aws.env
 TOFU_BIN ?= $(shell if command -v tofu >/dev/null 2>&1; then echo tofu; elif command -v terraform >/dev/null 2>&1; then echo terraform; fi)
 
 -include $(AWS_ENV_FILE)
 
-PRODUCTIVE_K3S_REPO ?= $(abspath $(USE_CASE_DIR)/../../../productive-k3s)
+PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s)
 PRODUCTIVE_K3S_SOURCE ?= remote
 PRODUCTIVE_K3S_VERSION ?=
 PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s

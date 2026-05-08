@@ -1,10 +1,10 @@
 # Documentación Para Usuarios
 
-Esta sección agrupa los casos de uso públicos, los principales entrypoints de `make` y el comportamiento orientado a operadores de Productive K3S Infra.
+Esta sección agrupa los escenarios públicos, los principales entrypoints de `make` y el comportamiento orientado a operadores de Productive K3S Infra.
 
 ## Páginas
 
-### Casos de uso
+### Escenarios
 
 - [Multipass](multipass.md)
 - [On-prem basic](onprem-basic.md)

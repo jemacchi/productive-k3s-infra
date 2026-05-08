@@ -4,12 +4,12 @@ The reusable Ansible-side layer currently lives under `ansible/roles/remote_clus
 
 ## What it is
 
-Despite the directory name, the current public interface is not a full playbook-first experience. The role mostly packages shared shell and Python helpers under `files/` so multiple use cases can consume the same remote bootstrap logic.
+Despite the directory name, the current public interface is not a full playbook-first experience. The role mostly packages shared shell and Python helpers under `files/` so multiple scenarios can consume the same remote bootstrap logic.
 
 Current consumers:
 
-- `use-cases/onprem-basic`
-- `use-cases/aws-single-node`
+- `scenarios/onprem-basic`
+- `scenarios/aws-single-node`
 
 ## What it covers
 
@@ -42,7 +42,7 @@ When changing the shared remote layer:
 - assume both `onprem-basic` and `aws-single-node` are affected
 - preserve the generated metadata contract when possible
 - keep telemetry propagation aligned with the current tests
-- verify whether a use-case-local wrapper script also needs to change
+- verify whether a scenario-local wrapper script also needs to change
 
 ## Notes
 

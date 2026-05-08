@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-USE_CASE_DIR="${ROOT_DIR}/use-cases/multipass"
+SCENARIO_DIR="${ROOT_DIR}/scenarios/multipass"
 TOFU_BIN="${TOFU_BIN:-$(command -v tofu || command -v terraform || true)}"
 
 [[ -n "${TOFU_BIN}" ]] || {
@@ -11,14 +11,14 @@ TOFU_BIN="${TOFU_BIN:-$(command -v tofu || command -v terraform || true)}"
 }
 
 cleanup() {
-  make -C "${USE_CASE_DIR}" down TOFU_BIN="${TOFU_BIN}" >/dev/null 2>&1 || true
-  make -C "${USE_CASE_DIR}" clean >/dev/null 2>&1 || true
+  make -C "${SCENARIO_DIR}" down TOFU_BIN="${TOFU_BIN}" >/dev/null 2>&1 || true
+  make -C "${SCENARIO_DIR}" clean >/dev/null 2>&1 || true
 }
 
 trap cleanup EXIT
 
 cleanup
-make -C "${USE_CASE_DIR}" up TOFU_BIN="${TOFU_BIN}"
-make -C "${USE_CASE_DIR}" validate
+make -C "${SCENARIO_DIR}" up TOFU_BIN="${TOFU_BIN}"
+make -C "${SCENARIO_DIR}" validate
 
 printf '[PASS] multipass live test completed\n'

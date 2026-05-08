@@ -1,4 +1,4 @@
-# Multipass Use Case
+# Multipass Scenario
 
 `multipass` is the preferred local validation path for a multi-node Productive K3S environment.
 
@@ -11,13 +11,13 @@
 ## Main commands
 
 ```bash
-make -C use-cases/multipass infra-up
-make -C use-cases/multipass cluster-up
-make -C use-cases/multipass up
-make -C use-cases/multipass validate
-make -C use-cases/multipass status
-make -C use-cases/multipass down
-make -C use-cases/multipass clean
+make -C scenarios/multipass infra-up
+make -C scenarios/multipass cluster-up
+make -C scenarios/multipass up
+make -C scenarios/multipass validate
+make -C scenarios/multipass status
+make -C scenarios/multipass down
+make -C scenarios/multipass clean
 ```
 
 ## What `make up` does
@@ -35,7 +35,7 @@ make -C use-cases/multipass clean
 ## Notes
 
 !!! note
-    This use case does not currently update `/etc/hosts` on the control machine. Rancher and registry hostnames are guaranteed inside the VMs, not automatically on the host.
+    This scenario does not currently update `/etc/hosts` on the control machine. Rancher and registry hostnames are guaranteed inside the VMs, not automatically on the host.
 
 !!! note
     A first `Rancher` install on a cold cluster can spend several minutes in `ContainerCreating` while images are pulled.

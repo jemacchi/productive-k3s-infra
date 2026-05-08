@@ -2,14 +2,14 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-USE_CASE="${1:-}"
+SCENARIO="${1:-}"
 
-if [[ -z "${USE_CASE}" ]]; then
-  printf 'usage: %s <use-case>\n' "$0" >&2
+if [[ -z "${SCENARIO}" ]]; then
+  printf 'usage: %s <scenario>\n' "$0" >&2
   exit 2
 fi
 
-USE_CASE_DIR="${ROOT_DIR}/use-cases/${USE_CASE}"
+SCENARIO_DIR="${ROOT_DIR}/scenarios/${SCENARIO}"
 
 fail() {
   printf '[FAIL] %s\n' "$1" >&2
@@ -38,54 +38,57 @@ expect_output() {
 }
 
 expect_ignored_generated() {
-  local path="${ROOT_DIR}/use-cases/${USE_CASE}/generated/contract-probe"
-  git -C "${ROOT_DIR}" check-ignore -q "${path}" || fail "generated/ should be ignored for ${USE_CASE}"
+  local path="${ROOT_DIR}/scenarios/${SCENARIO}/generated/contract-probe"
+  git -C "${ROOT_DIR}" check-ignore -q "${path}" || fail "generated/ should be ignored for ${SCENARIO}"
 }
 
-need_file "${USE_CASE_DIR}/Makefile"
-need_file "${USE_CASE_DIR}/README.md"
+need_file "${SCENARIO_DIR}/Makefile"
+need_file "${SCENARIO_DIR}/README.md"
 need_file "${ROOT_DIR}/docs/src/en/user-docs/privacy-and-telemetry.md"
 need_file "${ROOT_DIR}/docs/src/es/user-docs/privacy-and-telemetry.md"
 expect_ignored_generated
 
 git -C "${ROOT_DIR}" check-ignore -q "test-artifacts/contract-probe" || fail "test-artifacts/ should be ignored"
 
-make -C "${USE_CASE_DIR}" -n test-static >/dev/null
-make -C "${USE_CASE_DIR}" -n test-contract >/dev/null
-make -C "${USE_CASE_DIR}" -n test-live >/dev/null
+make -C "${SCENARIO_DIR}" -n test-static >/dev/null
+make -C "${SCENARIO_DIR}" -n test-contract >/dev/null
+make -C "${SCENARIO_DIR}" -n test-live >/dev/null
 
-case "${USE_CASE}" in
+case "${SCENARIO}" in
   multipass)
-    need_file "${USE_CASE_DIR}/opentofu/main.tf"
-    need_file "${USE_CASE_DIR}/opentofu/outputs.tf"
-    need_file "${USE_CASE_DIR}/opentofu/variables.tf"
-    need_file "${USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh"
-    need_file "${USE_CASE_DIR}/scripts/run_bootstrap_session.py"
+    need_file "${ROOT_DIR}/profiles/multipass/1-server-2-agents.env"
+    need_file "${SCENARIO_DIR}/opentofu/main.tf"
+    need_file "${SCENARIO_DIR}/opentofu/outputs.tf"
+    need_file "${SCENARIO_DIR}/opentofu/variables.tf"
+    need_file "${SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh"
+    need_file "${SCENARIO_DIR}/scripts/run_bootstrap_session.py"
     for output_name in cluster_name base_domain remote_dir server_name agent_names rancher_host registry_host; do
-      expect_output "${USE_CASE_DIR}/opentofu/outputs.tf" "${output_name}"
+      expect_output "${SCENARIO_DIR}/opentofu/outputs.tf" "${output_name}"
     done
     ;;
   onprem-basic)
-    need_file "${USE_CASE_DIR}/onprem.env.example"
+    need_file "${ROOT_DIR}/profiles/on-prem/basic.env"
+    need_file "${SCENARIO_DIR}/onprem.env.example"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/common.sh"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/refresh-generated-artifacts.sh"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/run_remote_bootstrap_session.py"
-    has_pattern '^onprem\.env$' "${USE_CASE_DIR}/.gitignore" || fail "onprem.env should be ignored"
+    has_pattern '^onprem\.env$' "${SCENARIO_DIR}/.gitignore" || fail "onprem.env should be ignored"
     ;;
   aws-single-node)
-    need_file "${USE_CASE_DIR}/aws.env.example"
-    need_file "${USE_CASE_DIR}/opentofu/main.tf"
-    need_file "${USE_CASE_DIR}/opentofu/outputs.tf"
-    need_file "${USE_CASE_DIR}/opentofu/variables.tf"
-    need_file "${USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh"
+    need_file "${ROOT_DIR}/profiles/aws-single-node/basic.env"
+    need_file "${SCENARIO_DIR}/aws.env.example"
+    need_file "${SCENARIO_DIR}/opentofu/main.tf"
+    need_file "${SCENARIO_DIR}/opentofu/outputs.tf"
+    need_file "${SCENARIO_DIR}/opentofu/variables.tf"
+    need_file "${SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh"
     for output_name in cluster_name base_domain remote_dir rancher_host registry_host region ssh_user instance_id availability_zone ami_id public_ip private_ip public_dns vpc_id subnet_id security_group_id; do
-      expect_output "${USE_CASE_DIR}/opentofu/outputs.tf" "${output_name}"
+      expect_output "${SCENARIO_DIR}/opentofu/outputs.tf" "${output_name}"
     done
-    has_pattern '^aws\.env$' "${USE_CASE_DIR}/.gitignore" || fail "aws.env should be ignored"
+    has_pattern '^aws\.env$' "${SCENARIO_DIR}/.gitignore" || fail "aws.env should be ignored"
     ;;
   *)
-    fail "unsupported use case '${USE_CASE}'"
+    fail "unsupported scenario '${SCENARIO}'"
     ;;
 esac
 
-printf '[PASS] contract checks for %s\n' "${USE_CASE}"
+printf '[PASS] contract checks for %s\n' "${SCENARIO}"

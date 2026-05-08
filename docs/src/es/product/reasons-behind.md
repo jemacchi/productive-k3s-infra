@@ -20,9 +20,9 @@ No alcanza cuando además necesitás estandarizar:
 - cómo se secuencian los pasos de bootstrap multinodo
 - cómo debería correrse una validación específica de infraestructura
 
-## Por qué los casos de uso son el entrypoint público
+## Por qué los escenarios son el entrypoint público
 
-Este repositorio está centrado intencionalmente en `use-cases/` en lugar de snippets genéricos.
+Este repositorio está centrado intencionalmente en `scenarios/` en lugar de snippets genéricos.
 
 El objetivo de diseño es ofrecer caminos de despliegue que sean:
 
@@ -41,7 +41,7 @@ y no una colección de helpers desconectados.
 
 ## Por qué mantener capas compartidas por debajo
 
-Aun cuando la interfaz pública está orientada a casos de uso, la implementación igual necesita fronteras de reutilización.
+Aun cuando la interfaz pública está orientada a escenarios, la implementación igual necesita fronteras de reutilización.
 
 Por eso el repositorio mantiene lógica compartida en capas como:
 
@@ -70,7 +70,7 @@ Tomado como conjunto, el repositorio busca ubicarse entre scripting crudo de inf
 Apunta a ofrecer:
 
 - flujos de infraestructura que sigan siendo públicos y entendibles
-- casos de uso más realistas que ejemplos de juguete
+- escenarios más realistas que ejemplos de juguete
 - un puente estable hacia entornos K3S reales, remotos o multinodo
 
 ## Ver también

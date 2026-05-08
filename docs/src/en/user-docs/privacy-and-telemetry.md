@@ -14,7 +14,7 @@ Matrix executions write JSON artifacts under `test-artifacts/`.
 
 They are meant to capture:
 
-- use case name
+- scenario name
 - test level
 - result
 - duration
@@ -36,8 +36,8 @@ They are not meant to capture:
 - if `TELEMETRY_ENABLED` is explicitly set to `true` or `false`, that value is used as-is
 - if `TELEMETRY_ENABLED` is unset and the run is interactive, the repository prompts once and defaults to `Yes`
 - if `TELEMETRY_ENABLED` is unset and the run is non-interactive, it resolves to `false`
-- root matrix values are propagated into each use case
-- each use case propagates the same telemetry values into nested `productive-k3s` bootstrap commands
+- root matrix values are propagated into each scenario
+- each scenario propagates the same telemetry values into nested `productive-k3s` bootstrap commands
 
 ## Supported propagated variables
 

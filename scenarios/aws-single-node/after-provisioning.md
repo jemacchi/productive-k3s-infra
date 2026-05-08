@@ -2,14 +2,14 @@
 
 This is an example workflow that shows how to use the `aws-single-node` cluster after `make up` finishes successfully.
 
-It is not a separate guarantee beyond the use case itself. Its purpose is to demonstrate that the provisioned EC2 instance is usable as a real `productive-k3s` cluster.
+It is not a separate guarantee beyond the scenario itself. Its purpose is to demonstrate that the provisioned EC2 instance is usable as a real `productive-k3s` cluster.
 
 ## 1. Resolve The Server IP
 
 Read the generated metadata:
 
 ```bash
-make -C use-cases/aws-single-node status
+make -C scenarios/aws-single-node status
 ```
 
 The server public IP is available in:
@@ -41,7 +41,7 @@ sudo k3s kubectl get pods -A
 sudo k3s kubectl get ingress -A
 ```
 
-For this use case, you should see a single `Ready` node and the shared components from the stack.
+For this scenario, you should see a single `Ready` node and the shared components from the stack.
 
 ## 4. Access Rancher From The Control Machine
 

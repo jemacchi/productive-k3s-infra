@@ -2,17 +2,17 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOURCE_DIR="${ROOT_DIR}/use-cases/multipass"
+SOURCE_DIR="${ROOT_DIR}/scenarios/multipass"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
-TEST_USE_CASE_DIR="${TMP_DIR}/multipass"
-mkdir -p "${TEST_USE_CASE_DIR}"
-cp -R "${SOURCE_DIR}/scripts" "${TEST_USE_CASE_DIR}/scripts"
-mkdir -p "${TEST_USE_CASE_DIR}/generated/logs"
+TEST_SCENARIO_DIR="${TMP_DIR}/multipass"
+mkdir -p "${TEST_SCENARIO_DIR}"
+cp -R "${SOURCE_DIR}/scripts" "${TEST_SCENARIO_DIR}/scripts"
+mkdir -p "${TEST_SCENARIO_DIR}/generated/logs"
 mkdir -p "${TMP_DIR}/bin"
 
-cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "telemetry-test",
   "base_domain": "k3s.lab.internal",
@@ -59,7 +59,7 @@ cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
 }
 EOF
 
-cat > "${TEST_USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 jq -n \
@@ -84,15 +84,15 @@ jq -n \
     productive_k3s_version: $productive_k3s_version
   }' > "${CAPTURE_FILE}"
 EOF
-chmod +x "${TEST_USE_CASE_DIR}/scripts/refresh-generated-artifacts.sh"
+chmod +x "${TEST_SCENARIO_DIR}/scripts/refresh-generated-artifacts.sh"
 
 for script_name in push-productive-k3s.sh bootstrap-server.sh bootstrap-agents.sh bootstrap-stack.sh; do
-  cat > "${TEST_USE_CASE_DIR}/scripts/${script_name}" <<'EOF'
+  cat > "${TEST_SCENARIO_DIR}/scripts/${script_name}" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 exit 0
 EOF
-  chmod +x "${TEST_USE_CASE_DIR}/scripts/${script_name}"
+  chmod +x "${TEST_SCENARIO_DIR}/scripts/${script_name}"
 done
 
 cat > "${TMP_DIR}/bin/multipass" <<'EOF'
@@ -104,6 +104,7 @@ chmod +x "${TMP_DIR}/bin/multipass"
 
 export CAPTURE_FILE="${TMP_DIR}/cluster-up-env.json"
 export PATH="${TMP_DIR}/bin:${PATH}"
+export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
 export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s"
 export TELEMETRY_ENABLED="false"
 export TELEMETRY_ENDPOINT=""
@@ -115,7 +116,7 @@ export TELEMETRY_USER_AGENT="productive-k3s-infra/default"
 export PRODUCTIVE_K3S_SOURCE="local"
 export PRODUCTIVE_K3S_VERSION=""
 
-bash "${TEST_USE_CASE_DIR}/scripts/cluster-up.sh"
+bash "${TEST_SCENARIO_DIR}/scripts/cluster-up.sh"
 
 jq -e '
   .telemetry_enabled == "true" and

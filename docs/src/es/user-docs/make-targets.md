@@ -2,10 +2,10 @@
 
 `make` es la interfaz pública para operar este repositorio.
 
-El artifact público de release expone el mismo contrato de casos de uso mediante:
+El artifact público de release ahora expone el contrato orientado a profiles mediante:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive-k3s-infra-cli.sh | bash -s -- <use-case> <command>
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- <command> --profile <file>
 ```
 
 ## Targets de nivel raíz
@@ -16,11 +16,19 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive
 | `make docs-serve` | Servir la documentación localmente |
 | `make docs-up` | Levantar el servidor de docs en background |
 | `make docs-down` | Detener el servidor de docs y limpiar artefactos |
-| `make test-static` | Ejecutar checks static sobre todos los casos de uso públicos |
-| `make test-contract` | Ejecutar checks contract sobre todos los casos de uso públicos |
-| `make test-live` | Ejecutar validaciones live sobre todos los casos de uso públicos |
+| `make test-static` | Ejecutar checks static sobre todos los escenarios públicos |
+| `make test-contract` | Ejecutar checks contract sobre todos los escenarios públicos |
+| `make test-live` | Ejecutar validaciones live sobre todos los escenarios públicos |
 | `make test-live-gha-onprem` | Ejecutar la validación live single-node de `onprem-basic` sobre un runner hospedado por GitHub |
 | `make test-matrix` | Ejecutar `static`, `contract` y `live` en secuencia |
+| `make infra-help` | Mostrar el uso del CLI público orientado a profiles |
+| `make infra-doctor` | Ejecutar checks locales básicos para el CLI orientado a profiles |
+| `make infra-list-profiles` | Listar los profiles de ejemplo versionados |
+| `make infra-validate PROFILE=...` | Validar el profile elegido y delegar al escenario correspondiente |
+| `make infra-plan PROFILE=...` | Mostrar el plan actual para el profile elegido |
+| `make infra-apply PROFILE=...` | Aplicar el profile elegido delegando al escenario correspondiente |
+| `make infra-destroy PROFILE=...` | Destruir o desarmar el profile elegido cuando esté soportado |
+| `make infra-status PROFILE=...` | Imprimir el estado generado para el profile elegido |
 | `make multipass` | Ejecutar el flujo público default de `multipass` (`up`) |
 | `make onprem` | Ejecutar el flujo público default de `onprem-basic` (`up`) |
 | `make aws-single-node` | Ejecutar el flujo público default de AWS single-node (`up`) |
@@ -33,7 +41,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive
 | `infra-up` | Crear las VMs y refrescar metadata generada |
 | `cluster-up` | Ejecutar el flujo de bootstrap multinodo |
 | `stack-up` | Reejecutar la instalación del stack compartido en el servidor |
-| `validate` | Ejecutar la validación del caso de uso |
+| `validate` | Ejecutar la validación del escenario |
 | `up` | `infra-up + cluster-up + validate` |
 | `down` | Destruir las VMs |
 | `clean` | Borrar artefactos generados y estado local de `OpenTofu` |
@@ -72,7 +80,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/vX.Y.Z/productive
     El contrato público es el nombre del target y su comportamiento orientado al operador, no necesariamente el detalle exacto de los scripts internos que invoca.
 
 !!! note
-    El CLI de release usa el mismo modelo público, pero nombra primero el caso de uso, por ejemplo `multipass up` u `onprem preflight`.
+    El release CLI usa `command --profile <file>` como contrato público principal.
 
 !!! note
     `status` es importante en este repositorio porque la metadata generada forma parte del modelo operativo, no sólo de un detalle interno de implementación.

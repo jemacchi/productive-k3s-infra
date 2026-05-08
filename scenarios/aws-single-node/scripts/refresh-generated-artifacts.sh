@@ -2,13 +2,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USE_CASE_DIR="${USE_CASE_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 CASE_PREFIX="${CASE_PREFIX:-AWS}"
-export USE_CASE_DIR CASE_PREFIX
+export SCENARIO_DIR CASE_PREFIX
 
-SHARED_DIR="${USE_CASE_DIR}/../../ansible/roles/remote_cluster/files"
-GENERATED_DIR="${USE_CASE_DIR}/generated"
-OPENTOFU_DIR="${USE_CASE_DIR}/opentofu"
+SHARED_DIR="${SCENARIO_DIR}/../../ansible/roles/remote_cluster/files"
+GENERATED_DIR="${SCENARIO_DIR}/generated"
+OPENTOFU_DIR="${SCENARIO_DIR}/opentofu"
 TOFU_OUTPUTS_JSON="${GENERATED_DIR}/tofu-outputs.json"
 TOFU_BIN="${TOFU_BIN:-tofu}"
 

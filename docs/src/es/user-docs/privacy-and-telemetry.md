@@ -14,7 +14,7 @@ Las ejecuciones de matriz escriben artefactos JSON bajo `test-artifacts/`.
 
 Están pensados para capturar:
 
-- nombre del caso de uso
+- nombre del escenario
 - nivel de test
 - resultado
 - duración
@@ -36,8 +36,8 @@ No están pensados para capturar:
 - si `TELEMETRY_ENABLED` se define explícitamente como `true` o `false`, se usa ese valor tal cual
 - si `TELEMETRY_ENABLED` no está definido y la corrida es interactiva, el repositorio pregunta una vez y el default es `Yes`
 - si `TELEMETRY_ENABLED` no está definido y la corrida es no interactiva, resuelve a `false`
-- los valores definidos en la matriz raíz se propagan hacia cada caso de uso
-- cada caso de uso propaga esos mismos valores hacia los comandos nested de bootstrap de `productive-k3s`
+- los valores definidos en la matriz raíz se propagan hacia cada escenario
+- cada escenario propaga esos mismos valores hacia los comandos nested de bootstrap de `productive-k3s`
 
 ## Variables soportadas para propagación
 

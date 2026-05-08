@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 permissions:
   contents: write
@@ -25,6 +25,19 @@ jobs:
           git fetch origin main:refs/remotes/origin/main --force
           git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"
 
+      - name: Parse composite release tag
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release-versioning.sh validate "${GITHUB_REF_NAME}"
+          eval "$(./scripts/release-versioning.sh env "${GITHUB_REF_NAME}")"
+          {
+            echo "infra_release_tag=${PK3S_INFRA_RELEASE_TAG}"
+            echo "infra_semver=${PK3S_INFRA_SEMVER}"
+            echo "core_semver=${PK3S_CORE_SEMVER}"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build release archive
         id: bundle
         shell: bash
@@ -33,19 +46,25 @@ jobs:
           mkdir -p dist
           archive_path="$(bash ./scripts/build-release-bundle.sh "${GITHUB_REF_NAME}" dist)"
           archive_name="$(basename "$archive_path")"
-          sha256sum "$archive_path" > "${archive_path}.sha256"
-          archive_sha="$(cut -d' ' -f1 < "${archive_path}.sha256")"
+          checksum_path="dist/checksums.txt"
+          (
+            cd dist
+            sha256sum "${archive_name}" > "$(basename "${checksum_path}")"
+          )
+          tarball_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${archive_name}"
+          checksum_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/checksums.txt"
           sed \
-            -e "s|__VERSION__|${GITHUB_REF_NAME}|g" \
-            -e "s|__OWNER__|${GITHUB_REPOSITORY_OWNER}|g" \
-            -e "s|__REPO__|${GITHUB_REPOSITORY#*/}|g" \
-            -e "s|__ARCHIVE_NAME__|${archive_name}|g" \
-            -e "s|__ARCHIVE_SHA256__|${archive_sha}|g" \
+            -e "s|__PK3S_INFRA_VERSION__|${GITHUB_REF_NAME}|g" \
+            -e "s|__PK3S_INFRA_REPO__|${GITHUB_REPOSITORY}|g" \
+            -e "s|__PK3S_INFRA_TARBALL_URL__|${tarball_url}|g" \
+            -e "s|__PK3S_INFRA_CHECKSUM_URL__|${checksum_url}|g" \
+            -e "s|__PK3S_CORE_VERSION__|${{ steps.versions.outputs.core_semver }}|g" \
             scripts/install-release-template.sh > dist/productive-k3s-infra-cli.sh
           chmod +x dist/productive-k3s-infra-cli.sh
           {
             echo "archive_path=${archive_path}"
             echo "archive_name=${archive_name}"
+            echo "checksum_path=${checksum_path}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub release
@@ -56,7 +75,7 @@ jobs:
           set -euo pipefail
           gh release create "${GITHUB_REF_NAME}" \
             "${{ steps.bundle.outputs.archive_path }}" \
-            "${{ steps.bundle.outputs.archive_path }}.sha256" \
+            "${{ steps.bundle.outputs.checksum_path }}" \
             "dist/productive-k3s-infra-cli.sh" \
             --title "${GITHUB_REF_NAME}" \
             --generate-notes \

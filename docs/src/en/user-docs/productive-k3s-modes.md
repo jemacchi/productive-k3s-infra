@@ -19,7 +19,7 @@ That split makes the orchestration model explicit:
 2. establish the cluster shape second
 3. install the shared stack last
 
-## How use cases consume them
+## How scenarios consume them
 
 - `multipass`: explicitly uses `server`, `agent`, and `stack`
 - `onprem-basic`: can exercise `single-node` for one host, or `server`, `agent`, and `stack` for multi-node layouts

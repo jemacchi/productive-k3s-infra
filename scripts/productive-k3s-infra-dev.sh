@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 TESTS_DIR="${REPO_DIR}/tests"
-USE_CASES="multipass onprem-basic aws-single-node"
+SCENARIOS="multipass onprem-basic aws-single-node"
 
 usage() {
   cat <<'EOF'
@@ -47,15 +47,19 @@ case "$COMMAND" in
     exec "${REPO_DIR}/docs/clean.sh" "$@"
     ;;
   test-static)
-    "${TESTS_DIR}/run-matrix.sh" static ${USE_CASES}
+    "${TESTS_DIR}/run-matrix.sh" static ${SCENARIOS}
+    bash "${TESTS_DIR}/test-release-versioning.sh"
+    bash "${TESTS_DIR}/test-productive-k3s-infra-cli.sh"
+    bash "${TESTS_DIR}/test-release-bundle.sh"
+    bash "${TESTS_DIR}/test-release-installer.sh"
     bash "${TESTS_DIR}/test-live-onprem-basic-noninteractive.sh"
     exec bash -n "${TESTS_DIR}/live-onprem-basic-github-host.sh"
     ;;
   test-contract)
-    exec "${TESTS_DIR}/run-matrix.sh" contract ${USE_CASES}
+    exec "${TESTS_DIR}/run-matrix.sh" contract ${SCENARIOS}
     ;;
   test-live)
-    exec "${TESTS_DIR}/run-matrix.sh" live ${USE_CASES}
+    exec "${TESTS_DIR}/run-matrix.sh" live ${SCENARIOS}
     ;;
   test-live-gha-onprem)
     exec "${TESTS_DIR}/live-onprem-basic-github-host.sh" "$@"

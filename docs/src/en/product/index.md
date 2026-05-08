@@ -2,7 +2,7 @@
 
 `Productive K3S Infra` is the infrastructure companion repository for `Productive K3S`.
 
-It does not replace the cluster bootstrap logic from `productive-k3s`. Instead, it packages the surrounding infrastructure concerns into reusable public use cases:
+It does not replace the cluster bootstrap logic from `productive-k3s`. Instead, it packages the surrounding infrastructure concerns into reusable public scenarios:
 
 - machine provisioning when needed
 - inventory rendering and generated metadata

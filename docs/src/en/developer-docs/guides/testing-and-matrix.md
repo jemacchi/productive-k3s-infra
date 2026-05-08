@@ -5,7 +5,7 @@ The repository exposes a three-level validation model.
 ## Root matrix levels
 
 - `static`: shell syntax, Python compile checks, OpenTofu validation, and selected behavior tests
-- `contract`: checks that each public use case exposes the expected files, outputs, ignores, and targets
+- `contract`: checks that each public scenario exposes the expected files, outputs, ignores, and targets
 - `live`: executes the real environment flow when the environment allows it
 
 ## Root commands
@@ -31,7 +31,7 @@ Matrix runs write JSON manifests under `test-artifacts/`.
 
 Those artifacts record:
 
-- use case
+- scenario
 - level
 - result
 - duration
@@ -41,9 +41,9 @@ Those artifacts record:
 
 ## Development guidance
 
-When changing a public use case, review whether you need to update:
+When changing a public scenario, review whether you need to update:
 
-- the use-case-local `test-static` target
+- the scenario-local `test-static` target
 - the contract expectations in `tests/contract-check.sh`
 - any telemetry propagation tests
 - the generated metadata contract consumed by matrix manifests

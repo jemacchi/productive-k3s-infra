@@ -57,7 +57,7 @@ jobs:
           name: pr-validation-artifacts
           path: |
             productive-k3s-infra/test-artifacts
-            productive-k3s-infra/use-cases/*/generated
+            productive-k3s-infra/scenarios/*/generated
           if-no-files-found: ignore
 
   live-onprem-github-host:
@@ -94,5 +94,5 @@ jobs:
           name: pr-validation-live-onprem-github-host-artifacts
           path: |
             productive-k3s-infra/test-artifacts
-            productive-k3s-infra/use-cases/onprem-basic/generated
+            productive-k3s-infra/scenarios/onprem-basic/generated
           if-no-files-found: ignore

@@ -1,12 +1,12 @@
-# On-Premises Basic Use Case
+# On-Premises Basic Scenario
 
-This use case bootstraps `productive-k3s` onto machines that already exist and are reachable over SSH.
+This scenario bootstraps `productive-k3s` onto machines that already exist and are reachable over SSH.
 
 Unlike `multipass`, this path does not provision infrastructure. The user provides the machine IPs, chooses which node is the `server`, and optionally provides one or more `agent` IPs.
 
 Internally, `onprem-basic` now consumes the reusable remote bootstrap layer under [ansible/roles/remote_cluster](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/ansible/roles/remote_cluster/README.md:1), which is also reused by the public AWS single-node path.
 
-## What This Use Case Does
+## What This Scenario Does
 
 `onprem-basic` is meant for a simple lab or early on-prem validation flow:
 
@@ -25,7 +25,7 @@ Validated layouts in this repository now include:
 
 ## Supported Runtime Matrix
 
-This use case validates target machines against the currently supported `productive-k3s` runtime matrix:
+This scenario validates target machines against the currently supported `productive-k3s` runtime matrix:
 
 - Ubuntu `24.04` LTS
 - Ubuntu `22.04` LTS
@@ -37,7 +37,7 @@ If a target host is reachable but its Linux runtime is outside that set, `make p
 ## Structure
 
 ```text
-use-cases/onprem-basic/
+scenarios/onprem-basic/
   Makefile
   README.md
   onprem.env.example
@@ -77,7 +77,7 @@ Required on each target machine:
 Copy the example file:
 
 ```bash
-cp use-cases/onprem-basic/onprem.env.example use-cases/onprem-basic/onprem.env
+cp scenarios/onprem-basic/onprem.env.example scenarios/onprem-basic/onprem.env
 ```
 
 Then edit `onprem.env`.
@@ -99,7 +99,9 @@ Optional variables:
 - `ONPREM_REGISTRY_HOST`
 - `ONPREM_REMOTE_DIR`
 - `PRODUCTIVE_K3S_SOURCE=local|remote`
-- `PRODUCTIVE_K3S_VERSION=vX.Y.Z`
+- `PRODUCTIVE_K3S_VERSION=X.Y.Z`
+
+When this scenario is executed through a published `productive-k3s-infra-cli.sh` release, the CLI already forces `PRODUCTIVE_K3S_SOURCE=remote` and binds `PRODUCTIVE_K3S_VERSION` to the `A.B.C` segment of the infra release tag `X.Y.Z-A.B.C`.
 
 ## Role Assignment
 
@@ -136,44 +138,44 @@ ONPREM_AGENT_IPS=192.168.1.11
 Run preflight only:
 
 ```bash
-make -C use-cases/onprem-basic preflight
+make -C scenarios/onprem-basic preflight
 ```
 
 Run the full cluster path:
 
 ```bash
-make -C use-cases/onprem-basic up
+make -C scenarios/onprem-basic up
 ```
 
 Run the full cluster path using the latest remote release:
 
 ```bash
-make -C use-cases/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote
+make -C scenarios/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote
 ```
 
 Run the full cluster path using a pinned release:
 
 ```bash
-make -C use-cases/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=v0.9.0
+make -C scenarios/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.0
 ```
 
 Inspect the resolved metadata:
 
 ```bash
-make -C use-cases/onprem-basic status
+make -C scenarios/onprem-basic status
 ```
 
 Remove local generated metadata:
 
 ```bash
-make -C use-cases/onprem-basic clean
+make -C scenarios/onprem-basic clean
 ```
 
 ## After Provisioning
 
 Once `make up` and `make validate` pass, you have a working cluster on top of the declared `server` machine and optional `agent` nodes.
 
-For a concrete example, see [after-provisioning.md](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/use-cases/onprem-basic/after-provisioning.md:1). It shows how to:
+For a concrete example, see [after-provisioning.md](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/scenarios/onprem-basic/after-provisioning.md:1). It shows how to:
 
 - connect to the `server` using the same SSH values used by `onprem.env`
 - install a public Helm chart into the cluster
@@ -199,10 +201,10 @@ That document is only an example workflow, but it is a practical way to confirm 
 
 ## Notes
 
-- This use case does not create or destroy machines.
+- This scenario does not create or destroy machines.
 - It assumes the target machines are already provisioned and reachable.
 - It assumes passwordless `sudo`; it does not automate interactive sudo password entry.
 - The generated metadata is reusable across `preflight`, `status`, `stack-up`, and `validate`.
-- If the copied `productive-k3s` bundle does not yet expose `scripts/preflight-host.sh`, the use case logs a warning and continues with the infrastructure-side preflight only.
-- As in the other use cases, the first `Rancher` install can spend extra time in `ContainerCreating` while images are pulled on cold nodes.
-- The current public validation evidence for this use case includes both `single-host` and `server + agent` layouts using Ubuntu `24.04` targets over SSH.
+- If the copied `productive-k3s` bundle does not yet expose `scripts/preflight-host.sh`, the scenario logs a warning and continues with the infrastructure-side preflight only.
+- As in the other scenarios, the first `Rancher` install can spend extra time in `ContainerCreating` while images are pulled on cold nodes.
+- The current public validation evidence for this scenario includes both `single-host` and `server + agent` layouts using Ubuntu `24.04` targets over SSH.

@@ -2,11 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USE_CASE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-GENERATED_DIR="${USE_CASE_DIR}/generated"
-OPENTOFU_DIR="${USE_CASE_DIR}/opentofu"
+SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+GENERATED_DIR="${SCENARIO_DIR}/generated"
+OPENTOFU_DIR="${SCENARIO_DIR}/opentofu"
 LOG_DIR="${GENERATED_DIR}/logs"
-PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${USE_CASE_DIR}/../../../productive-k3s" && pwd)}"
+PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../productive-k3s" && pwd)}"
 PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-local}"
 PRODUCTIVE_K3S_VERSION="${PRODUCTIVE_K3S_VERSION:-}"
 PRODUCTIVE_K3S_RELEASE_REPO="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s}"
@@ -85,7 +85,7 @@ resolve_telemetry_enabled() {
 
   if can_use_tty; then
     local telemetry_consent="y"
-    prompt_yesno telemetry_consent "y" "Productive K3S Infra can send anonymous telemetry about this use case run to help improve the installation flow. It does not include any sensitive information like hostnames or other environment-specific identifiers. If enabled, this choice will also be propagated to the underlying productive-k3s bootstrap steps. Enable anonymous telemetry for this run?"
+    prompt_yesno telemetry_consent "y" "Productive K3S Infra can send anonymous telemetry about this scenario run to help improve the installation flow. It does not include any sensitive information like hostnames or other environment-specific identifiers. If enabled, this choice will also be propagated to the underlying productive-k3s bootstrap steps. Enable anonymous telemetry for this run?"
     if [[ "${telemetry_consent}" == "y" ]]; then
       TELEMETRY_ENABLED="true"
     else
@@ -186,6 +186,31 @@ validate_productive_k3s_source() {
   esac
 }
 
+normalize_release_version() {
+  local version="$1"
+  printf '%s\n' "${version#v}"
+}
+
+productive_k3s_release_json() {
+  local version="$1"
+  local release_json=""
+  if [[ -n "${version}" ]]; then
+    if release_json="$(curl -fsSL "$(productive_k3s_release_api_url "${version}")" 2>/dev/null)"; then
+      printf '%s\n' "${release_json}"
+      return 0
+    fi
+    if [[ "${version}" != v* ]]; then
+      release_json="$(curl -fsSL "$(productive_k3s_release_api_url "v${version}")")"
+      printf '%s\n' "${release_json}"
+      return 0
+    fi
+    return 1
+  fi
+
+  release_json="$(curl -fsSL "$(productive_k3s_release_api_url "")")"
+  printf '%s\n' "${release_json}"
+}
+
 productive_k3s_release_api_url() {
   local version="$1"
   if [[ -n "${version}" ]]; then
@@ -202,10 +227,10 @@ resolve_productive_k3s_release_tag() {
     return
   fi
   if [[ -n "${PRODUCTIVE_K3S_VERSION}" ]]; then
-    printf '%s\n' "${PRODUCTIVE_K3S_VERSION}"
+    normalize_release_version "${PRODUCTIVE_K3S_VERSION}"
     return
   fi
-  curl -fsSL "$(productive_k3s_release_api_url "")" | jq -r '.tag_name'
+  productive_k3s_release_json "" | jq -r '.tag_name' | sed 's/^v//'
 }
 
 download_productive_k3s_release_bundle() {
@@ -213,8 +238,9 @@ download_productive_k3s_release_bundle() {
   local version="$2"
   local release_json archive_name sha_name archive_url sha_url
 
-  release_json="$(curl -fsSL "$(productive_k3s_release_api_url "${version}")")"
-  archive_name="productive-k3s-${version}.tar.gz"
+  version="$(normalize_release_version "${version}")"
+  release_json="$(productive_k3s_release_json "${version}")"
+  archive_name="productive-k3s-v${version}.tar.gz"
   sha_name="${archive_name}.sha256"
   archive_url="$(printf '%s' "${release_json}" | jq -r --arg name "${archive_name}" '.assets[] | select(.name == $name) | .browser_download_url')"
   sha_url="$(printf '%s' "${release_json}" | jq -r --arg name "${sha_name}" '.assets[] | select(.name == $name) | .browser_download_url')"

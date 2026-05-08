@@ -5,7 +5,7 @@ El repositorio expone un modelo de validación en tres niveles.
 ## Niveles de la matriz raíz
 
 - `static`: sintaxis de shell, compilación de Python, validación de OpenTofu y ciertos tests de comportamiento
-- `contract`: verifica que cada caso de uso público exponga los archivos, outputs, ignores y targets esperados
+- `contract`: verifica que cada escenario público exponga los archivos, outputs, ignores y targets esperados
 - `live`: ejecuta el flujo real del entorno cuando el ambiente lo permite
 
 ## Comandos raíz
@@ -31,7 +31,7 @@ Las corridas de matriz escriben manifests JSON bajo `test-artifacts/`.
 
 Esos artefactos registran:
 
-- caso de uso
+- escenario
 - nivel
 - resultado
 - duración
@@ -41,9 +41,9 @@ Esos artefactos registran:
 
 ## Guía de desarrollo
 
-Cuando cambies un caso de uso público, revisá si tenés que actualizar:
+Cuando cambies un escenario público, revisá si tenés que actualizar:
 
-- el target `test-static` local del caso de uso
+- el target `test-static` local del escenario
 - las expectativas de contrato en `tests/contract-check.sh`
 - algún test de propagación de telemetría
 - el contrato de metadata generada consumido por los manifests de matriz

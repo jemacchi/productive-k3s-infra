@@ -14,11 +14,11 @@
 ## Comandos principales
 
 ```bash
-make -C use-cases/onprem-basic preflight
-make -C use-cases/onprem-basic up
-make -C use-cases/onprem-basic validate
-make -C use-cases/onprem-basic status
-make -C use-cases/onprem-basic clean
+make -C scenarios/onprem-basic preflight
+make -C scenarios/onprem-basic up
+make -C scenarios/onprem-basic validate
+make -C scenarios/onprem-basic status
+make -C scenarios/onprem-basic clean
 ```
 
 ## Qué hace `make up`
@@ -43,12 +43,12 @@ make -C use-cases/onprem-basic clean
 3. copia del bundle de `productive-k3s` a las máquinas destino
 4. ejecución del host preflight remoto de `productive-k3s` cuando ese bundle contiene `scripts/preflight-host.sh`
 
-Si el bundle copiado de `productive-k3s` todavía no expone ese helper, el caso de uso deja un warning y sigue sólo con el preflight compartido del lado infraestructura.
+Si el bundle copiado de `productive-k3s` todavía no expone ese helper, el escenario deja un warning y sigue sólo con el preflight compartido del lado infraestructura.
 
 ## Notas
 
 !!! note
-    Este caso de uso no provisiona máquinas. Asume que la infraestructura ya existe.
+    Este escenario no provisiona máquinas. Asume que la infraestructura ya existe.
 
 !!! note
     La misma capa compartida de bootstrap remoto también se reutiliza desde `aws-single-node`, lo que mantiene alineado el comportamiento del lado `SSH`.

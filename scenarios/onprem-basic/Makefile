@@ -2,18 +2,18 @@
 
 .EXPORT_ALL_VARIABLES:
 
-USE_CASE_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-export USE_CASE_DIR
+SCENARIO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+export SCENARIO_DIR
 export CASE_PREFIX := ONPREM
-GENERATED_DIR := $(USE_CASE_DIR)/generated
-SCRIPTS_DIR := $(USE_CASE_DIR)/../../ansible/roles/remote_cluster/files
-LOCAL_SCRIPTS_DIR := $(USE_CASE_DIR)/scripts
-TESTS_DIR := $(USE_CASE_DIR)/../../tests
-ONPREM_ENV_FILE ?= $(USE_CASE_DIR)/onprem.env
+GENERATED_DIR := $(SCENARIO_DIR)/generated
+SCRIPTS_DIR := $(SCENARIO_DIR)/../../ansible/roles/remote_cluster/files
+LOCAL_SCRIPTS_DIR := $(SCENARIO_DIR)/scripts
+TESTS_DIR := $(SCENARIO_DIR)/../../tests
+ONPREM_ENV_FILE ?= $(SCENARIO_DIR)/onprem.env
 
 -include $(ONPREM_ENV_FILE)
 
-PRODUCTIVE_K3S_REPO ?= $(abspath $(USE_CASE_DIR)/../../../productive-k3s)
+PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s)
 PRODUCTIVE_K3S_SOURCE ?= local
 PRODUCTIVE_K3S_VERSION ?=
 PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s

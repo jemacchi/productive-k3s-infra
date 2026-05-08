@@ -1,13 +1,13 @@
 # Role: remote_cluster
 
-This folder contains the reusable `SSH`-based bootstrap and validation layer used by more than one public use case.
+This folder contains the reusable `SSH`-based bootstrap and validation layer used by more than one public scenario.
 
 Current consumers:
 
-- `use-cases/onprem-basic`
-- `use-cases/aws-single-node`
+- `scenarios/onprem-basic`
+- `scenarios/aws-single-node`
 
-The assets live under `files/` because today they are consumed as shell and Python helpers by the use-case `Makefile` flows. They are generic enough to be treated as shared Ansible-side assets even before a full playbook-driven interface exists.
+The assets live under `files/` because today they are consumed as shell and Python helpers by the scenario `Makefile` flows. They are generic enough to be treated as shared Ansible-side assets even before a full playbook-driven interface exists.
 
 What this reusable layer covers:
 

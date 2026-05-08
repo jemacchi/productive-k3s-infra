@@ -4,7 +4,7 @@ Reusable roles should be placed here.
 
 Implemented reusable content:
 
-- `remote_cluster`: shared `SSH`-based bootstrap and validation layer consumed by the public `onprem-basic` and `aws-single-node` use cases
+- `remote_cluster`: shared `SSH`-based bootstrap and validation layer consumed by the public `onprem-basic` and `aws-single-node` scenarios
 
 Possible future roles:
 

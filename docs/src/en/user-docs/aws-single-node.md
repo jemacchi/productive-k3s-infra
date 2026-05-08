@@ -1,4 +1,4 @@
-# AWS Single-Node Use Case
+# AWS Single-Node Scenario
 
 `aws-single-node` is the public AWS entry point of this repository.
 
@@ -13,11 +13,11 @@ It provisions one `EC2` instance with `OpenTofu`, then bootstraps `productive-k3
 ## Main commands
 
 ```bash
-make -C use-cases/aws-single-node infra-up
-make -C use-cases/aws-single-node up
-make -C use-cases/aws-single-node validate
-make -C use-cases/aws-single-node status
-make -C use-cases/aws-single-node down
+make -C scenarios/aws-single-node infra-up
+make -C scenarios/aws-single-node up
+make -C scenarios/aws-single-node validate
+make -C scenarios/aws-single-node status
+make -C scenarios/aws-single-node down
 ```
 
 ## What `make up` does

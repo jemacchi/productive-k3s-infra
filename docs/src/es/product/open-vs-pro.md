@@ -39,7 +39,7 @@ Eso implica que el código público debería preferir:
 ## Notas
 
 !!! note
-    "Pro" es un límite de alcance, no una señal de que el repositorio open esté incompleto. El repositorio open igual debería ofrecer casos de uso reales y funcionando.
+    "Pro" es un límite de alcance, no una señal de que el repositorio open esté incompleto. El repositorio open igual debería ofrecer escenarios reales y funcionando.
 
 !!! note
-    Los casos de uso públicos son intencionalmente simples en varios puntos. Esa simplicidad suele ser parte del posicionamiento del producto open, no necesariamente una feature faltante.
+    Los escenarios públicos son intencionalmente simples en varios puntos. Esa simplicidad suele ser parte del posicionamiento del producto open, no necesariamente una feature faltante.

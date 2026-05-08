@@ -1,39 +1,25 @@
 # After Provisioning
 
-This document shows a simple example to confirm that the `onprem-basic` use case produced a usable Kubernetes cluster.
+This document shows a simple example to confirm that the `multipass` scenario produced a usable Kubernetes cluster.
 
-The example installs a public Helm chart from the `server` machine and then accesses the deployed service from the host machine that initiated the SSH-based bootstrap.
+The example installs a public Helm chart from the `server` VM and then accesses the deployed service from the host machine.
 
 ## What This Example Proves
 
 If `make up` and `make validate` already passed, this example demonstrates that:
 
-- the declared `server` machine is running a reachable K3S cluster
-- `helm` can deploy workloads into that cluster
-- the deployed workload can be reached from outside the server through a Kubernetes `NodePort` service
+- the three-node K3S cluster is reachable from the `server` VM
+- `helm` can deploy workloads into the cluster
+- the workload becomes reachable from outside the VM through a Kubernetes `NodePort` service
 
 This is only an example workload. It is not part of the base infrastructure guarantee.
 
-## Inputs From `onprem.env`
-
-This workflow assumes the `server` IP comes from `onprem.env`.
-
-Example:
-
-```bash
-ONPREM_SERVER_IP=10.162.98.21
-ONPREM_SSH_USER=ubuntu
-ONPREM_SSH_KEY_PATH=/home/jmacchi/.ssh/id_ed25519
-```
-
-Use your own values if your `onprem.env` differs.
-
 ## Example: Deploy `bitnami/nginx`
 
-Open a shell on the `server` machine:
+Open a shell on the `server` VM:
 
 ```bash
-ssh -i /home/jmacchi/.ssh/id_ed25519 ubuntu@10.162.98.21
+multipass shell productive-k3s-mp-server
 ```
 
 Confirm the cluster is up:
@@ -51,7 +37,7 @@ helm repo update
 sudo k3s kubectl create namespace demo
 ```
 
-Install the chart. On this machine, `helm` usually needs the K3S kubeconfig through `sudo -E`:
+Install the chart. On this VM, `helm` usually needs the K3S kubeconfig through `sudo -E`:
 
 ```bash
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
@@ -78,22 +64,28 @@ In that example, the host can reach the service over HTTP on port `30658`.
 
 ## Access It From The Host Machine
 
-Use the same `server` IP from `onprem.env`.
-
-If the `server` IP is `10.162.98.21` and the service exposes `80:30658/TCP`, test it from the host:
+Find the `server` IP if needed:
 
 ```bash
-curl http://10.162.98.21:30658
+multipass list
+```
+
+If the `server` IP is `10.162.98.39` and the service exposes `80:30658/TCP`, test it from the host:
+
+```bash
+curl http://10.162.98.39:30658
 ```
 
 You can also open the same URL in a browser:
 
 ```text
-http://10.162.98.21:30658
+http://10.162.98.39:30658
 ```
+
+Because this is a `NodePort`, the same service should also be reachable through the IP of either agent VM on the same exposed port.
 
 ## Notes
 
 - If `helm` fails with `Kubernetes cluster unreachable` and tries `http://localhost:8080`, it means no valid kubeconfig was provided to `helm`.
-- The `KUBECONFIG=/etc/rancher/k3s/k3s.yaml` plus `sudo -E` pattern is the expected fix on the `server` machine.
-- For a cleaner URL, the next step would be creating an `Ingress` and pointing a local hostname to the IP declared in `ONPREM_SERVER_IP`.
+- The `KUBECONFIG=/etc/rancher/k3s/k3s.yaml` plus `sudo -E` pattern is the expected fix on the `server` VM.
+- For a cleaner URL, the next step would be creating an `Ingress` and adding the chosen hostname to the host machine's `/etc/hosts`.

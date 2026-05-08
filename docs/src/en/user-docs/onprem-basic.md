@@ -1,4 +1,4 @@
-# On-Prem Basic Use Case
+# On-Prem Basic Scenario
 
 `onprem-basic` bootstraps `productive-k3s` onto machines that already exist and are reachable over `SSH`.
 
@@ -14,11 +14,11 @@
 ## Main commands
 
 ```bash
-make -C use-cases/onprem-basic preflight
-make -C use-cases/onprem-basic up
-make -C use-cases/onprem-basic validate
-make -C use-cases/onprem-basic status
-make -C use-cases/onprem-basic clean
+make -C scenarios/onprem-basic preflight
+make -C scenarios/onprem-basic up
+make -C scenarios/onprem-basic validate
+make -C scenarios/onprem-basic status
+make -C scenarios/onprem-basic clean
 ```
 
 ## What `make up` does
@@ -43,12 +43,12 @@ make -C use-cases/onprem-basic clean
 3. copies the `productive-k3s` bundle to the target machines
 4. runs the remote host preflight from `productive-k3s` when that bundle contains `scripts/preflight-host.sh`
 
-If the copied `productive-k3s` bundle does not yet expose that helper, the use case logs a warning and continues with the shared infrastructure-side preflight only.
+If the copied `productive-k3s` bundle does not yet expose that helper, the scenario logs a warning and continues with the shared infrastructure-side preflight only.
 
 ## Notes
 
 !!! note
-    This use case does not provision machines. It assumes the infrastructure already exists.
+    This scenario does not provision machines. It assumes the infrastructure already exists.
 
 !!! note
     The same shared remote bootstrap layer is reused by `aws-single-node`, which keeps the SSH-side behavior aligned across both remote flows.

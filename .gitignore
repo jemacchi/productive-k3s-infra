@@ -2,5 +2,5 @@
 __pycache__/
 docs/.venv/
 docs/site/
-use-cases/*/generated/
+scenarios/*/generated/
 test-artifacts/

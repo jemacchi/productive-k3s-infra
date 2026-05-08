@@ -30,7 +30,7 @@ The infrastructure flows in this repository treat the `productive-k3s` execution
 - `agent`
 - `stack`
 
-Different use cases consume those modes differently:
+Different scenarios consume those modes differently:
 
 - `multipass`: `server`, `agent`, `stack`
 - `onprem-basic`: `single-node` or `server`, `agent`, `stack` depending on topology

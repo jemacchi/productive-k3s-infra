@@ -1,6 +1,6 @@
-# Multipass Use Case
+# Multipass Scenario
 
-This use case provisions a local three-node Productive K3S cluster on top of Multipass:
+This scenario provisions a local three-node Productive K3S cluster on top of Multipass:
 
 - `1` server VM
 - `2` agent VMs
@@ -24,12 +24,12 @@ Networking model:
 - the cluster uses the default Multipass network
 - agents join the server through its Multipass-assigned private IPv4 address
 - Rancher and registry use internal hostnames derived from `base_domain`
-- the use case writes `/etc/hosts` entries inside all VMs so those hostnames resolve to the server IP without depending on external DNS
+- the scenario writes `/etc/hosts` entries inside all VMs so those hostnames resolve to the server IP without depending on external DNS
 
 ## Structure
 
 ```text
-use-cases/multipass/
+scenarios/multipass/
   Makefile
   README.md
   generated/
@@ -71,7 +71,9 @@ Source selection:
 
 - `PRODUCTIVE_K3S_SOURCE=local`: package the local checkout and copy it into the VMs
 - `PRODUCTIVE_K3S_SOURCE=remote`: download a published GitHub Release bundle and copy that into the VMs
-- `PRODUCTIVE_K3S_VERSION=vX.Y.Z`: optional pin when `PRODUCTIVE_K3S_SOURCE=remote`; if omitted, the use case resolves the latest release from `PRODUCTIVE_K3S_RELEASE_REPO`
+- `PRODUCTIVE_K3S_VERSION=X.Y.Z`: optional pin when `PRODUCTIVE_K3S_SOURCE=remote`; if omitted, the scenario resolves the latest release from `PRODUCTIVE_K3S_RELEASE_REPO`
+
+When this scenario is executed through a published `productive-k3s-infra-cli.sh` release, the CLI already forces `PRODUCTIVE_K3S_SOURCE=remote` and binds `PRODUCTIVE_K3S_VERSION` to the `A.B.C` segment of the infra release tag `X.Y.Z-A.B.C`.
 
 ## Usage
 
@@ -102,7 +104,7 @@ make up PRODUCTIVE_K3S_SOURCE=remote
 Provision using a pinned remote release:
 
 ```bash
-make up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=v0.9.0
+make up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.0
 ```
 
 Inspect the resolved metadata:
@@ -127,7 +129,7 @@ make clean
 
 Once `make up` and `make validate` pass, you have a working three-node cluster that can accept workloads from the `server` VM.
 
-For a concrete example, see [after-provisioning.md](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/use-cases/multipass/after-provisioning.md:1). It shows how to:
+For a concrete example, see [after-provisioning.md](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/scenarios/multipass/after-provisioning.md:1). It shows how to:
 
 - install a public Helm chart into the cluster
 - verify that the workload is running
@@ -147,7 +149,7 @@ That document is only an example workflow, but it is a practical way to confirm 
 6. `productive-k3s` runs in `agent` mode on the remaining nodes.
 7. Host aliases for Rancher and registry are synchronized into each VM.
 8. `productive-k3s` runs in `stack` mode on the server.
-9. A use-case-specific validation confirms node readiness, core namespaces, ingress reachability, and default storage.
+9. A scenario-specific validation confirms node readiness, core namespaces, ingress reachability, and default storage.
 
 ## Notes
 
@@ -155,4 +157,4 @@ That document is only an example workflow, but it is a practical way to confirm 
 - Rancher and registry are therefore guaranteed to resolve inside the VMs, but not automatically on the host.
 - The validation here is not the same as `productive-k3s/scripts/validate-k3s-stack.sh`, because that validator still assumes some single-node and host-local defaults such as NFS and fixed local hostnames.
 - The first `Rancher` install can spend several minutes in `ContainerCreating` while each VM pulls the `rancher/rancher` image. That is expected on a cold cluster.
-- `stack-up` reconciles the default `StorageClass` for this use case so that `longhorn` ends up as the only default class after the shared stack is installed.
+- `stack-up` reconciles the default `StorageClass` for this scenario so that `longhorn` ends up as the only default class after the shared stack is installed.

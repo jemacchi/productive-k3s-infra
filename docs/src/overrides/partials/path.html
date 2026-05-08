@@ -33,7 +33,7 @@
     {% if '/user-docs/multipass' in page.url or '/user-docs/onprem-basic' in page.url or '/user-docs/aws-single-node' in page.url %}
       {% set crumbs = [
         {"label": "Documentación para usuarios" if page.url.startswith('es/') else "User Docs", "url": "es/user-docs/" if page.url.startswith('es/') else "en/user-docs/"},
-        {"label": "Casos de uso" if page.url.startswith('es/') else "Use cases", "url": None}
+        {"label": "Escenarios" if page.url.startswith('es/') else "Scenarios", "url": None}
       ] %}
     {% else %}
       {% set crumbs = [{"label": "Documentación para usuarios" if page.url.startswith('es/') else "User Docs", "url": "es/user-docs/" if page.url.startswith('es/') else "en/user-docs/"}] %}

@@ -1,5 +1,5 @@
 site_name: Productive K3S Infra
-site_description: Pre-assembled infrastructure use cases for Productive K3S, with bilingual documentation.
+site_description: Pre-assembled infrastructure scenarios for Productive K3S, with bilingual documentation.
 site_author: Productive K3S Infra
 site_url: https://infra.productive-k3s.io/
 repo_url: https://github.com/jemacchi/productive-k3s-infra
@@ -71,7 +71,7 @@ nav:
           - Relationship with Productive K3S: en/product/productive-k3s-relationship.md
       - User docs:
           - en/user-docs/index.md
-          - Use cases:
+          - Scenarios:
               - Multipass: en/user-docs/multipass.md
               - On-prem basic: en/user-docs/onprem-basic.md
               - AWS single-node: en/user-docs/aws-single-node.md
@@ -98,7 +98,7 @@ nav:
           - Relación con Productive K3S: es/product/productive-k3s-relationship.md
       - Documentación para usuarios:
           - es/user-docs/index.md
-          - Casos de uso:
+          - Escenarios:
               - Multipass: es/user-docs/multipass.md
               - On-prem basic: es/user-docs/onprem-basic.md
               - AWS single-node: es/user-docs/aws-single-node.md

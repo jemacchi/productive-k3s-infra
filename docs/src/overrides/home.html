@@ -53,9 +53,9 @@
 
       <section class="pk3s-home-section pk3s-two-col">
         <article class="pk3s-card">
-          <h2 data-pk3s-text="use_cases_title">{{ page.meta.use_cases_title }}</h2>
-          <ul data-pk3s-list="use_cases">
-            {% for item in page.meta.use_cases %}<li>{{ item }}</li>{% endfor %}
+          <h2 data-pk3s-text="scenarios_title">{{ page.meta.scenarios_title }}</h2>
+          <ul data-pk3s-list="scenarios">
+            {% for item in page.meta.scenarios %}<li>{{ item }}</li>{% endfor %}
           </ul>
         </article>
         <article class="pk3s-card">
@@ -144,8 +144,8 @@
           why_option_1_text: {{ page.meta.why_options[1].text | tojson }},
           bridge_note: {{ page.meta.bridge_note | tojson }},
           bridge_points: {{ page.meta.bridge_points | tojson }},
-          use_cases_title: {{ page.meta.use_cases_title | tojson }},
-          use_cases: {{ page.meta.use_cases | tojson }},
+          scenarios_title: {{ page.meta.scenarios_title | tojson }},
+          scenarios: {{ page.meta.scenarios | tojson }},
           principles_title: {{ page.meta.principles_title | tojson }},
           principles: {{ page.meta.principles | tojson }},
           environments_title: {{ page.meta.environments_title | tojson }},
@@ -170,8 +170,8 @@
           why_option_1_text: {{ page.meta.why_options_es[1].text | tojson }},
           bridge_note: {{ page.meta.bridge_note_es | tojson }},
           bridge_points: {{ page.meta.bridge_points_es | tojson }},
-          use_cases_title: {{ page.meta.use_cases_title_es | tojson }},
-          use_cases: {{ page.meta.use_cases_es | tojson }},
+          scenarios_title: {{ page.meta.scenarios_title_es | tojson }},
+          scenarios: {{ page.meta.scenarios_es | tojson }},
           principles_title: {{ page.meta.principles_title_es | tojson }},
           principles: {{ page.meta.principles_es | tojson }},
           environments_title: {{ page.meta.environments_title_es | tojson }},

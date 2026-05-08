@@ -6,12 +6,12 @@ SOURCE_DIR="${ROOT_DIR}/ansible/roles/remote_cluster/files"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
-TEST_USE_CASE_DIR="${TMP_DIR}/remote-cluster"
-mkdir -p "${TEST_USE_CASE_DIR}"
-cp -R "${SOURCE_DIR}" "${TEST_USE_CASE_DIR}/scripts"
-mkdir -p "${TEST_USE_CASE_DIR}/generated/logs"
+TEST_SCENARIO_DIR="${TMP_DIR}/remote-cluster"
+mkdir -p "${TEST_SCENARIO_DIR}"
+cp -R "${SOURCE_DIR}" "${TEST_SCENARIO_DIR}/scripts"
+mkdir -p "${TEST_SCENARIO_DIR}/generated/logs"
 
-cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/generated/cluster.json" <<'EOF'
 {
   "cluster_name": "preflight-test",
   "base_domain": "k3s.lab.internal",
@@ -56,16 +56,16 @@ cat > "${TEST_USE_CASE_DIR}/generated/cluster.json" <<'EOF'
 }
 EOF
 
-cat > "${TEST_USE_CASE_DIR}/scripts/common.sh" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/scripts/common.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USE_CASE_DIR="${USE_CASE_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
-GENERATED_DIR="${USE_CASE_DIR}/generated"
+SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+GENERATED_DIR="${SCENARIO_DIR}/generated"
 LOG_DIR="${GENERATED_DIR}/logs"
 CLUSTER_JSON="${GENERATED_DIR}/cluster.json"
-PRECHECK_LOG="${USE_CASE_DIR}/precheck.log"
+PRECHECK_LOG="${SCENARIO_DIR}/precheck.log"
 REMOTE_DIR="/home/ubuntu/productive-k3s"
 
 log() {
@@ -114,31 +114,31 @@ remote_exec() {
   return 0
 }
 EOF
-chmod +x "${TEST_USE_CASE_DIR}/scripts/common.sh"
+chmod +x "${TEST_SCENARIO_DIR}/scripts/common.sh"
 
-export USE_CASE_DIR="${TEST_USE_CASE_DIR}"
-bash "${TEST_USE_CASE_DIR}/scripts/preflight-productive-k3s.sh"
+export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
+bash "${TEST_SCENARIO_DIR}/scripts/preflight-productive-k3s.sh"
 
-grep -q -- "test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'" "${TEST_USE_CASE_DIR}/precheck.log" || {
+grep -q -- "test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'" "${TEST_SCENARIO_DIR}/precheck.log" || {
   echo "[FAIL] did not check whether productive-k3s preflight exists remotely" >&2
   exit 1
 }
 
-grep -q -- "./scripts/preflight-host.sh --mode single-node" "${TEST_USE_CASE_DIR}/precheck.log" || {
+grep -q -- "./scripts/preflight-host.sh --mode single-node" "${TEST_SCENARIO_DIR}/precheck.log" || {
   echo "[FAIL] did not run single-node productive-k3s preflight for a single-host layout" >&2
   exit 1
 }
 
-cat > "${TEST_USE_CASE_DIR}/scripts/common.sh" <<'EOF'
+cat > "${TEST_SCENARIO_DIR}/scripts/common.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USE_CASE_DIR="${USE_CASE_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
-GENERATED_DIR="${USE_CASE_DIR}/generated"
+SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
+GENERATED_DIR="${SCENARIO_DIR}/generated"
 LOG_DIR="${GENERATED_DIR}/logs"
 CLUSTER_JSON="${GENERATED_DIR}/cluster.json"
-PRECHECK_LOG="${USE_CASE_DIR}/precheck.log"
+PRECHECK_LOG="${SCENARIO_DIR}/precheck.log"
 REMOTE_DIR="/home/ubuntu/productive-k3s"
 
 log() {
@@ -183,17 +183,17 @@ remote_exec() {
   return 0
 }
 EOF
-chmod +x "${TEST_USE_CASE_DIR}/scripts/common.sh"
-rm -f "${TEST_USE_CASE_DIR}/precheck.log"
+chmod +x "${TEST_SCENARIO_DIR}/scripts/common.sh"
+rm -f "${TEST_SCENARIO_DIR}/precheck.log"
 
-bash "${TEST_USE_CASE_DIR}/scripts/preflight-productive-k3s.sh"
+bash "${TEST_SCENARIO_DIR}/scripts/preflight-productive-k3s.sh"
 
-grep -q -- "test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'" "${TEST_USE_CASE_DIR}/precheck.log" || {
+grep -q -- "test -x '/home/ubuntu/productive-k3s/scripts/preflight-host.sh'" "${TEST_SCENARIO_DIR}/precheck.log" || {
   echo "[FAIL] missing-script scenario did not probe the remote preflight helper" >&2
   exit 1
 }
 
-if grep -q -- "./scripts/preflight-host.sh --mode" "${TEST_USE_CASE_DIR}/precheck.log"; then
+if grep -q -- "./scripts/preflight-host.sh --mode" "${TEST_SCENARIO_DIR}/precheck.log"; then
   echo "[FAIL] missing-script scenario should not attempt to execute the remote preflight helper" >&2
   exit 1
 fi

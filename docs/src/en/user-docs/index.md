@@ -1,10 +1,10 @@
 # User Docs
 
-This section groups the public use cases, the main `make` entry points, and the operator-facing behavior of Productive K3S Infra.
+This section groups the public scenarios, the main `make` entry points, and the operator-facing behavior of Productive K3S Infra.
 
 ## Pages
 
-### Use cases
+### Scenarios
 
 - [Multipass](multipass.md)
 - [On-prem basic](onprem-basic.md)

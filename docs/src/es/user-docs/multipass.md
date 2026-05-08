@@ -11,13 +11,13 @@
 ## Comandos principales
 
 ```bash
-make -C use-cases/multipass infra-up
-make -C use-cases/multipass cluster-up
-make -C use-cases/multipass up
-make -C use-cases/multipass validate
-make -C use-cases/multipass status
-make -C use-cases/multipass down
-make -C use-cases/multipass clean
+make -C scenarios/multipass infra-up
+make -C scenarios/multipass cluster-up
+make -C scenarios/multipass up
+make -C scenarios/multipass validate
+make -C scenarios/multipass status
+make -C scenarios/multipass down
+make -C scenarios/multipass clean
 ```
 
 ## Qué hace `make up`
@@ -35,7 +35,7 @@ make -C use-cases/multipass clean
 ## Notas
 
 !!! note
-    Este caso de uso no actualiza hoy `/etc/hosts` en la máquina de control. Los hostnames de Rancher y registry quedan garantizados dentro de las VMs, no automáticamente en el host.
+    Este escenario no actualiza hoy `/etc/hosts` en la máquina de control. Los hostnames de Rancher y registry quedan garantizados dentro de las VMs, no automáticamente en el host.
 
 !!! note
     Una primera instalación de `Rancher` sobre un clúster frío puede pasar varios minutos en `ContainerCreating` mientras se descargan imágenes.

@@ -1,8 +1,10 @@
-.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-static test-contract test-live test-live-gha-onprem test-matrix test-productive-k3s-infra-cli multipass onprem aws-single-node
+.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-static test-contract test-live test-live-gha-onprem test-matrix test-productive-k3s-infra-cli infra-help infra-doctor infra-list-profiles infra-validate infra-plan infra-apply infra-destroy infra-status multipass onprem aws-single-node
 
-USE_CASES := multipass onprem-basic aws-single-node
+SCENARIOS := multipass onprem-basic aws-single-node
 TESTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/tests
 SCRIPTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/scripts
+PUBLIC_CLI := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/productive-k3s-infra.sh
+PROFILE ?=
 export TELEMETRY_ENABLED ?=
 export TELEMETRY_ENDPOINT ?=
 export TELEMETRY_MAX_RETRIES ?= 3
@@ -43,11 +45,35 @@ test-matrix: test-static test-contract test-live
 test-productive-k3s-infra-cli:
 	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-productive-k3s-infra-cli
 
+infra-help:
+	$(PUBLIC_CLI) help
+
+infra-doctor:
+	$(PUBLIC_CLI) doctor
+
+infra-list-profiles:
+	$(PUBLIC_CLI) list-profiles
+
+infra-validate:
+	$(PUBLIC_CLI) validate --profile $(PROFILE)
+
+infra-plan:
+	$(PUBLIC_CLI) plan --profile $(PROFILE)
+
+infra-apply:
+	$(PUBLIC_CLI) apply --profile $(PROFILE)
+
+infra-destroy:
+	$(PUBLIC_CLI) destroy --profile $(PROFILE)
+
+infra-status:
+	$(PUBLIC_CLI) status --profile $(PROFILE)
+
 multipass:
-	$(SCRIPTS_DIR)/productive-k3s-infra.sh multipass up
+	$(PUBLIC_CLI) multipass up
 
 onprem:
-	$(SCRIPTS_DIR)/productive-k3s-infra.sh onprem up
+	$(PUBLIC_CLI) onprem up
 
 aws-single-node:
-	$(SCRIPTS_DIR)/productive-k3s-infra.sh aws-single-node up
+	$(PUBLIC_CLI) aws-single-node up

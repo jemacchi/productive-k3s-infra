@@ -39,7 +39,7 @@ That means the public code should prefer:
 ## Notes
 
 !!! note
-    "Pro" is a boundary of scope, not a signal that the open repository is incomplete. The open repository should still provide real, working use cases.
+    "Pro" is a boundary of scope, not a signal that the open repository is incomplete. The open repository should still provide real, working scenarios.
 
 !!! note
-    Public use cases are intentionally simple in several places. Simplicity is often part of the public product positioning, not necessarily a missing feature.
+    Public scenarios are intentionally simple in several places. Simplicity is often part of the public product positioning, not necessarily a missing feature.

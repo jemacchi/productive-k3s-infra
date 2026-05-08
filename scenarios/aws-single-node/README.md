@@ -1,12 +1,12 @@
-# AWS Single-Node Use Case
+# AWS Single-Node Scenario
 
-This use case provisions a basic AWS `EC2` instance with `OpenTofu`, then bootstraps `productive-k3s` onto it over `SSH`.
+This scenario provisions a basic AWS `EC2` instance with `OpenTofu`, then bootstraps `productive-k3s` onto it over `SSH`.
 
 It is the public AWS entry point of this repository: one machine, one cluster, one control path. The goal is to make evaluation easy, not to model a hardened production AWS layout.
 
-Its post-provision bootstrap path reuses the same remote cluster layer under [ansible/roles/remote_cluster](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/ansible/roles/remote_cluster/README.md:1) that `onprem-basic` also consumes, so the `SSH`, bundle copy, bootstrap phases, and validation logic stay aligned across both use cases.
+Its post-provision bootstrap path reuses the same remote cluster layer under [ansible/roles/remote_cluster](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/ansible/roles/remote_cluster/README.md:1) that `onprem-basic` also consumes, so the `SSH`, bundle copy, bootstrap phases, and validation logic stay aligned across both scenarios.
 
-## What This Use Case Does
+## What This Scenario Does
 
 `aws-single-node` is meant for a simple public cloud validation flow:
 
@@ -21,7 +21,7 @@ Its post-provision bootstrap path reuses the same remote cluster layer under [an
 ## Structure
 
 ```text
-use-cases/aws-single-node/
+scenarios/aws-single-node/
   Makefile
   README.md
   after-provisioning.md
@@ -64,7 +64,7 @@ Required in AWS:
 Copy the example file:
 
 ```bash
-cp use-cases/aws-single-node/aws.env.example use-cases/aws-single-node/aws.env
+cp scenarios/aws-single-node/aws.env.example scenarios/aws-single-node/aws.env
 ```
 
 Then edit `aws.env`.
@@ -91,7 +91,9 @@ Common variables:
 - `AWS_REGISTRY_HOST`
 - `AWS_REMOTE_DIR`
 - `PRODUCTIVE_K3S_SOURCE=local|remote`
-- `PRODUCTIVE_K3S_VERSION=vX.Y.Z`
+- `PRODUCTIVE_K3S_VERSION=X.Y.Z`
+
+When this scenario is executed through a published `productive-k3s-infra-cli.sh` release, the CLI already forces `PRODUCTIVE_K3S_SOURCE=remote` and binds `PRODUCTIVE_K3S_VERSION` to the `A.B.C` segment of the infra release tag `X.Y.Z-A.B.C`.
 
 Authentication variables can be supplied through the same `aws.env` file:
 
@@ -102,7 +104,7 @@ Authentication variables can be supplied through the same `aws.env` file:
 
 ## Network Model
 
-This use case supports two simple network inputs:
+This scenario supports two simple network inputs:
 
 - leave both `AWS_VPC_ID` and `AWS_SUBNET_ID` empty to use the default `VPC` path
 - set both `AWS_VPC_ID` and `AWS_SUBNET_ID` to target an existing network explicitly
@@ -114,44 +116,44 @@ Setting only one of them is rejected before apply.
 Initialize and provision only the infrastructure:
 
 ```bash
-make -C use-cases/aws-single-node infra-up
+make -C scenarios/aws-single-node infra-up
 ```
 
 Run the full cluster path:
 
 ```bash
-make -C use-cases/aws-single-node up
+make -C scenarios/aws-single-node up
 ```
 
 Run the full cluster path using the latest remote release:
 
 ```bash
-make -C use-cases/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote
+make -C scenarios/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote
 ```
 
 Run the full cluster path using a pinned release:
 
 ```bash
-make -C use-cases/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=v0.9.0
+make -C scenarios/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.0
 ```
 
 Inspect the resolved metadata:
 
 ```bash
-make -C use-cases/aws-single-node status
+make -C scenarios/aws-single-node status
 ```
 
 Destroy the AWS resources and clean local generated files:
 
 ```bash
-make -C use-cases/aws-single-node down
+make -C scenarios/aws-single-node down
 ```
 
 ## After Provisioning
 
 Once `make up` and `make validate` pass, you have a working cluster on the EC2 instance that `OpenTofu` created.
 
-For a concrete example, see [after-provisioning.md](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/use-cases/aws-single-node/after-provisioning.md:1). It shows how to:
+For a concrete example, see [after-provisioning.md](/home/jmacchi/prg/jemacchi/productive-k3s-env/productive-k3s-infra/scenarios/aws-single-node/after-provisioning.md:1). It shows how to:
 
 - connect to the instance over `SSH`
 - verify the `single-node` cluster from the server host
@@ -175,7 +177,7 @@ That document is only an example workflow, but it is the practical proof that th
 
 ## Notes
 
-- This use case is intentionally public and basic; it uses `SSH`, not `SSM`.
+- This scenario is intentionally public and basic; it uses `SSH`, not `SSM`.
 - It creates a single-node cluster only.
 - The security group is deliberately simple and should be narrowed before any non-evaluation use.
 - `AWS_VPC_ID` and `AWS_SUBNET_ID` are optional, but they must be set together.
