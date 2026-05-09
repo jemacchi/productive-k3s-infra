@@ -1,4 +1,4 @@
-.PHONY: infra-init infra-up cluster-up stack-up validate up down clean status test-static test-contract test-live
+.PHONY: infra-init infra-up cluster-up stack-up validate up down clean status test-clean test-checkstatus test-static test-contract test-live scenario-test-static scenario-test-contract scenario-test-live
 
 SCENARIO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 export SCENARIO_DIR
@@ -51,7 +51,6 @@ clean:
 	rm -f $(GENERATED_DIR)/server-url.txt
 	rm -rf $(GENERATED_DIR)/logs
 	rm -rf $(OPENTOFU_DIR)/.terraform
-	rm -f $(OPENTOFU_DIR)/.terraform.lock.hcl
 	rm -f $(OPENTOFU_DIR)/terraform.tfstate
 	rm -f $(OPENTOFU_DIR)/terraform.tfstate.backup
 
@@ -73,7 +72,22 @@ status:
 	fi
 	@cat $(GENERATED_DIR)/cluster.json
 
-test-static: infra-init
+test-clean:
+	TEST_SCENARIO=multipass ../../scripts/productive-k3s-infra-dev.sh test-clean
+
+test-checkstatus:
+	TEST_SCENARIO=multipass ../../scripts/productive-k3s-infra-dev.sh test-checkstatus
+
+test-static:
+	bash ../../tests/run-scenario-test.sh static multipass $(SCENARIO_DIR) scenario-test-static
+
+test-contract:
+	bash ../../tests/run-scenario-test.sh contract multipass $(SCENARIO_DIR) scenario-test-contract
+
+test-live:
+	bash ../../tests/run-scenario-test.sh live multipass $(SCENARIO_DIR) scenario-test-live
+
+scenario-test-static: infra-init
 	bash -n $(SCRIPTS_DIR)/*.sh
 	python3 -m py_compile $(SCRIPTS_DIR)/run_bootstrap_session.py
 	$(TOFU_BIN) -chdir=$(OPENTOFU_DIR) init -backend=false
@@ -83,8 +97,8 @@ test-static: infra-init
 	bash $(TESTS_DIR)/test-multipass-telemetry-propagation.sh
 	bash $(TESTS_DIR)/test-multipass-cluster-up-preserves-telemetry.sh
 
-test-contract:
+scenario-test-contract:
 	$(TESTS_DIR)/contract-check.sh multipass
 
-test-live:
+scenario-test-live:
 	$(TESTS_DIR)/live-multipass.sh

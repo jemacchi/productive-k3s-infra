@@ -16,6 +16,8 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `make docs-serve` | Serve the docs locally |
 | `make docs-up` | Run the docs server in the background |
 | `make docs-down` | Stop the docs server and clean docs artifacts |
+| `make test-clean` | Remove local matrix test result artifacts before a new validation cycle |
+| `make test-checkstatus` | Summarize the currently recorded matrix test outcomes from local artifacts |
 | `make test-static` | Run static checks across all public scenarios |
 | `make test-contract` | Run contract checks across all public scenarios |
 | `make test-live` | Run live validations across all public scenarios |
@@ -46,6 +48,11 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `down` | Destroy the VMs |
 | `clean` | Remove generated artifacts and local `OpenTofu` state |
 | `status` | Re-render and print `generated/cluster.json` |
+| `test-static` | Run only the `multipass` static validation path and record a local test manifest |
+| `test-contract` | Run only the `multipass` contract validation path and record a local test manifest |
+| `test-live` | Run only the `multipass` live validation path and record a local test manifest |
+| `test-clean` | Remove only the recorded matrix test artifacts for `multipass` |
+| `test-checkstatus` | Summarize only the recorded matrix test outcomes for `multipass` |
 
 ## On-prem basic targets
 
@@ -58,6 +65,11 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `up` | `cluster-up + validate` |
 | `status` | Re-render and print `generated/cluster.json` |
 | `clean` | Remove local generated metadata |
+| `test-static` | Run only the `onprem-basic` static validation path and record a local test manifest |
+| `test-contract` | Run only the `onprem-basic` contract validation path and record a local test manifest |
+| `test-live` | Run only the `onprem-basic` live validation path and record a local test manifest |
+| `test-clean` | Remove only the recorded matrix test artifacts for `onprem-basic` |
+| `test-checkstatus` | Summarize only the recorded matrix test outcomes for `onprem-basic` |
 
 ## AWS single-node targets
 
@@ -73,6 +85,11 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `up` | `infra-up + cluster-up + validate` |
 | `down` | `infra-down + clean` |
 | `status` | Print `generated/cluster.json` |
+| `test-static` | Run only the `aws-single-node` static validation path and record a local test manifest |
+| `test-contract` | Run only the `aws-single-node` contract validation path and record a local test manifest |
+| `test-live` | Run only the `aws-single-node` live validation path and record a local test manifest |
+| `test-clean` | Remove only the recorded matrix test artifacts for `aws-single-node` |
+| `test-checkstatus` | Summarize only the recorded matrix test outcomes for `aws-single-node` |
 
 ## Notes
 

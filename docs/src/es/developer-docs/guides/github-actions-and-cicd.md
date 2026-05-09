@@ -6,7 +6,7 @@ Este repositorio tiene un modelo de validación apto para CI y ahora incluye un 
 
 - targets raíz determinísticos de `make` para docs y validación por matriz
 - niveles estructurados `static`, `contract` y `live`
-- artefactos JSON anónimos bajo `test-artifacts/` como evidencia de ejecución
+- artefactos JSON anónimos bajo `test-artifacts/` como evidencia de ejecución, incluyendo manifests por escenario y summaries de matriz
 - una separación clara entre entrypoints orientados al operador y scripts internos
 - un target dedicado `test-live-gha-onprem` que trata al runner de GitHub como host remoto para `onprem-basic`
 - un workflow de release por tags para `productive-k3s-infra-cli.sh`

@@ -2,5 +2,25 @@
 __pycache__/
 docs/.venv/
 docs/site/
+docs/.mkdocs.pid
+docs/.mkdocs.log
+.live-onprem-basic.*/
+.live-onprem-basic-github-host.*/
 scenarios/*/generated/
 test-artifacts/
+
+# Terraform/OpenTofu
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Sensitive vars
+*.tfvars
+*.auto.tfvars
+
+# Optional local overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
