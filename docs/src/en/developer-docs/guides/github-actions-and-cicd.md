@@ -6,7 +6,7 @@ This repository has a CI-friendly validation model and now includes a post-merge
 
 - deterministic root `make` targets for docs and matrix validation
 - structured `static`, `contract`, and `live` levels
-- anonymous JSON artifacts under `test-artifacts/` for run evidence
+- anonymous JSON artifacts under `test-artifacts/` for run evidence, including per-scenario manifests and matrix summaries
 - a clear split between operator entry points and implementation scripts
 - a dedicated `test-live-gha-onprem` target that treats the GitHub runner as the remote `onprem-basic` host
 - a tag-driven release workflow for `productive-k3s-infra-cli.sh`

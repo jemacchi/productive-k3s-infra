@@ -1,4 +1,4 @@
-.PHONY: preflight cluster-up stack-up validate up status clean test-static test-contract test-live
+.PHONY: preflight cluster-up stack-up validate up status clean test-clean test-checkstatus test-static test-contract test-live scenario-test-static scenario-test-contract scenario-test-live
 
 .EXPORT_ALL_VARIABLES:
 
@@ -102,7 +102,22 @@ status:
 	$(SCRIPTS_DIR)/refresh-generated-artifacts.sh
 	@cat $(GENERATED_DIR)/cluster.json
 
+test-clean:
+	TEST_SCENARIO=onprem-basic ../../scripts/productive-k3s-infra-dev.sh test-clean
+
+test-checkstatus:
+	TEST_SCENARIO=onprem-basic ../../scripts/productive-k3s-infra-dev.sh test-checkstatus
+
 test-static:
+	bash ../../tests/run-scenario-test.sh static onprem-basic $(SCENARIO_DIR) scenario-test-static
+
+test-contract:
+	bash ../../tests/run-scenario-test.sh contract onprem-basic $(SCENARIO_DIR) scenario-test-contract
+
+test-live:
+	bash ../../tests/run-scenario-test.sh live onprem-basic $(SCENARIO_DIR) scenario-test-live
+
+scenario-test-static:
 	bash -n $(SCRIPTS_DIR)/*.sh
 	python3 -m py_compile $(SCRIPTS_DIR)/run_remote_bootstrap_session.py
 	@if [ -d "$(LOCAL_SCRIPTS_DIR)" ] && ls $(LOCAL_SCRIPTS_DIR)/* >/dev/null 2>&1; then \
@@ -115,10 +130,10 @@ test-static:
 	bash $(TESTS_DIR)/test-remote-telemetry-consent.sh
 	bash $(TESTS_DIR)/test-remote-cluster-up-preserves-telemetry.sh
 
-test-contract:
+scenario-test-contract:
 	$(TESTS_DIR)/contract-check.sh onprem-basic
 
-test-live:
+scenario-test-live:
 	$(TESTS_DIR)/live-onprem-basic.sh
 
 clean:

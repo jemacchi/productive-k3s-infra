@@ -1,6 +1,6 @@
 # Privacy And Telemetry
 
-`productive-k3s-infra` produces anonymous test-run manifests for matrix executions.
+`productive-k3s-infra` produces anonymous test-run manifests for matrix executions and direct scenario test runs.
 
 ## Goals
 
@@ -10,7 +10,9 @@
 
 ## Anonymous test artifacts
 
-Matrix executions write JSON artifacts under `test-artifacts/`.
+Matrix executions and direct scenario test targets write JSON artifacts under `test-artifacts/`.
+
+The shared scenario manifests live under `test-artifacts/infra-runs/`, and matrix layers also emit root `*-summary.json` files under `test-artifacts/`.
 
 They are meant to capture:
 

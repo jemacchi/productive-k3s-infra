@@ -3,28 +3,27 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LEVEL="${1:-}"
-shift || true
-ARTIFACTS_DIR="${ROOT_DIR}/test-artifacts"
+SCENARIO="${2:-}"
+SCENARIO_DIR="${3:-}"
+TARGET="${4:-}"
+shift 4 || true
+
+ARTIFACTS_DIR="${TEST_ARTIFACTS_DIR:-${ROOT_DIR}/test-artifacts}"
 RUNS_DIR="${ARTIFACTS_DIR}/infra-runs"
 RUN_TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
-MATRIX_RUN_ID="${RUN_TIMESTAMP}-${LEVEL}-$$"
+RUN_ID="${RUN_TIMESTAMP}-${LEVEL}-${SCENARIO}-$$"
 
-if [[ -z "${LEVEL}" || "$#" -eq 0 ]]; then
-  printf 'usage: %s <static|contract|live> <scenario> [scenario...]\n' "$0" >&2
+usage() {
+  printf 'usage: %s <static|contract|live> <scenario> <scenario-dir> <target> [args...]\n' "$0" >&2
   exit 2
-fi
+}
+
+[[ -n "${LEVEL}" && -n "${SCENARIO}" && -n "${SCENARIO_DIR}" && -n "${TARGET}" ]] || usage
 
 case "${LEVEL}" in
   static|contract|live) ;;
-  *)
-    printf '[FAIL] unsupported matrix level: %s\n' "${LEVEL}" >&2
-    exit 2
-    ;;
+  *) usage ;;
 esac
-
-passes=()
-skips=()
-fails=()
 
 json_escape() {
   printf '%s' "$1" | sed \
@@ -67,28 +66,8 @@ telemetry_endpoint_configured_json() {
   fi
 }
 
-json_array_from_values() {
-  if (($# == 0)); then
-    printf '[]'
-    return 0
-  fi
-
-  local first=1 value
-  printf '['
-  for value in "$@"; do
-    if (( first == 0 )); then
-      printf ', '
-    fi
-    first=0
-    printf '"%s"' "$(json_escape "${value}")"
-  done
-  printf ']'
-}
-
 scenario_metadata() {
-  local scenario="$1"
-  local level="$2"
-  case "${scenario}:${level}" in
+  case "${SCENARIO}:${LEVEL}" in
     multipass:*)
       ENVIRONMENT="vm"
       TOPOLOGY="three-node"
@@ -128,25 +107,24 @@ scenario_metadata() {
 }
 
 write_run_manifest() {
-  local scenario="$1"
-  local result="$2"
-  local started_at="$3"
-  local finished_at="$4"
-  local duration_seconds="$5"
-  local output_file="$6"
+  local result="$1"
+  local started_at="$2"
+  local finished_at="$3"
+  local duration_seconds="$4"
+  local output_file="$5"
   local source_mode="${PRODUCTIVE_K3S_SOURCE:-}"
   local source_version="${PRODUCTIVE_K3S_VERSION:-}"
   local release_repo="${PRODUCTIVE_K3S_RELEASE_REPO:-jemacchi/productive-k3s-core}"
 
-  scenario_metadata "${scenario}" "${LEVEL}"
+  scenario_metadata
 
   mkdir -p "${RUNS_DIR}"
   {
     printf '{\n'
     printf '  "schema_version": "1",\n'
     printf '  "repository": "productive-k3s-infra",\n'
-    printf '  "run_id": "%s",\n' "$(json_escape "${MATRIX_RUN_ID}-${scenario}")"
-    printf '  "scenario": "%s",\n' "$(json_escape "${scenario}")"
+    printf '  "run_id": "%s",\n' "$(json_escape "${RUN_ID}")"
+    printf '  "scenario": "%s",\n' "$(json_escape "${SCENARIO}")"
     printf '  "execution_kind": "%s",\n' "$(json_escape "$(execution_kind)")"
     printf '  "test_level": "%s",\n' "$(json_escape "${LEVEL}")"
     printf '  "result": "%s",\n' "$(json_escape "${result}")"
@@ -189,89 +167,55 @@ write_run_manifest() {
   } > "${output_file}"
 }
 
-for scenario in "$@"; do
-  target="scenario-test-${LEVEL}"
-  scenario_dir="${ROOT_DIR}/scenarios/${scenario}"
-  log_file="$(mktemp)"
-  manifest_file="${RUNS_DIR}/${MATRIX_RUN_ID}-${scenario}.json"
-  started_at="$(date -Iseconds)"
-  started_epoch="$(date +%s)"
+log_file="$(mktemp)"
+manifest_file="${RUNS_DIR}/${RUN_ID}.json"
+started_at="$(date -Iseconds)"
+started_epoch="$(date +%s)"
+rc=0
 
-  printf '\n==> [%s] %s\n' "${LEVEL}" "${scenario}"
-  rc=0
-  if [[ "${LEVEL}" == "live" ]]; then
-    set +e
-    script -qefc "make -C \"${scenario_dir}\" \"${target}\"" /dev/null \
-      | tr -d '\000' \
-      | tee "${log_file}"
-    rc=${PIPESTATUS[0]}
-    set -e
+if [[ "${LEVEL}" == "live" ]]; then
+  set +e
+  script -qefc "make -C \"${SCENARIO_DIR}\" \"${TARGET}\" $*" /dev/null \
+    | tr -d '\000' \
+    | tee "${log_file}"
+  rc=${PIPESTATUS[0]}
+  set -e
+else
+  if make -C "${SCENARIO_DIR}" "${TARGET}" "$@" >"${log_file}" 2>&1; then
+    rc=0
   else
-    if make -C "${scenario_dir}" "${target}" >"${log_file}" 2>&1; then
-      rc=0
-    else
-      rc=$?
-    fi
+    rc=$?
   fi
-  finished_at="$(date -Iseconds)"
-  finished_epoch="$(date +%s)"
-  duration_seconds="$((finished_epoch - started_epoch))"
+fi
 
-  if [[ "${rc}" == "0" ]]; then
-    passes+=("${scenario}")
-    write_run_manifest "${scenario}" "pass" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
-    printf '[PASS] %s %s\n' "${scenario}" "${target}"
-    if [[ "${LEVEL}" != "live" ]]; then
-      cat "${log_file}"
-    fi
-  else
-    if [[ "${rc}" == "3" ]] || grep -q '^\[SKIP\]' "${log_file}"; then
-      skips+=("${scenario}")
-      write_run_manifest "${scenario}" "skip" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
-      printf '[SKIP] %s %s\n' "${scenario}" "${target}"
-      if [[ "${LEVEL}" != "live" ]]; then
-        cat "${log_file}"
-      fi
-    else
-      fails+=("${scenario}")
-      write_run_manifest "${scenario}" "fail" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
-      printf '[FAIL] %s %s\n' "${scenario}" "${target}" >&2
-      if [[ "${LEVEL}" != "live" ]]; then
-        cat "${log_file}" >&2
-      fi
-    fi
+finished_at="$(date -Iseconds)"
+finished_epoch="$(date +%s)"
+duration_seconds="$((finished_epoch - started_epoch))"
+
+if [[ "${rc}" == "0" ]]; then
+  write_run_manifest "pass" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
+  printf '[PASS] %s %s\n' "${SCENARIO}" "${TARGET}"
+  if [[ "${LEVEL}" != "live" ]]; then
+    cat "${log_file}"
   fi
   rm -f "${log_file}"
-done
-
-printf '\nMatrix summary (%s)\n' "${LEVEL}"
-printf '  pass: %s\n' "${passes[*]:-none}"
-printf '  skip: %s\n' "${skips[*]:-none}"
-printf '  fail: %s\n' "${fails[*]:-none}"
-
-mkdir -p "${ARTIFACTS_DIR}"
-{
-  printf '{\n'
-  printf '  "schema_version": "1",\n'
-  printf '  "repository": "productive-k3s-infra",\n'
-  printf '  "run_id": "%s",\n' "$(json_escape "${MATRIX_RUN_ID}")"
-  printf '  "test_level": "%s",\n' "$(json_escape "${LEVEL}")"
-  printf '  "execution_kind": "%s",\n' "$(json_escape "$(execution_kind)")"
-  printf '  "pass": %s,\n' "$(json_array_from_values "${passes[@]}")"
-  printf '  "skip": %s,\n' "$(json_array_from_values "${skips[@]}")"
-  printf '  "fail": %s,\n' "$(json_array_from_values "${fails[@]}")"
-  printf '  "telemetry": {\n'
-  printf '    "share_metrics_enabled": %s,\n' "$(telemetry_enabled_json)"
-  printf '    "anonymous_by_default": true,\n'
-  printf '    "endpoint_configured": %s,\n' "$(telemetry_endpoint_configured_json)"
-  printf '    "propagates_to_productive_k3s": true,\n'
-  printf '    "max_retries": %s,\n' "${TELEMETRY_MAX_RETRIES:-3}"
-  printf '    "connect_timeout_seconds": %s,\n' "${TELEMETRY_CONNECT_TIMEOUT_SECONDS:-5}"
-  printf '    "request_timeout_seconds": %s\n' "${TELEMETRY_REQUEST_TIMEOUT_SECONDS:-10}"
-  printf '  }\n'
-  printf '}\n'
-} > "${ARTIFACTS_DIR}/${MATRIX_RUN_ID}-summary.json"
-
-if (( ${#fails[@]} > 0 )); then
-  exit 1
+  exit 0
 fi
+
+if [[ "${rc}" == "3" ]] || grep -q '^\[SKIP\]' "${log_file}"; then
+  write_run_manifest "skip" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
+  printf '[SKIP] %s %s\n' "${SCENARIO}" "${TARGET}"
+  if [[ "${LEVEL}" != "live" ]]; then
+    cat "${log_file}"
+  fi
+  rm -f "${log_file}"
+  exit 0
+fi
+
+write_run_manifest "fail" "${started_at}" "${finished_at}" "${duration_seconds}" "${manifest_file}"
+printf '[FAIL] %s %s\n' "${SCENARIO}" "${TARGET}" >&2
+if [[ "${LEVEL}" != "live" ]]; then
+  cat "${log_file}" >&2
+fi
+rm -f "${log_file}"
+exit 1

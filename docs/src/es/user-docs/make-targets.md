@@ -16,6 +16,8 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `make docs-serve` | Servir la documentación localmente |
 | `make docs-up` | Levantar el servidor de docs en background |
 | `make docs-down` | Detener el servidor de docs y limpiar artefactos |
+| `make test-clean` | Borrar artifacts locales de resultados de matriz antes de un nuevo ciclo de validación |
+| `make test-checkstatus` | Resumir los resultados de tests de matriz actualmente registrados en artifacts locales |
 | `make test-static` | Ejecutar checks static sobre todos los escenarios públicos |
 | `make test-contract` | Ejecutar checks contract sobre todos los escenarios públicos |
 | `make test-live` | Ejecutar validaciones live sobre todos los escenarios públicos |
@@ -46,6 +48,11 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `down` | Destruir las VMs |
 | `clean` | Borrar artefactos generados y estado local de `OpenTofu` |
 | `status` | Re-renderizar e imprimir `generated/cluster.json` |
+| `test-static` | Ejecutar sólo la validación static de `multipass` y registrar un manifest local de test |
+| `test-contract` | Ejecutar sólo la validación contract de `multipass` y registrar un manifest local de test |
+| `test-live` | Ejecutar sólo la validación live de `multipass` y registrar un manifest local de test |
+| `test-clean` | Borrar sólo los artifacts registrados de tests de matriz para `multipass` |
+| `test-checkstatus` | Resumir sólo los resultados registrados de tests de matriz para `multipass` |
 
 ## Targets de On-prem basic
 
@@ -58,6 +65,11 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `up` | `cluster-up + validate` |
 | `status` | Re-renderizar e imprimir `generated/cluster.json` |
 | `clean` | Borrar metadata generada local |
+| `test-static` | Ejecutar sólo la validación static de `onprem-basic` y registrar un manifest local de test |
+| `test-contract` | Ejecutar sólo la validación contract de `onprem-basic` y registrar un manifest local de test |
+| `test-live` | Ejecutar sólo la validación live de `onprem-basic` y registrar un manifest local de test |
+| `test-clean` | Borrar sólo los artifacts registrados de tests de matriz para `onprem-basic` |
+| `test-checkstatus` | Resumir sólo los resultados registrados de tests de matriz para `onprem-basic` |
 
 ## Targets de AWS single-node
 
@@ -73,6 +85,11 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `up` | `infra-up + cluster-up + validate` |
 | `down` | `infra-down + clean` |
 | `status` | Imprimir `generated/cluster.json` |
+| `test-static` | Ejecutar sólo la validación static de `aws-single-node` y registrar un manifest local de test |
+| `test-contract` | Ejecutar sólo la validación contract de `aws-single-node` y registrar un manifest local de test |
+| `test-live` | Ejecutar sólo la validación live de `aws-single-node` y registrar un manifest local de test |
+| `test-clean` | Borrar sólo los artifacts registrados de tests de matriz para `aws-single-node` |
+| `test-checkstatus` | Resumir sólo los resultados registrados de tests de matriz para `aws-single-node` |
 
 ## Notas
 

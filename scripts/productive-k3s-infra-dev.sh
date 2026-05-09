@@ -17,6 +17,8 @@ Development commands:
   docs-up
   docs-down
   docs-clean
+  test-clean
+  test-checkstatus
   test-static
   test-contract
   test-live
@@ -46,8 +48,16 @@ case "$COMMAND" in
   docs-down|docs-clean)
     exec "${REPO_DIR}/docs/clean.sh" "$@"
     ;;
+  test-clean)
+    exec bash "${TESTS_DIR}/clean-test-state.sh" "$@"
+    ;;
+  test-checkstatus)
+    exec bash "${TESTS_DIR}/check-test-status.sh" "$@"
+    ;;
   test-static)
     "${TESTS_DIR}/run-matrix.sh" static ${SCENARIOS}
+    bash "${TESTS_DIR}/test-artifact-tools.sh"
+    bash "${TESTS_DIR}/test-scenario-test-artifacts.sh"
     bash "${TESTS_DIR}/test-release-versioning.sh"
     bash "${TESTS_DIR}/test-productive-k3s-infra-cli.sh"
     bash "${TESTS_DIR}/test-release-bundle.sh"

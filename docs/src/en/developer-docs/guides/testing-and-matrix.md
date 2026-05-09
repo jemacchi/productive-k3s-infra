@@ -11,15 +11,20 @@ The repository exposes a three-level validation model.
 ## Root commands
 
 ```bash
+make test-clean
 make test-static
 make test-contract
 make test-live
 make test-matrix
+make test-checkstatus
 ```
 
 ## Main test entry points
 
 - `tests/run-matrix.sh`
+- `tests/run-scenario-test.sh`
+- `tests/check-test-status.sh`
+- `tests/clean-test-state.sh`
 - `tests/contract-check.sh`
 - `tests/live-multipass.sh`
 - `tests/live-onprem-basic.sh`
@@ -27,7 +32,12 @@ make test-matrix
 
 ## Artifact model
 
-Matrix runs write JSON manifests under `test-artifacts/`.
+All test entrypoints write JSON artifacts under `test-artifacts/`.
+
+The layout is:
+
+- `test-artifacts/infra-runs/`: one manifest per scenario execution, produced by both matrix runs and direct scenario runs
+- `test-artifacts/*-summary.json`: one root summary per matrix layer such as `static`, `contract`, or `live`
 
 Those artifacts record:
 
@@ -38,6 +48,30 @@ Those artifacts record:
 - topology and environment class
 - selected Productive K3S Core source details
 - anonymous telemetry-related metadata
+
+## Local review workflow
+
+Use this sequence when you want a clean, operator-friendly review loop:
+
+```bash
+make test-clean
+make test-matrix
+make test-checkstatus
+```
+
+`make test-checkstatus` reads the recorded JSON manifests and prints a short status report instead of forcing you to inspect each file manually.
+
+If you want to inspect only one scenario, run the same targets from the scenario directory:
+
+```bash
+make -C scenarios/multipass test-clean
+make -C scenarios/multipass test-static
+make -C scenarios/multipass test-checkstatus
+```
+
+The scenario-local `test-static`, `test-contract`, and `test-live` targets go through `tests/run-scenario-test.sh`, which means they also emit manifests that `make -C scenarios/<name> test-checkstatus` can summarize immediately afterward.
+
+The scenario-local `test-clean` and `test-checkstatus` targets filter the shared `test-artifacts/infra-runs/` state down to the current scenario only.
 
 ## Development guidance
 

@@ -1,4 +1,4 @@
-.PHONY: tofu-init infra-up infra-down preflight cluster-up stack-up validate up down status clean test-static test-contract test-live
+.PHONY: tofu-init infra-up infra-down preflight cluster-up stack-up validate up down status clean test-clean test-checkstatus test-static test-contract test-live scenario-test-static scenario-test-contract scenario-test-live
 
 .EXPORT_ALL_VARIABLES:
 
@@ -98,7 +98,22 @@ status:
 	fi
 	@cat $(GENERATED_DIR)/cluster.json
 
-test-static: tofu-init
+test-clean:
+	TEST_SCENARIO=aws-single-node ../../scripts/productive-k3s-infra-dev.sh test-clean
+
+test-checkstatus:
+	TEST_SCENARIO=aws-single-node ../../scripts/productive-k3s-infra-dev.sh test-checkstatus
+
+test-static:
+	bash ../../tests/run-scenario-test.sh static aws-single-node $(SCENARIO_DIR) scenario-test-static
+
+test-contract:
+	bash ../../tests/run-scenario-test.sh contract aws-single-node $(SCENARIO_DIR) scenario-test-contract
+
+test-live:
+	bash ../../tests/run-scenario-test.sh live aws-single-node $(SCENARIO_DIR) scenario-test-live
+
+scenario-test-static: tofu-init
 	bash -n $(SHARED_SCRIPTS_DIR)/*.sh $(SCRIPTS_DIR)/*.sh
 	python3 -m py_compile $(SHARED_SCRIPTS_DIR)/run_remote_bootstrap_session.py
 	$(TOFU_BIN) -chdir=$(OPENTOFU_DIR) init -backend=false
@@ -107,10 +122,10 @@ test-static: tofu-init
 	bash $(TESTS_DIR)/test-remote-telemetry-consent.sh
 	bash $(TESTS_DIR)/test-remote-cluster-up-preserves-telemetry.sh
 
-test-contract:
+scenario-test-contract:
 	$(TESTS_DIR)/contract-check.sh aws-single-node
 
-test-live:
+scenario-test-live:
 	@echo "[SKIP] aws-single-node live test requires AWS credentials and an account"
 	@exit 3
 

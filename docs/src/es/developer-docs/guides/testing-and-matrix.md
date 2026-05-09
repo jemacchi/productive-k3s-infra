@@ -11,15 +11,20 @@ El repositorio expone un modelo de validación en tres niveles.
 ## Comandos raíz
 
 ```bash
+make test-clean
 make test-static
 make test-contract
 make test-live
 make test-matrix
+make test-checkstatus
 ```
 
 ## Entry points principales de tests
 
 - `tests/run-matrix.sh`
+- `tests/run-scenario-test.sh`
+- `tests/check-test-status.sh`
+- `tests/clean-test-state.sh`
 - `tests/contract-check.sh`
 - `tests/live-multipass.sh`
 - `tests/live-onprem-basic.sh`
@@ -27,7 +32,12 @@ make test-matrix
 
 ## Modelo de artefactos
 
-Las corridas de matriz escriben manifests JSON bajo `test-artifacts/`.
+Todos los entrypoints de tests escriben artefactos JSON bajo `test-artifacts/`.
+
+El layout es:
+
+- `test-artifacts/infra-runs/`: un manifest por ejecución de escenario, producido tanto por corridas de matriz como por corridas directas por escenario
+- `test-artifacts/*-summary.json`: un summary raíz por capa de matriz como `static`, `contract` o `live`
 
 Esos artefactos registran:
 
@@ -38,6 +48,30 @@ Esos artefactos registran:
 - topología y clase de entorno
 - detalles seleccionados de la fuente de Productive K3S Core
 - metadata anónima relacionada con telemetría
+
+## Flujo local de revisión
+
+Usá esta secuencia cuando quieras un loop limpio y fácil de revisar:
+
+```bash
+make test-clean
+make test-matrix
+make test-checkstatus
+```
+
+`make test-checkstatus` lee los manifests JSON registrados e imprime un reporte corto, sin obligarte a inspeccionar cada archivo manualmente.
+
+Si querés revisar sólo un escenario, corré los mismos targets desde el directorio del escenario:
+
+```bash
+make -C scenarios/multipass test-clean
+make -C scenarios/multipass test-static
+make -C scenarios/multipass test-checkstatus
+```
+
+Los targets locales `test-static`, `test-contract` y `test-live` pasan por `tests/run-scenario-test.sh`, así que también generan manifests que `make -C scenarios/<name> test-checkstatus` puede resumir inmediatamente después.
+
+Los targets locales `test-clean` y `test-checkstatus` filtran el estado compartido bajo `test-artifacts/infra-runs/` para dejar sólo el escenario actual.
 
 ## Guía de desarrollo
 

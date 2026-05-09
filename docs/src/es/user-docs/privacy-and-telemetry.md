@@ -1,6 +1,6 @@
 # Privacidad Y Telemetría
 
-`productive-k3s-infra` produce manifests anónimos de ejecución para las corridas de matriz.
+`productive-k3s-infra` produce manifests anónimos de ejecución para las corridas de matriz y para las corridas directas de tests por escenario.
 
 ## Objetivos
 
@@ -10,7 +10,9 @@
 
 ## Artefactos anónimos de test
 
-Las ejecuciones de matriz escriben artefactos JSON bajo `test-artifacts/`.
+Las ejecuciones de matriz y los targets directos de tests por escenario escriben artefactos JSON bajo `test-artifacts/`.
+
+Los manifests compartidos por escenario viven bajo `test-artifacts/infra-runs/`, y las capas de matriz además emiten archivos raíz `*-summary.json` bajo `test-artifacts/`.
 
 Están pensados para capturar:
 
