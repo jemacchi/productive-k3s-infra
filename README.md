@@ -19,7 +19,7 @@ The main implementation units are still organized as `scenarios/`, but user-faci
 The repository also exposes a public release CLI entrypoint:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate --profile ./profiles/on-prem/basic.env
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate-profile --profile ./profiles/on-prem/basic.env
 curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/multipass/1-server-2-agents.env
 ```
 
@@ -33,6 +33,7 @@ When you execute `productive-k3s-infra-cli.sh` from a GitHub Release, it default
 For local operator convenience, the root `Makefile` now also exposes:
 
 - `make infra-list-profiles`
+- `make infra-validate-profile PROFILE=profiles/on-prem/basic.env`
 - `make infra-validate PROFILE=profiles/on-prem/basic.env`
 - `make infra-apply PROFILE=profiles/multipass/1-server-2-agents.env`
 - scenario shortcuts such as `make multipass`, `make onprem`, and `make aws-single-node` for direct scenario-oriented workflows

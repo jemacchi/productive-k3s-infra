@@ -48,6 +48,7 @@ cp -R "${REPO_ROOT}/profiles" "${STAGE_DIR}/${PREFIX}"
 mkdir -p "${STAGE_DIR}/${PREFIX}/scripts"
 cp "${REPO_ROOT}/scripts/productive-k3s-infra.sh" "${STAGE_DIR}/${PREFIX}/scripts/"
 cp "${REPO_ROOT}/scripts/productive-k3s-infra-dev.sh" "${STAGE_DIR}/${PREFIX}/scripts/"
+cp "${REPO_ROOT}/scripts/release-config.sh" "${STAGE_DIR}/${PREFIX}/scripts/"
 cat > "${STAGE_DIR}/${PREFIX}/scripts/release.env" <<EOF
 PK3S_INFRA_RELEASE_TAG=${PK3S_INFRA_RELEASE_TAG}
 PK3S_INFRA_SEMVER=${PK3S_INFRA_SEMVER}
@@ -58,6 +59,8 @@ PRODUCTIVE_K3S_VERSION=${PRODUCTIVE_K3S_VERSION_DEFAULT}
 PRODUCTIVE_K3S_RELEASE_REPO=${PRODUCTIVE_K3S_RELEASE_REPO_DEFAULT}
 EOF
 cp -R "${REPO_ROOT}/scenarios" "${STAGE_DIR}/${PREFIX}"
+mkdir -p "${STAGE_DIR}/${PREFIX}/ansible/roles/remote_cluster"
+cp -R "${REPO_ROOT}/ansible/roles/remote_cluster/files" "${STAGE_DIR}/${PREFIX}/ansible/roles/remote_cluster/"
 
 find "${STAGE_DIR}/${PREFIX}/scenarios" -type d \( -name generated -o -name .terraform \) -prune -exec rm -rf {} +
 find "${STAGE_DIR}/${PREFIX}/scenarios" -type f \( -name '*.tfstate' -o -name '*.tfstate.backup' -o -name 'onprem.env' -o -name 'aws.env' \) -delete

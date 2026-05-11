@@ -47,7 +47,7 @@ The public operator interface is:
 Release CLI examples:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate --profile ./profiles/on-prem/basic.env
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate-profile --profile ./profiles/on-prem/basic.env
 curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- plan --profile ./profiles/multipass/1-server-2-agents.env
 curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/aws-single-node/basic.env
 ```
@@ -56,10 +56,13 @@ Root Makefile shortcuts:
 
 ```bash
 make infra-list-profiles
+make infra-validate-profile PROFILE=profiles/on-prem/basic.env
 make infra-validate PROFILE=profiles/on-prem/basic.env
 make infra-plan PROFILE=profiles/multipass/1-server-2-agents.env
 make infra-apply PROFILE=profiles/aws-single-node/basic.env
 ```
+
+Use `validate-profile` when you only want to check that the `.env` contract is valid. Use `validate` when you want the scenario-specific post-provision validation, which may require generated runtime state such as inventories or cluster metadata.
 
 Typical scenario command patterns:
 
