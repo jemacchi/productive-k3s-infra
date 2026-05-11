@@ -17,6 +17,7 @@ Development commands:
   docs-up
   docs-down
   docs-clean
+  set-core-version
   test-clean
   test-checkstatus
   test-static
@@ -48,6 +49,9 @@ case "$COMMAND" in
   docs-down|docs-clean)
     exec "${REPO_DIR}/docs/clean.sh" "$@"
     ;;
+  set-core-version)
+    exec "${REPO_DIR}/scripts/set-core-version.sh" "$@"
+    ;;
   test-clean)
     exec bash "${TESTS_DIR}/clean-test-state.sh" "$@"
     ;;
@@ -61,6 +65,7 @@ case "$COMMAND" in
     bash "${TESTS_DIR}/test-release-versioning.sh"
     bash "${TESTS_DIR}/test-core-release-bundle-contract.sh"
     bash "${TESTS_DIR}/test-create-release-tag.sh"
+    bash "${TESTS_DIR}/test-set-core-version.sh"
     bash "${TESTS_DIR}/test-productive-k3s-infra-cli.sh"
     bash "${TESTS_DIR}/test-release-bundle.sh"
     bash "${TESTS_DIR}/test-release-installer.sh"
