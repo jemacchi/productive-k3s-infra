@@ -62,10 +62,12 @@ case "$COMMAND" in
     "${TESTS_DIR}/run-matrix.sh" static ${SCENARIOS}
     bash "${TESTS_DIR}/test-artifact-tools.sh"
     bash "${TESTS_DIR}/test-scenario-test-artifacts.sh"
+    bash "${TESTS_DIR}/test-scripts-executable.sh"
     bash "${TESTS_DIR}/test-release-versioning.sh"
     bash "${TESTS_DIR}/test-core-release-bundle-contract.sh"
     bash "${TESTS_DIR}/test-create-release-tag.sh"
     bash "${TESTS_DIR}/test-set-core-version.sh"
+    bash "${TESTS_DIR}/test-multipass-tofu-ensure-instance-cloud-init.sh"
     bash "${TESTS_DIR}/test-productive-k3s-infra-cli.sh"
     bash "${TESTS_DIR}/test-release-bundle.sh"
     bash "${TESTS_DIR}/test-release-installer.sh"
