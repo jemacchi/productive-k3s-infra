@@ -36,6 +36,7 @@ Profile-driven commands:
   bundle info --json
   doctor
   list-profiles
+  validate-profile --profile <file>
   validate --profile <file>
   plan --profile <file>
   apply --profile <file>
@@ -306,6 +307,18 @@ run_profile_doctor() {
   esac
 }
 
+run_validate_profile_only() {
+  local profile="$1"
+  enforce_release_bound_productive_k3s_version
+  source_profile "${profile}"
+  enforce_release_bound_productive_k3s_version
+  validate_profile
+  log "INFO" "Loading profile: ${profile}"
+  log "INFO" "Scenario: ${PK3S_INFRA_SCENARIO}"
+  log "INFO" "Engine: ${PK3S_INFRA_ENGINE}"
+  log "OK" "Profile validation passed"
+}
+
 profile_command_dispatch() {
   local command="$1"
   local profile="$2"
@@ -463,6 +476,10 @@ case "${COMMAND}" in
     ;;
   list-profiles)
     run_list_profiles
+    ;;
+  validate-profile)
+    [[ -n "${PROFILE_PATH}" ]] || die 3 "the '${COMMAND}' command requires --profile <file>"
+    run_validate_profile_only "${PROFILE_PATH}"
     ;;
   validate|plan|apply|destroy|status)
     [[ -n "${PROFILE_PATH}" ]] || die 3 "the '${COMMAND}' command requires --profile <file>"

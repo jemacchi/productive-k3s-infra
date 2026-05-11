@@ -47,7 +47,7 @@ La interfaz pública para operar el repo es:
 Ejemplos con el CLI de release:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate --profile ./profiles/on-prem/basic.env
+curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate-profile --profile ./profiles/on-prem/basic.env
 curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- plan --profile ./profiles/multipass/1-server-2-agents.env
 curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/aws-single-node/basic.env
 ```
@@ -56,10 +56,13 @@ Atajos del Makefile root:
 
 ```bash
 make infra-list-profiles
+make infra-validate-profile PROFILE=profiles/on-prem/basic.env
 make infra-validate PROFILE=profiles/on-prem/basic.env
 make infra-plan PROFILE=profiles/multipass/1-server-2-agents.env
 make infra-apply PROFILE=profiles/aws-single-node/basic.env
 ```
+
+Usá `validate-profile` cuando sólo quieras chequear que el contrato del `.env` sea válido. Usá `validate` cuando quieras la validación específica del escenario después del provisioning, que puede requerir estado generado como inventarios o metadata del clúster.
 
 Patrones habituales de comandos por escenario:
 

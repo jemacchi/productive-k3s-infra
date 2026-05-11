@@ -26,6 +26,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `make infra-help` | Mostrar el uso del CLI público orientado a profiles |
 | `make infra-doctor` | Ejecutar checks locales básicos para el CLI orientado a profiles |
 | `make infra-list-profiles` | Listar los profiles de ejemplo versionados |
+| `make infra-validate-profile PROFILE=...` | Validar sólo el contrato del profile elegido |
 | `make infra-validate PROFILE=...` | Validar el profile elegido y delegar al escenario correspondiente |
 | `make infra-plan PROFILE=...` | Mostrar el plan actual para el profile elegido |
 | `make infra-apply PROFILE=...` | Aplicar el profile elegido delegando al escenario correspondiente |

@@ -128,6 +128,12 @@ bash "$CLI" validate --profile "${PROFILE_DIR}/onprem.env"
 assert_contains "$(cat "$OUTPUT_FILE")" "-C ${REPO_DIR}/scenarios/onprem-basic validate"
 assert_contains "$(cat "$OUTPUT_FILE")" "ONPREM_ENV_FILE=${PROFILE_DIR}/onprem.env"
 
+PROFILE_VALIDATE_ONLY_OUTPUT="$(bash "$CLI" validate-profile --profile "${PROFILE_DIR}/onprem.env")"
+assert_contains "$PROFILE_VALIDATE_ONLY_OUTPUT" "Loading profile: ${PROFILE_DIR}/onprem.env"
+assert_contains "$PROFILE_VALIDATE_ONLY_OUTPUT" "Scenario: onprem-basic"
+assert_contains "$PROFILE_VALIDATE_ONLY_OUTPUT" "Engine: ansible"
+assert_contains "$PROFILE_VALIDATE_ONLY_OUTPUT" "Profile validation passed"
+
 OUTPUT_FILE="${TMP_DIR}/profile-apply.out"
 PRODUCTIVE_K3S_INFRA_MAKE_BIN="$STUB_MAKE" \
 PRODUCTIVE_K3S_INFRA_TEST_OUTPUT="$OUTPUT_FILE" \
@@ -164,6 +170,9 @@ assert_contains "$ROOT_ONPREM" "${REPO_DIR}/productive-k3s-infra.sh onprem up"
 
 ROOT_INFRA_VALIDATE="$(make -C "$REPO_DIR" -n infra-validate PROFILE=${PROFILE_DIR}/onprem.env)"
 assert_contains "$ROOT_INFRA_VALIDATE" "${REPO_DIR}/productive-k3s-infra.sh validate --profile ${PROFILE_DIR}/onprem.env"
+
+ROOT_INFRA_VALIDATE_PROFILE="$(make -C "$REPO_DIR" -n infra-validate-profile PROFILE=${PROFILE_DIR}/onprem.env)"
+assert_contains "$ROOT_INFRA_VALIDATE_PROFILE" "${REPO_DIR}/productive-k3s-infra.sh validate-profile --profile ${PROFILE_DIR}/onprem.env"
 
 ROOT_INFRA_APPLY="$(make -C "$REPO_DIR" -n infra-apply PROFILE=${PROFILE_DIR}/onprem.env)"
 assert_contains "$ROOT_INFRA_APPLY" "${REPO_DIR}/productive-k3s-infra.sh apply --profile ${PROFILE_DIR}/onprem.env"
