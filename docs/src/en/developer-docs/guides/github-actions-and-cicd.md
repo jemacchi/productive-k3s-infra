@@ -29,11 +29,16 @@ The repo-level default for official release-oriented flows now lives in `scripts
 
 That config is the single source of truth for the default remote `productive-k3s-core` version used when composing official infra release tags.
 
+For developer maintenance, this repo also ships a private helper that rewrites the versioned examples and test expectations in one pass:
+
+- `make set-core-version CORE_VERSION=A.B.C`
+- `./scripts/set-core-version.sh A.B.C`
+
 ## Creating a release tag
 
 The supported release tagging flow is:
 
-1. update `PRODUCTIVE_K3S_CORE_VERSION_DEFAULT` in `scripts/release-config.sh` when the bundled core version changes
+1. run `make set-core-version CORE_VERSION=A.B.C` when the bundled core version changes
 2. run `make tag-release VERSION=X.Y.Z`
 3. push the resulting composite tag with `git push origin X.Y.Z-A.B.C`
 

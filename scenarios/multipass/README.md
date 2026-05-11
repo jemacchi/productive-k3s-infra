@@ -104,7 +104,7 @@ make up PRODUCTIVE_K3S_SOURCE=remote
 Provision using a pinned remote release:
 
 ```bash
-make up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.0
+make up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.1
 ```
 
 Inspect the resolved metadata:

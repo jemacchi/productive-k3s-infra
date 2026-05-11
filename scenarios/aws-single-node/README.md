@@ -134,7 +134,7 @@ make -C scenarios/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote
 Run the full cluster path using a pinned release:
 
 ```bash
-make -C scenarios/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.0
+make -C scenarios/aws-single-node up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.1
 ```
 
 Inspect the resolved metadata:
