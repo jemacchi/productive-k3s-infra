@@ -12,6 +12,7 @@ theme:
   name: material
   custom_dir: src/overrides
   language: en
+  favicon: assets/images/favicon.ico
   features:
     - navigation.tabs
     - navigation.indexes
@@ -117,6 +118,15 @@ nav:
               - Flujo de documentación: es/developer-docs/guides/documentation-workflow.md
 
 extra:
+  pk3s:
+    footer_slogan_en: "Pre-assembled infrastructure paths for Productive K3S Core, from local validation to reusable public deployment scenarios."
+    footer_slogan_es: "Caminos de infraestructura prearmados para Productive K3S Core, desde validacion local hasta escenarios publicos de despliegue reutilizables."
+    contact_label_en: "Contact"
+    contact_label_es: "Contacto"
+    newsletter_label_en: "Newsletter"
+    newsletter_label_es: "Newsletter"
+    newsletter_placeholder_en: "E-mail"
+    newsletter_placeholder_es: "E-mail"
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/jemacchi/productive-k3s-infra
