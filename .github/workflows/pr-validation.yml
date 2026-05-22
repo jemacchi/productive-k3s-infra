@@ -49,15 +49,14 @@ jobs:
         run: |
           set -euo pipefail
           sudo snap install multipass
-          sudo usermod -a -G multipass "$USER"
-          sg multipass -c 'multipass version'
+          sudo multipass version
 
       - name: Run static checks
         working-directory: productive-k3s-infra
         shell: bash
         run: |
           set -euo pipefail
-          sg multipass -c 'make test-static'
+          sudo --preserve-env=TELEMETRY_ENABLED make test-static
 
       - name: Run contract checks
         working-directory: productive-k3s-infra
@@ -105,15 +104,14 @@ jobs:
         run: |
           set -euo pipefail
           sudo snap install multipass
-          sudo usermod -a -G multipass "$USER"
-          sg multipass -c 'multipass version'
+          sudo multipass version
 
       - name: Run GitHub-host on-prem live test
         working-directory: productive-k3s-infra
         shell: bash
         run: |
           set -euo pipefail
-          sg multipass -c 'make test-live-gha-onprem'
+          sudo --preserve-env=TELEMETRY_ENABLED make test-live-gha-onprem
 
       - name: Upload live artifacts
         if: always()
