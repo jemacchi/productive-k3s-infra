@@ -22,6 +22,8 @@ jobs:
   static-and-contract:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-24.04
+    env:
+      TELEMETRY_ENABLED: "false"
     steps:
       - name: Checkout productive-k3s-infra
         uses: actions/checkout@v4
@@ -47,11 +49,15 @@ jobs:
         run: |
           set -euo pipefail
           sudo snap install multipass
-          multipass version
+          sudo usermod -a -G multipass "$USER"
+          sg multipass -c 'multipass version'
 
       - name: Run static checks
         working-directory: productive-k3s-infra
-        run: make test-static
+        shell: bash
+        run: |
+          set -euo pipefail
+          sg multipass -c 'make test-static'
 
       - name: Run contract checks
         working-directory: productive-k3s-infra
@@ -59,8 +65,6 @@ jobs:
 
       - name: Run telemetry regressions
         working-directory: productive-k3s-infra
-        env:
-          TELEMETRY_ENABLED: "false"
         run: make test-telemetry
 
       - name: Upload matrix artifacts
@@ -79,6 +83,8 @@ jobs:
       - static-and-contract
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    env:
+      TELEMETRY_ENABLED: "false"
     steps:
       - name: Checkout productive-k3s-infra
         uses: actions/checkout@v4
@@ -99,13 +105,15 @@ jobs:
         run: |
           set -euo pipefail
           sudo snap install multipass
-          multipass version
+          sudo usermod -a -G multipass "$USER"
+          sg multipass -c 'multipass version'
 
       - name: Run GitHub-host on-prem live test
         working-directory: productive-k3s-infra
-        env:
-          TELEMETRY_ENABLED: "false"
-        run: make test-live-gha-onprem
+        shell: bash
+        run: |
+          set -euo pipefail
+          sg multipass -c 'make test-live-gha-onprem'
 
       - name: Upload live artifacts
         if: always()
