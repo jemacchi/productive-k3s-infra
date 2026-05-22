@@ -9,7 +9,17 @@ trap 'rm -rf "${TMP_DIR}"' EXIT
 assert_file_contains() {
   local file="$1"
   local pattern="$2"
-  if ! rg -q "${pattern}" "${file}"; then
+  local matched=0
+  if command -v rg >/dev/null 2>&1; then
+    if rg -q "${pattern}" "${file}"; then
+      matched=1
+    fi
+  else
+    if grep -Eq "${pattern}" "${file}"; then
+      matched=1
+    fi
+  fi
+  if [[ "${matched}" -ne 1 ]]; then
     printf '[FAIL] expected %s to contain %s\n' "${file}" "${pattern}" >&2
     exit 1
   fi
