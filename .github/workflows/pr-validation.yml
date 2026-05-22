@@ -22,6 +22,8 @@ jobs:
   static-and-contract:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-24.04
+    env:
+      TELEMETRY_ENABLED: "false"
     steps:
       - name: Checkout productive-k3s-infra
         uses: actions/checkout@v4
@@ -42,13 +44,34 @@ jobs:
         with:
           tofu_wrapper: false
 
+      - name: Install Multipass
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo snap install multipass
+          mkdir -p "${RUNNER_TEMP}/ci-bin"
+          cat > "${RUNNER_TEMP}/ci-bin/multipass" <<'EOF'
+          #!/usr/bin/env bash
+          exec sudo /snap/bin/multipass "$@"
+          EOF
+          chmod +x "${RUNNER_TEMP}/ci-bin/multipass"
+          echo "${RUNNER_TEMP}/ci-bin" >> "${GITHUB_PATH}"
+          "${RUNNER_TEMP}/ci-bin/multipass" version
+
       - name: Run static checks
         working-directory: productive-k3s-infra
-        run: make test-static
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOFU_BIN="$(command -v tofu)" make test-static
 
       - name: Run contract checks
         working-directory: productive-k3s-infra
         run: make test-contract
+
+      - name: Run telemetry regressions
+        working-directory: productive-k3s-infra
+        run: make test-telemetry
 
       - name: Upload matrix artifacts
         if: always()
@@ -66,6 +89,8 @@ jobs:
       - static-and-contract
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    env:
+      TELEMETRY_ENABLED: "false"
     steps:
       - name: Checkout productive-k3s-infra
         uses: actions/checkout@v4
@@ -81,11 +106,26 @@ jobs:
           path: productive-k3s-core
           fetch-depth: 0
 
+      - name: Install Multipass
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo snap install multipass
+          mkdir -p "${RUNNER_TEMP}/ci-bin"
+          cat > "${RUNNER_TEMP}/ci-bin/multipass" <<'EOF'
+          #!/usr/bin/env bash
+          exec sudo /snap/bin/multipass "$@"
+          EOF
+          chmod +x "${RUNNER_TEMP}/ci-bin/multipass"
+          echo "${RUNNER_TEMP}/ci-bin" >> "${GITHUB_PATH}"
+          "${RUNNER_TEMP}/ci-bin/multipass" version
+
       - name: Run GitHub-host on-prem live test
         working-directory: productive-k3s-infra
-        env:
-          TELEMETRY_ENABLED: "false"
-        run: make test-live-gha-onprem
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOFU_BIN="$(command -v tofu)" make test-live-gha-onprem
 
       - name: Upload live artifacts
         if: always()
