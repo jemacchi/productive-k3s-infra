@@ -18,7 +18,22 @@ if printf '%s\n' "${default_scs}" | grep -q '^local-path|true$'; then
   remote_exec "${SERVER_IP}" "sudo k3s kubectl patch storageclass local-path -p '{\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'"
 fi
 
-if ! printf '%s\n' "${default_scs}" | grep -q '^longhorn|true$'; then
-  log "Marking longhorn as default StorageClass"
-  remote_exec "${SERVER_IP}" "sudo k3s kubectl patch storageclass longhorn -p '{\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
+preferred_longhorn_sc="longhorn"
+if printf '%s\n' "${default_scs}" | grep -q '^longhorn-single|'; then
+  preferred_longhorn_sc="longhorn-single"
+fi
+
+if ! printf '%s\n' "${default_scs}" | grep -q "^${preferred_longhorn_sc}|true$"; then
+  log "Marking ${preferred_longhorn_sc} as default StorageClass"
+  remote_exec "${SERVER_IP}" "sudo k3s kubectl patch storageclass ${preferred_longhorn_sc} -p '{\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'"
+fi
+
+if [[ "${preferred_longhorn_sc}" != "longhorn" ]] && printf '%s\n' "${default_scs}" | grep -q '^longhorn|true$'; then
+  log "Marking longhorn as non-default StorageClass"
+  remote_exec "${SERVER_IP}" "sudo k3s kubectl patch storageclass longhorn -p '{\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'"
+fi
+
+if printf '%s\n' "${default_scs}" | grep -q '^longhorn-static|true$'; then
+  log "Marking longhorn-static as non-default StorageClass"
+  remote_exec "${SERVER_IP}" "sudo k3s kubectl patch storageclass longhorn-static -p '{\"metadata\":{\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"false\"}}}'"
 fi

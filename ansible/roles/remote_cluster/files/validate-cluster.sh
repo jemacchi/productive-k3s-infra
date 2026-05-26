@@ -49,6 +49,10 @@ remote_exec "${SERVER_IP}" "curl -k -fsS --max-time 20 https://${REGISTRY_HOST}/
 default_scs="$(remote_exec "${SERVER_IP}" "sudo k3s kubectl get sc -o jsonpath='{range .items[*]}{.metadata.name}{\"|\"}{.metadata.annotations.storageclass\\.kubernetes\\.io/is-default-class}{\"\\n\"}{end}' | awk -F'|' '\$2 == \"true\" {print \$1}'")"
 default_sc_count="$(printf '%s\n' "${default_scs}" | sed '/^$/d' | wc -l | tr -d ' ')"
 [[ "${default_sc_count}" == "1" ]] || fail "expected exactly one default StorageClass, got: ${default_scs//$'\n'/, }"
-[[ "${default_scs}" == "longhorn" ]] || fail "expected longhorn as the only default StorageClass, got '${default_scs}'"
+expected_default_sc="longhorn"
+if remote_exec "${SERVER_IP}" "sudo k3s kubectl get sc longhorn-single >/dev/null 2>&1"; then
+  expected_default_sc="longhorn-single"
+fi
+[[ "${default_scs}" == "${expected_default_sc}" ]] || fail "expected ${expected_default_sc} as the only default StorageClass, got '${default_scs}'"
 
 log "On-prem cluster validation passed"
