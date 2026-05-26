@@ -23,6 +23,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `make test-live` | Ejecutar validaciones live sobre todos los escenarios públicos |
 | `make test-live-onprem-arm` | Ejecutar sólo la validación live pública ARM mediante `scenarios/onprem-basic-arm` |
 | `make test-live-gha-onprem` | Ejecutar la validación live single-node de `onprem-basic` sobre un runner hospedado por GitHub |
+| `make test-aws-localstack-contract` | Ejecutar la validación del contrato de infraestructura AWS single-node contra LocalStack |
 | `make test-matrix` | Ejecutar `static`, `contract` y `live` en secuencia |
 | `make infra-help` | Mostrar el uso del CLI público orientado a profiles |
 | `make infra-doctor` | Ejecutar checks locales básicos para el CLI orientado a profiles |

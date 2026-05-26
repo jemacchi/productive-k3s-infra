@@ -1,4 +1,4 @@
-.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-clean test-checkstatus test-static test-contract test-telemetry test-live test-live-onprem-arm test-live-gha-onprem test-k3s-engine-propagation test-matrix test-productive-k3s-infra-cli infra-help infra-doctor infra-list-profiles infra-validate-profile infra-validate infra-plan infra-apply infra-destroy infra-status tag-release set-core-version scenario-up scenario-down scenario-status scenario-infra-up scenario-infra-down multipass onprem onprem-arm aws-single-node
+.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-clean test-checkstatus test-static test-contract test-telemetry test-live test-live-onprem-arm test-live-gha-onprem test-k3s-engine-propagation test-aws-localstack-contract test-matrix test-productive-k3s-infra-cli infra-help infra-doctor infra-list-profiles infra-validate-profile infra-validate infra-plan infra-apply infra-destroy infra-status tag-release set-core-version scenario-up scenario-down scenario-status scenario-infra-up scenario-infra-down multipass onprem onprem-arm aws-single-node
 
 SCENARIOS := multipass onprem-basic onprem-basic-arm aws-single-node
 TESTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/tests
@@ -56,6 +56,9 @@ test-live-gha-onprem:
 
 test-k3s-engine-propagation:
 	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-k3s-engine-propagation
+
+test-aws-localstack-contract:
+	bash $(TESTS_DIR)/test-aws-single-node-localstack-contract.sh
 
 test-matrix: test-static test-contract test-live
 
