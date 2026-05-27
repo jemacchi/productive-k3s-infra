@@ -1,4 +1,4 @@
-.PHONY: docs-build docs-serve docs-up docs-down docs-clean test-clean test-checkstatus test-static test-contract test-telemetry test-live test-live-onprem-arm test-live-gha-onprem test-k3s-engine-propagation test-aws-localstack-contract test-matrix test-productive-k3s-infra-cli infra-help infra-doctor infra-list-profiles infra-validate-profile infra-validate infra-plan infra-apply infra-destroy infra-status tag-release set-core-version scenario-up scenario-down scenario-status scenario-infra-up scenario-infra-down multipass onprem onprem-arm aws-single-node
+.PHONY: docs-build docs-serve docs-up docs-down docs-clean test test-unit test-lint test-format test-spell test-coverage test-clean test-checkstatus test-static test-contract test-telemetry test-live test-live-onprem-arm test-live-gha-onprem test-k3s-engine-propagation test-aws-localstack-contract test-matrix test-productive-k3s-infra-cli infra-help infra-doctor infra-list-profiles infra-validate-profile infra-validate infra-plan infra-apply infra-destroy infra-status tag-release set-core-version scenario-up scenario-down scenario-status scenario-infra-up scenario-infra-down multipass onprem onprem-arm aws-single-node
 
 SCENARIOS := multipass onprem-basic onprem-basic-arm aws-single-node
 TESTS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))/tests
@@ -29,6 +29,23 @@ docs-down:
 
 docs-clean:
 	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh docs-clean
+
+test: test-unit test-lint test-format test-spell
+
+test-unit:
+	bash ./tests/bin/run-shellspec.sh
+
+test-lint:
+	bash ./tests/bin/run-shellcheck.sh
+
+test-format:
+	bash ./tests/bin/run-shfmt.sh
+
+test-spell:
+	bash ./tests/bin/run-spellcheck.sh
+
+test-coverage:
+	bash ./tests/bin/run-kcov.sh
 
 test-clean:
 	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-clean
