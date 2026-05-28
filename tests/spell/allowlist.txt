@@ -1,0 +1,16 @@
+productive
+k3s
+opentofu
+localstack
+longhorn
+rancher
+telemetry
+amd64
+arm64
+aarch64
+ansible
+multipass
+mktemp
+sha256sum
+ubuntu
+debian

@@ -19,8 +19,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  quick-checks:
+    name: Quick Checks
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
+    runs-on: ubuntu-24.04
+    env:
+      TELEMETRY_ENABLED: "false"
+    steps:
+      - name: Checkout productive-k3s-infra
+        uses: actions/checkout@v4
+        with:
+          path: productive-k3s-infra
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install shell test tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/bin" "$HOME/.local/share"
+
+          curl -fsSLO https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
+          tar -xJf shellcheck-v0.11.0.linux.x86_64.tar.xz
+          install shellcheck-v0.11.0/shellcheck "$HOME/.local/bin/shellcheck"
+
+          curl -fsSLo "$HOME/.local/bin/shfmt" https://github.com/mvdan/sh/releases/download/v3.13.1/shfmt_v3.13.1_linux_amd64
+          chmod +x "$HOME/.local/bin/shfmt"
+
+          curl -fsSLO https://github.com/shellspec/shellspec/releases/download/0.28.1/shellspec-dist.tar.gz
+          mkdir -p "$HOME/.local/share/shellspec"
+          tar -xzf shellspec-dist.tar.gz -C "$HOME/.local/share/shellspec"
+          cat > "$HOME/.local/bin/shellspec" <<'EOF'
+          #!/usr/bin/env bash
+          exec "$HOME/.local/share/shellspec/shellspec/shellspec" "$@"
+          EOF
+          chmod +x "$HOME/.local/bin/shellspec"
+
+          python3 -m pip install --user codespell
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run quick checks
+        working-directory: productive-k3s-infra
+        shell: bash
+        run: |
+          set -euo pipefail
+          make test-unit
+          make test-lint
+          make test-format
+          make test-spell
+
   static-and-contract:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
+    needs:
+      - quick-checks
     runs-on: ubuntu-24.04
     env:
       TELEMETRY_ENABLED: "false"
@@ -83,9 +138,69 @@ jobs:
             productive-k3s-infra/scenarios/*/generated
           if-no-files-found: ignore
 
+  aws-localstack-contract:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
+    needs:
+      - static-and-contract
+    runs-on: ubuntu-24.04
+    env:
+      TELEMETRY_ENABLED: "false"
+      LOCALSTACK_ENDPOINT: "http://localhost:4566"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
+    steps:
+      - name: Checkout productive-k3s-infra
+        uses: actions/checkout@v4
+        with:
+          path: productive-k3s-infra
+          fetch-depth: 0
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_wrapper: false
+
+      - name: Start LocalStack
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d \
+            --name localstack-ci \
+            -p 4566:4566 \
+            -e SERVICES=ec2,sts,iam \
+            -e EC2_VM_MANAGER=mock \
+            localstack/localstack:2.3.2
+
+      - name: Wait for LocalStack health
+        shell: bash
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 60); do
+            if curl -fsS "${LOCALSTACK_ENDPOINT}/_localstack/health" >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "LocalStack did not become healthy in time" >&2
+          exit 1
+
+      - name: Run aws-single-node LocalStack contract test
+        working-directory: productive-k3s-infra
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOFU_BIN="$(command -v tofu)" make test-aws-localstack-contract
+
+      - name: Dump LocalStack logs
+        if: always()
+        shell: bash
+        run: docker logs localstack-ci || true
+
   live-onprem-github-host:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false }}
     needs:
+      - quick-checks
       - static-and-contract
     runs-on: ubuntu-24.04
     timeout-minutes: 90

@@ -20,6 +20,8 @@ docs/src/assets/images/favicon.ico
 .live-onprem-basic-github-host.*/
 scenarios/*/generated/
 test-artifacts/
+tests/artifacts/*
+tests/coverage/*
 .wrangler/
 
 # Terraform/OpenTofu

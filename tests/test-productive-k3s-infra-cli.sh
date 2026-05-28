@@ -194,13 +194,16 @@ assert_contains "$LIST_OUTPUT" "profiles/on-prem/basic.env"
 assert_contains "$LIST_OUTPUT" "profiles/on-prem/arm.env"
 
 ROOT_MULTIPASS="$(make -C "$REPO_DIR" -n multipass)"
-assert_contains "$ROOT_MULTIPASS" "${REPO_DIR}/productive-k3s-infra.sh multipass up"
+assert_contains "$ROOT_MULTIPASS" "make scenario-up SCENARIO=multipass"
+assert_contains "$ROOT_MULTIPASS" "make -C scenarios/\$resolved up"
 
 ROOT_ONPREM="$(make -C "$REPO_DIR" -n onprem)"
-assert_contains "$ROOT_ONPREM" "${REPO_DIR}/productive-k3s-infra.sh onprem up"
+assert_contains "$ROOT_ONPREM" "make scenario-up SCENARIO=onprem"
+assert_contains "$ROOT_ONPREM" "make -C scenarios/\$resolved up"
 
 ROOT_ONPREM_ARM="$(make -C "$REPO_DIR" -n onprem-arm)"
-assert_contains "$ROOT_ONPREM_ARM" "${REPO_DIR}/productive-k3s-infra.sh onprem-arm up"
+assert_contains "$ROOT_ONPREM_ARM" "make scenario-up SCENARIO=onprem-arm"
+assert_contains "$ROOT_ONPREM_ARM" "make -C scenarios/\$resolved up"
 
 ROOT_TEST_LIVE_ONPREM_ARM="$(make -C "$REPO_DIR" -n test-live-onprem-arm)"
 assert_contains "$ROOT_TEST_LIVE_ONPREM_ARM" "make -C scenarios/onprem-basic-arm test-live"

@@ -12,12 +12,77 @@ The repository exposes a three-level validation model.
 
 ```bash
 make test-clean
+make test
+make test-unit
+make test-lint
+make test-format
+make test-spell
+make test-coverage
 make test-static
 make test-contract
 make test-live
 make test-matrix
 make test-checkstatus
 ```
+
+## Local tooling for fast shell tests
+
+The repo now exposes a local fast layer in addition to `static`, `contract`, and `live`.
+
+- `make test-unit`: `ShellSpec` specs under `tests/spec/`
+- `make test-lint`: shell lint for the testing harness
+- `make test-format`: `shfmt` check for the testing harness
+- `make test-spell`: lightweight spell checks
+- `make test-coverage`: shell coverage through `kcov`
+
+If you install tools without root, keep `~/.local/bin` in `PATH`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+User-local install commands used during development on Ubuntu:
+
+```bash
+mkdir -p "$HOME/.local/bin" "$HOME/.local/share"
+curl -fsSLO https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
+tar -xJf shellcheck-v0.11.0.linux.x86_64.tar.xz
+install shellcheck-v0.11.0/shellcheck "$HOME/.local/bin/shellcheck"
+
+curl -fsSLo "$HOME/.local/bin/shfmt" https://github.com/mvdan/sh/releases/download/v3.13.1/shfmt_v3.13.1_linux_amd64
+chmod +x "$HOME/.local/bin/shfmt"
+
+curl -fsSLO https://github.com/shellspec/shellspec/releases/download/0.28.1/shellspec-dist.tar.gz
+mkdir -p "$HOME/.local/share/shellspec"
+tar -xzf shellspec-dist.tar.gz -C "$HOME/.local/share/shellspec"
+cat > "$HOME/.local/bin/shellspec" <<'EOF'
+#!/usr/bin/env bash
+exec "$HOME/.local/share/shellspec/shellspec/shellspec" "$@"
+EOF
+chmod +x "$HOME/.local/bin/shellspec"
+
+python3 -m pip install --user codespell
+```
+
+`kcov` still needs system development headers on Ubuntu:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y kcov libelf-dev libdw-dev
+```
+
+## Current local coverage baseline
+
+The current maintainer baseline from the latest local `make test-coverage` run is:
+
+- total ShellSpec coverage: `75.14%`
+- `ansible/roles/remote_cluster/files/common.sh`: `77.60%`
+- `scripts/productive-k3s-infra.sh`: `75.89%`
+- `scripts/release-versioning.sh`: `64.29%`
+- `scenarios/aws-single-node/scripts/refresh-generated-artifacts.sh`: `67.92%`
+- `scripts/create-release-tag.sh`: `59.09%`
+
+This baseline is intended to guide future additions and refactors. It is not yet enforced as a CI threshold.
 
 ## Main test entry points
 
