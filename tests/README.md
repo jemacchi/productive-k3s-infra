@@ -55,7 +55,7 @@ Latest local `make test-coverage` run:
 - `ansible/roles/remote_cluster/files/common.sh`: `77.60%`
 - `scripts/productive-k3s-infra.sh`: `75.89%`
 - `scripts/release-versioning.sh`: `64.29%`
-- `scenarios/aws-single-node/scripts/refresh-generated-artifacts.sh`: `67.92%`
+- `scenarios/cloud/aws-single-node/scripts/refresh-generated-artifacts.sh`: `67.92%`
 - `scripts/create-release-tag.sh`: `59.09%`
 
 Treat this as a maintainer baseline for new changes, not as a hard CI gate.

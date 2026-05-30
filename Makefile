@@ -66,7 +66,7 @@ test-live:
 	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-live
 
 test-live-onprem-arm:
-	$(MAKE) -C scenarios/onprem-basic-arm test-live
+	$(MAKE) -C scenarios/edge/onprem-basic-arm test-live
 
 test-live-gha-onprem:
 	$(SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-live-gha-onprem
@@ -122,16 +122,23 @@ define run_scenario_target
 		onprem-arm) printf '%s' "onprem-basic-arm" ;; \
 		*) printf '' ;; \
 	esac)"; \
+	scenario_dir="$$(case "$$resolved" in \
+		multipass) printf '%s' 'scenarios/local/multipass' ;; \
+		onprem-basic) printf '%s' 'scenarios/edge/onprem-basic' ;; \
+		onprem-basic-arm) printf '%s' 'scenarios/edge/onprem-basic-arm' ;; \
+		aws-single-node) printf '%s' 'scenarios/cloud/aws-single-node' ;; \
+		*) printf '' ;; \
+	esac)"; \
 	if [ -z "$$resolved" ]; then \
 		echo "Unknown SCENARIO='$(SCENARIO)'." >&2; \
 		echo "Supported values: multipass, onprem, onprem-arm, aws-single-node." >&2; \
 		exit 1; \
 	fi; \
-	if ! $(MAKE) -C scenarios/$$resolved -n $(1) >/dev/null 2>&1; then \
+	if ! $(MAKE) -C "$$scenario_dir" -n $(1) >/dev/null 2>&1; then \
 		echo "Scenario '$$resolved' does not support target '$(1)'." >&2; \
 		exit 2; \
 	fi; \
-	$(MAKE) -C scenarios/$$resolved $(1)
+	$(MAKE) -C "$$scenario_dir" $(1)
 endef
 
 scenario-up:

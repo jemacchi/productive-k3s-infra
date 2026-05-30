@@ -14,9 +14,9 @@ The retained public ARM validation used:
 
 That hardware profile completed:
 
-- `make -C scenarios/onprem-basic-arm preflight`
-- `make -C scenarios/onprem-basic-arm up`
-- `make -C scenarios/onprem-basic-arm validate`
+- `make -C scenarios/edge/onprem-basic-arm preflight`
+- `make -C scenarios/edge/onprem-basic-arm up`
+- `make -C scenarios/edge/onprem-basic-arm validate`
 
 The full stack still has tighter margins on that size of machine than on a larger x86 host, so the public guidance about higher RAM for a smoother full-stack experience still applies.
 
@@ -123,7 +123,7 @@ curl -4 -I -L --max-time 30 'https://github.com/k3s-io/k3s/releases/latest'
 Create:
 
 ```bash
-cp scenarios/onprem-basic-arm/onprem.env.example scenarios/onprem-basic-arm/onprem.env
+cp scenarios/edge/onprem-basic-arm/onprem.env.example scenarios/edge/onprem-basic-arm/onprem.env
 ```
 
 Then fill in your own values:

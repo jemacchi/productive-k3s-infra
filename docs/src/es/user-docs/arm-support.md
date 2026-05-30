@@ -14,9 +14,9 @@ La validación pública retenida para ARM usó:
 
 Ese perfil completó:
 
-- `make -C scenarios/onprem-basic-arm preflight`
-- `make -C scenarios/onprem-basic-arm up`
-- `make -C scenarios/onprem-basic-arm validate`
+- `make -C scenarios/edge/onprem-basic-arm preflight`
+- `make -C scenarios/edge/onprem-basic-arm up`
+- `make -C scenarios/edge/onprem-basic-arm validate`
 
 ## Preparación del host ARM
 
@@ -85,7 +85,7 @@ curl -4 -I -L --max-time 30 'https://github.com/k3s-io/k3s/releases/latest'
 ## Ejemplo de configuración
 
 ```bash
-cp scenarios/onprem-basic-arm/onprem.env.example scenarios/onprem-basic-arm/onprem.env
+cp scenarios/edge/onprem-basic-arm/onprem.env.example scenarios/edge/onprem-basic-arm/onprem.env
 ```
 
 Después completar valores propios:

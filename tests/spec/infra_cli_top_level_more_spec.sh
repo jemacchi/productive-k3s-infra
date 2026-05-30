@@ -87,7 +87,7 @@ EOF
     When run bash -lc 'PATH="$1:$PATH" MOCK_MAKE_LOG="$2" "$3" status --yes --profile "$4"; printf "\n__MAKE__\n"; cat "$2"' bash "$mock_bin" "$log_file" "$SCRIPT" "$profile"
     The status should equal 0
     The output should include '__MAKE__'
-    The output should include 'scenarios/multipass'
+    The output should include 'scenarios/local/multipass'
     The output should include 'status'
   End
 

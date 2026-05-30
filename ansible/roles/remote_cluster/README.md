@@ -4,8 +4,8 @@ This folder contains the reusable `SSH`-based bootstrap and validation layer use
 
 Current consumers:
 
-- `scenarios/onprem-basic`
-- `scenarios/aws-single-node`
+- `scenarios/edge/onprem-basic`
+- `scenarios/cloud/aws-single-node`
 
 The assets live under `files/` because today they are consumed as shell and Python helpers by the scenario `Makefile` flows. They are generic enough to be treated as shared Ansible-side assets even before a full playbook-driven interface exists.
 

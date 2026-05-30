@@ -9,7 +9,17 @@ if [[ -z "${SCENARIO}" ]]; then
   exit 2
 fi
 
-SCENARIO_DIR="${ROOT_DIR}/scenarios/${SCENARIO}"
+scenario_rel_dir() {
+  case "$1" in
+    multipass) printf 'scenarios/local/multipass\n' ;;
+    onprem-basic) printf 'scenarios/edge/onprem-basic\n' ;;
+    onprem-basic-arm) printf 'scenarios/edge/onprem-basic-arm\n' ;;
+    aws-single-node) printf 'scenarios/cloud/aws-single-node\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+SCENARIO_DIR="${ROOT_DIR}/$(scenario_rel_dir "${SCENARIO}")"
 
 fail() {
   printf '[FAIL] %s\n' "$1" >&2
@@ -38,7 +48,7 @@ expect_output() {
 }
 
 expect_ignored_generated() {
-  local path="${ROOT_DIR}/scenarios/${SCENARIO}/generated/contract-probe"
+  local path="${SCENARIO_DIR}/generated/contract-probe"
   git -C "${ROOT_DIR}" check-ignore -q "${path}" || fail "generated/ should be ignored for ${SCENARIO}"
 }
 
@@ -56,7 +66,7 @@ make -C "${SCENARIO_DIR}" -n test-live >/dev/null
 
 case "${SCENARIO}" in
   multipass)
-    need_file "${ROOT_DIR}/profiles/multipass/1-server-2-agents.env"
+    need_file "${ROOT_DIR}/profiles/local/multipass/1-server-2-agents.env"
     need_file "${SCENARIO_DIR}/opentofu/main.tf"
     need_file "${SCENARIO_DIR}/opentofu/outputs.tf"
     need_file "${SCENARIO_DIR}/opentofu/variables.tf"
@@ -67,18 +77,18 @@ case "${SCENARIO}" in
     done
     ;;
   onprem-basic|onprem-basic-arm)
-    need_file "${ROOT_DIR}/profiles/on-prem/basic.env"
+    need_file "${ROOT_DIR}/profiles/edge/on-prem/basic.env"
     need_file "${SCENARIO_DIR}/onprem.env.example"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/common.sh"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/refresh-generated-artifacts.sh"
     need_file "${ROOT_DIR}/ansible/roles/remote_cluster/files/run_remote_bootstrap_session.py"
     has_pattern '^onprem\.env$' "${SCENARIO_DIR}/.gitignore" || fail "onprem.env should be ignored"
     if [[ "${SCENARIO}" == "onprem-basic-arm" ]]; then
-      need_file "${ROOT_DIR}/profiles/on-prem/arm.env"
+      need_file "${ROOT_DIR}/profiles/edge/on-prem/arm.env"
     fi
     ;;
   aws-single-node)
-    need_file "${ROOT_DIR}/profiles/aws-single-node/basic.env"
+    need_file "${ROOT_DIR}/profiles/cloud/aws-single-node/basic.env"
     need_file "${SCENARIO_DIR}/aws.env.example"
     need_file "${SCENARIO_DIR}/opentofu/main.tf"
     need_file "${SCENARIO_DIR}/opentofu/outputs.tf"

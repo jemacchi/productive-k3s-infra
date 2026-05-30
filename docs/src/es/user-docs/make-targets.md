@@ -1,12 +1,15 @@
 # Targets De Make
 
-`make` es la interfaz pública para operar este repositorio.
+`make` es la interfaz principal de desarrollo y de operación source-based de este repositorio.
 
-El artifact público de release ahora expone el contrato orientado a profiles mediante:
+El contrato público de runtime ahora es package-first:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- <command> --profile <file>
+./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
 ```
+
+Los targets `make infra-*` de abajo siguen siendo deliberadamente source-based y están orientados a desarrollo y testing del repositorio.
 
 ## Targets de nivel raíz
 
@@ -21,7 +24,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `make test-static` | Ejecutar checks static sobre todos los escenarios públicos |
 | `make test-contract` | Ejecutar checks contract sobre todos los escenarios públicos |
 | `make test-live` | Ejecutar validaciones live sobre todos los escenarios públicos |
-| `make test-live-onprem-arm` | Ejecutar sólo la validación live pública ARM mediante `scenarios/onprem-basic-arm` |
+| `make test-live-onprem-arm` | Ejecutar sólo la validación live pública ARM mediante `scenarios/edge/onprem-basic-arm` |
 | `make test-live-gha-onprem` | Ejecutar la validación live single-node de `onprem-basic` sobre un runner hospedado por GitHub |
 | `make test-aws-localstack-contract` | Ejecutar la validación del contrato de infraestructura AWS single-node contra LocalStack |
 | `make test-matrix` | Ejecutar `static`, `contract` y `live` en secuencia |

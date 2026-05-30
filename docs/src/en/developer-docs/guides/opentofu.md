@@ -4,8 +4,8 @@
 
 ## Where it is used today
 
-- `scenarios/multipass/opentofu/`: creates the local VM topology used by the Multipass flow
-- `scenarios/aws-single-node/opentofu/`: provisions the public AWS single-node infrastructure
+- `scenarios/local/multipass/opentofu/`: creates the local VM topology used by the Multipass flow
+- `scenarios/cloud/aws-single-node/opentofu/`: provisions the public AWS single-node infrastructure
 
 ## What OpenTofu is responsible for
 

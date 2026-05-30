@@ -78,8 +78,486 @@ EOF
     The output should include '__MAKE__'
     The output should include "ONPREM_ENV_FILE=${profile}"
     The output should include '-n'
-    The output should include 'scenarios/onprem-basic'
+    The output should include 'scenarios/edge/onprem-basic'
     The output should include 'up'
+  End
+
+  It 'validates a profile tgz package'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scenario"
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: demo
+  engine:
+    type: shell
+  execution:
+    installScript: scenario/install.sh
+EOF
+    cat >"${pkg_dir}/scenario/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scenario/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile validate --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include 'Profile package validation passed'
+    The output should include 'Scenario: demo'
+    The output should include 'Engine: shell'
+  End
+
+  It 'rejects a profile tgz package without profile.yaml'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile validate --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 4
+    The stderr should include 'profile package is missing profile.yaml'
+  End
+
+  It 'rejects a profile tgz package with an unsupported engine'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: terraform
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile validate --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 4
+    The stderr should include 'unsupported profile package engine: terraform'
+  End
+
+  It 'executes profile install from a tgz package'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/installed.txt"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<EOF
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf 'installed\n' >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2"; test -f "$3" && printf "\n__MARKER__\n" && cat "$3"' bash "$SCRIPT" "$archive" "$marker"
+    The status should equal 0
+    The output should include '__MARKER__'
+    The output should include 'installed'
+  End
+
+  It 'executes profile apply from a tgz package through the packaged installer'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/applied.txt"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf 'applied\n' >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile apply --tgz "$2"; test -f "$3" && printf "\n__MARKER__\n" && cat "$3"' bash "$SCRIPT" "$archive" "$marker"
+    The status should equal 0
+    The output should include '__MARKER__'
+    The output should include 'applied'
+  End
+
+  It 'rejects profile install when the package is missing profile.env'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 4
+    The stderr should include 'profile package is missing profile.env'
+  End
+
+  It 'rejects profile install when the package scenario directory is missing'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 4
+    The stderr should include 'profile package scenario directory not found: scenarios/edge/onprem-basic'
+  End
+
+  It 'rejects profile install when the package install script is missing'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 4
+    The stderr should include 'profile package install script not found: scripts/install.sh'
+  End
+
+  It 'executes profile status from a tgz package through the embedded scenario'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mock_bin="$(mktemp -d)"
+    log_file="$(mktemp)"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    cat >"${mock_bin}/make" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${MOCK_MAKE_LOG}"
+exit 0
+EOF
+    chmod +x "${mock_bin}/make"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PATH="$1:$PATH" MOCK_MAKE_LOG="$2" "$3" profile status --tgz "$4"; printf "\n__MAKE__\n"; cat "$2"' bash "$mock_bin" "$log_file" "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include '__MAKE__'
+    The output should include 'scenarios/edge/onprem-basic'
+    The output should include 'status'
+  End
+
+  It 'executes package plan for an opentofu profile through embedded OpenTofu'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mock_bin="$(mktemp -d)"
+    log_file="$(mktemp)"
+    mkdir -p "${pkg_dir}/scenarios/local/multipass/opentofu" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=multipass
+PK3S_INFRA_ENGINE=opentofu
+TF_VAR_cluster_name=demo
+TF_VAR_image=ubuntu-24.04
+TF_VAR_base_domain=k3s.lab.internal
+TF_VAR_remote_dir=/srv/productive-k3s-core
+TF_VAR_server_cpus=4
+TF_VAR_server_memory=4096
+TF_VAR_server_disk=30
+TF_VAR_agent_cpus=2
+TF_VAR_agent_memory=2048
+TF_VAR_agent_disk=20
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: multipass
+  engine:
+    type: opentofu
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    cat >"${mock_bin}/tofu" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${MOCK_TOFU_LOG}"
+exit 0
+EOF
+    chmod +x "${mock_bin}/tofu"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PATH="$1:$PATH" MOCK_TOFU_LOG="$2" "$3" profile plan --tgz "$4"; printf "\n__TOFU__\n"; cat "$2"' bash "$mock_bin" "$log_file" "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include '__TOFU__'
+    The output should include '-backend=false'
+    The output should include 'init'
+    The output should include 'plan'
+  End
+
+  It 'executes package plan for an ansible profile through embedded scenario make dry-run'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mock_bin="$(mktemp -d)"
+    log_file="$(mktemp)"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    cat >"${mock_bin}/make" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${MOCK_MAKE_LOG}"
+exit 0
+EOF
+    chmod +x "${mock_bin}/make"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PATH="$1:$PATH" MOCK_MAKE_LOG="$2" "$3" profile plan --tgz "$4"; printf "\n__MAKE__\n"; cat "$2"' bash "$mock_bin" "$log_file" "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include '__MAKE__'
+    The output should include '-n'
+    The output should include 'scenarios/edge/onprem-basic'
+    The output should include 'up'
+  End
+
+  It 'rejects package destroy for onprem profiles'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scripts" "${pkg_dir}/scenarios/edge/onprem-basic"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile destroy --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 2
+    The stderr should include "unsupported packaged profile command 'destroy' for scenario 'onprem-basic'"
+  End
+
+  It 'keeps source-based validation behind dev profile'
+    profile="$(mktemp)"
+    cat >"${profile}" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=onprem
+PK3S_INFRA_ENGINE=ansible
+PK3S_INFRA_SCENARIO=onprem-basic
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+
+    When run bash -lc '"$1" dev profile validate --profile-env "$2"' bash "$SCRIPT" "$profile"
+    The status should equal 0
+    The output should include 'Profile validation passed'
   End
 
   It 'blocks onprem destroy without --yes'
@@ -125,7 +603,7 @@ EOF
     The status should equal 0
     The output should include '__MAKE__'
     The output should include "AWS_ENV_FILE=${profile}"
-    The output should include 'scenarios/aws-single-node'
+    The output should include 'scenarios/cloud/aws-single-node'
     The output should include 'up'
   End
 End

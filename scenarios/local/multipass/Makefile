@@ -5,7 +5,8 @@ export SCENARIO_DIR
 OPENTOFU_DIR := $(SCENARIO_DIR)/opentofu
 GENERATED_DIR := $(SCENARIO_DIR)/generated
 SCRIPTS_DIR := $(SCENARIO_DIR)/scripts
-TESTS_DIR := $(SCENARIO_DIR)/../../tests
+TESTS_DIR := $(SCENARIO_DIR)/../../../tests
+DEV_SCRIPTS_DIR := $(SCENARIO_DIR)/../../../scripts
 TOFU_BIN ?= $(shell if command -v tofu >/dev/null 2>&1; then echo tofu; elif command -v terraform >/dev/null 2>&1; then echo terraform; fi)
 
 export PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s-core)
@@ -73,19 +74,19 @@ status:
 	@cat $(GENERATED_DIR)/cluster.json
 
 test-clean:
-	TEST_SCENARIO=multipass ../../scripts/productive-k3s-infra-dev.sh test-clean
+	TEST_SCENARIO=multipass $(DEV_SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-clean
 
 test-checkstatus:
-	TEST_SCENARIO=multipass ../../scripts/productive-k3s-infra-dev.sh test-checkstatus
+	TEST_SCENARIO=multipass $(DEV_SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-checkstatus
 
 test-static:
-	bash ../../tests/run-scenario-test.sh static multipass $(SCENARIO_DIR) scenario-test-static
+	bash $(TESTS_DIR)/run-scenario-test.sh static multipass $(SCENARIO_DIR) scenario-test-static
 
 test-contract:
-	bash ../../tests/run-scenario-test.sh contract multipass $(SCENARIO_DIR) scenario-test-contract
+	bash $(TESTS_DIR)/run-scenario-test.sh contract multipass $(SCENARIO_DIR) scenario-test-contract
 
 test-live:
-	bash ../../tests/run-scenario-test.sh live multipass $(SCENARIO_DIR) scenario-test-live
+	bash $(TESTS_DIR)/run-scenario-test.sh live multipass $(SCENARIO_DIR) scenario-test-live
 
 scenario-test-static: infra-init
 	bash -n $(SCRIPTS_DIR)/*.sh

@@ -79,7 +79,7 @@ The current maintainer baseline from the latest local `make test-coverage` run i
 - `ansible/roles/remote_cluster/files/common.sh`: `77.60%`
 - `scripts/productive-k3s-infra.sh`: `75.89%`
 - `scripts/release-versioning.sh`: `64.29%`
-- `scenarios/aws-single-node/scripts/refresh-generated-artifacts.sh`: `67.92%`
+- `scenarios/cloud/aws-single-node/scripts/refresh-generated-artifacts.sh`: `67.92%`
 - `scripts/create-release-tag.sh`: `59.09%`
 
 This baseline is intended to guide future additions and refactors. It is not yet enforced as a CI threshold.
@@ -131,9 +131,9 @@ make test-checkstatus
 If you want to inspect only one scenario, run the same targets from the scenario directory:
 
 ```bash
-make -C scenarios/multipass test-clean
-make -C scenarios/multipass test-static
-make -C scenarios/multipass test-checkstatus
+make -C scenarios/local/multipass test-clean
+make -C scenarios/local/multipass test-static
+make -C scenarios/local/multipass test-checkstatus
 ```
 
 The scenario-local `test-static`, `test-contract`, and `test-live` targets go through `tests/run-scenario-test.sh`, which means they also emit manifests that `make -C scenarios/<name> test-checkstatus` can summarize immediately afterward.

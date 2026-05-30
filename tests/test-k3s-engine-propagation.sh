@@ -27,9 +27,9 @@ assert_json_equals() {
 
 setup_multipass_fixture() {
   local repo_dir="$1"
-  local scenario_dir="${repo_dir}/scenarios/multipass"
+  local scenario_dir="${repo_dir}/scenarios/local/multipass"
   mkdir -p "${scenario_dir}"
-  cp -R "${ROOT_DIR}/scenarios/multipass/scripts" "${scenario_dir}/scripts"
+  cp -R "${ROOT_DIR}/scenarios/local/multipass/scripts" "${scenario_dir}/scripts"
   mkdir -p "${repo_dir}/scripts"
   cp "${ROOT_DIR}/scripts/release-config.sh" "${repo_dir}/scripts/release-config.sh"
   mkdir -p "${scenario_dir}/generated/logs"
@@ -109,9 +109,9 @@ EOF
 
 setup_onprem_fixture() {
   local repo_dir="$1"
-  local scenario_dir="${repo_dir}/scenarios/onprem-basic"
+  local scenario_dir="${repo_dir}/scenarios/edge/onprem-basic"
   mkdir -p "${scenario_dir}"
-  cp -R "${ROOT_DIR}/scenarios/onprem-basic/scripts" "${scenario_dir}/scripts"
+  cp -R "${ROOT_DIR}/scenarios/edge/onprem-basic/scripts" "${scenario_dir}/scripts"
   mkdir -p "${repo_dir}/scripts"
   cp "${ROOT_DIR}/scripts/release-config.sh" "${repo_dir}/scripts/release-config.sh"
   mkdir -p "${scenario_dir}/generated/logs"
@@ -221,7 +221,7 @@ export PRODUCTIVE_K3S_ENGINE="k3sup"
 
 multipass_repo="${TMP_DIR}/multipass-repo"
 setup_multipass_fixture "${multipass_repo}"
-export SCENARIO_DIR="${multipass_repo}/scenarios/multipass"
+export SCENARIO_DIR="${multipass_repo}/scenarios/local/multipass"
 export CAPTURE_FILE="${TMP_DIR}/multipass-engine.json"
 bash "${SCENARIO_DIR}/scripts/bootstrap-server.sh"
 assert_json_equals "${CAPTURE_FILE}" '
@@ -246,7 +246,7 @@ pass "multipass agent wrapper invokes controller-side k3sup join"
 
 onprem_repo="${TMP_DIR}/onprem-repo"
 setup_onprem_fixture "${onprem_repo}"
-export SCENARIO_DIR="${onprem_repo}/scenarios/onprem-basic"
+export SCENARIO_DIR="${onprem_repo}/scenarios/edge/onprem-basic"
 export CAPTURE_FILE="${TMP_DIR}/onprem-engine.json"
 export ONPREM_SERVER_IP="10.0.0.10"
 export ONPREM_AGENT_IPS="10.0.0.11"

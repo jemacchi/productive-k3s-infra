@@ -21,6 +21,7 @@ TELEMETRY_EVENT_SENDER="${SCRIPT_DIR}/send-telemetry-event.sh"
 TELEMETRY_MARKER="${TELEMETRY_MARKER:-pk3s-public-v1}"
 
 PROFILE_PATH=""
+TGZ_PATH=""
 GLOBAL_DEBUG=0
 GLOBAL_YES=0
 GLOBAL_DRY_RUN=0
@@ -134,6 +135,8 @@ usage() {
   cat <<'EOF'
 Usage:
   ./productive-k3s-infra.sh <command> --profile <file> [flags]
+  ./productive-k3s-infra.sh profile <validate|install|plan|apply|destroy|status> --tgz <file> [flags]
+  ./productive-k3s-infra.sh dev profile <validate|plan|apply|destroy|status> --profile-env <file> [flags]
   ./productive-k3s-infra.sh <scenario> [command] [make-args...]
 
 Profile-driven commands:
@@ -142,6 +145,12 @@ Profile-driven commands:
   bundle info --json
   doctor
   list-profiles
+  profile validate --tgz <file>
+  profile install --tgz <file>
+  profile plan --tgz <file>
+  profile apply --tgz <file>
+  profile destroy --tgz <file>
+  profile status --tgz <file>
   validate-profile --profile <file>
   validate --profile <file>
   plan --profile <file>
@@ -157,6 +166,8 @@ Legacy compatibility:
 
 Supported global flags:
   --profile <file>
+  --profile-env <file>
+  --tgz <file>
   --debug
   --yes
   --dry-run
@@ -256,6 +267,26 @@ resolve_scenario() {
       ;;
     aws-single-node)
       printf 'aws-single-node\n'
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+scenario_rel_dir() {
+  case "$1" in
+    multipass)
+      printf 'scenarios/local/multipass\n'
+      ;;
+    onprem-basic)
+      printf 'scenarios/edge/onprem-basic\n'
+      ;;
+    onprem-basic-arm)
+      printf 'scenarios/edge/onprem-basic-arm\n'
+      ;;
+    aws-single-node)
+      printf 'scenarios/cloud/aws-single-node\n'
       ;;
     *)
       return 1
@@ -440,7 +471,7 @@ profile_command_dispatch() {
   validate_profile
 
   target="$(command_to_target "${command}" "${PK3S_INFRA_SCENARIO}")" || die 2 "unsupported command '${command}' for scenario '${PK3S_INFRA_SCENARIO}'"
-  scenario_dir="${REPO_DIR}/scenarios/${PK3S_INFRA_SCENARIO}"
+  scenario_dir="${REPO_DIR}/$(scenario_rel_dir "${PK3S_INFRA_SCENARIO}")"
   [[ -d "${scenario_dir}" ]] || die 1 "scenario directory not found: ${scenario_dir}"
 
   log "INFO" "Loading profile: ${profile}"
@@ -498,7 +529,7 @@ legacy_dispatch() {
     shift
   fi
 
-  local scenario_dir="${REPO_DIR}/scenarios/${scenario}"
+  local scenario_dir="${REPO_DIR}/$(scenario_rel_dir "${scenario}")"
   [[ -d "${scenario_dir}" ]] || die 1 "scenario directory not found: ${scenario_dir}"
 
   export TELEMETRY_PARENT_RUN_ID="${TELEMETRY_RUN_ID:-}"
@@ -533,6 +564,237 @@ run_list_profiles() {
   done
 }
 
+trim_yaml_value() {
+  local value="$1"
+  value="${value#*:}"
+  value="${value# }"
+  value="${value%\"}"
+  value="${value#\"}"
+  printf '%s' "${value}"
+}
+
+profile_yaml_get() {
+  local file="$1"
+  local key="$2"
+  awk -v key="${key}" '
+    /^metadata:/ { section="metadata"; subsection=""; next }
+    /^spec:/ { section="spec"; subsection=""; next }
+    section == "spec" && /^  scenario:/ { subsection="scenario"; next }
+    section == "spec" && /^  engine:/ { subsection="engine"; next }
+    section == "spec" && /^  execution:/ { subsection="execution"; next }
+    section == "metadata" && key == "metadata.name" && /^  name:/ { print; exit }
+    section == "metadata" && key == "metadata.version" && /^  version:/ { print; exit }
+    section == "spec" && subsection == "scenario" && key == "spec.scenario.type" && /^    type:/ { print; exit }
+    section == "spec" && subsection == "engine" && key == "spec.engine.type" && /^    type:/ { print; exit }
+    section == "spec" && subsection == "execution" && key == "spec.execution.installScript" && /^    installScript:/ { print; exit }
+  ' "${file}"
+}
+
+extract_tgz_to_temp() {
+  local archive="$1"
+  [[ -f "${archive}" ]] || die 3 "tgz package not found: ${archive}"
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+  tar -xzf "${archive}" -C "${tmp_dir}" || die 4 "could not extract tgz package: ${archive}"
+  printf '%s\n' "${tmp_dir}"
+}
+
+resolve_profile_manifest() {
+  local package_root="$1"
+  local manifest
+  manifest="$(find "${package_root}" -type f -name 'profile.yaml' | head -n1)"
+  [[ -n "${manifest}" ]] || die 4 "profile package is missing profile.yaml"
+  printf '%s\n' "${manifest}"
+}
+
+validate_profile_package() {
+  local manifest="$1"
+  local profile_name scenario_type engine_type install_script
+  profile_name="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "metadata.name")")"
+  scenario_type="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.scenario.type")")"
+  engine_type="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.engine.type")")"
+  install_script="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.execution.installScript")")"
+
+  [[ -n "${profile_name}" ]] || die 4 "profile package metadata.name is required"
+  [[ -n "${scenario_type}" ]] || die 4 "profile package spec.scenario.type is required"
+  [[ -n "${engine_type}" ]] || die 4 "profile package spec.engine.type is required"
+  [[ -n "${install_script}" ]] || die 4 "profile package spec.execution.installScript is required"
+
+  case "${engine_type}" in
+    opentofu|ansible|shell) ;;
+    *) die 4 "unsupported profile package engine: ${engine_type}" ;;
+  esac
+
+  printf '%s\n%s\n%s\n%s\n' "${profile_name}" "${scenario_type}" "${engine_type}" "${install_script}"
+}
+
+run_validate_profile_package() {
+  local tgz_path="$1"
+  local tmp_dir manifest metadata profile_name scenario_type engine_type install_script
+  tmp_dir="$(extract_tgz_to_temp "${tgz_path}")"
+  manifest="$(resolve_profile_manifest "${tmp_dir}")" || {
+    local rc=$?
+    rm -rf "${tmp_dir}"
+    return "${rc}"
+  }
+  metadata="$(validate_profile_package "${manifest}")" || {
+    local rc=$?
+    rm -rf "${tmp_dir}"
+    return "${rc}"
+  }
+  profile_name="$(printf '%s\n' "${metadata}" | sed -n '1p')"
+  scenario_type="$(printf '%s\n' "${metadata}" | sed -n '2p')"
+  engine_type="$(printf '%s\n' "${metadata}" | sed -n '3p')"
+  install_script="$(printf '%s\n' "${metadata}" | sed -n '4p')"
+
+  log "INFO" "Profile package: ${profile_name}"
+  log "INFO" "Scenario: ${scenario_type}"
+  log "INFO" "Engine: ${engine_type}"
+  log "INFO" "Install script: ${install_script}"
+  log "OK" "Profile package validation passed"
+  rm -rf "${tmp_dir}"
+}
+
+packaged_profile_env_file() {
+  local package_root="$1"
+  local env_file="${package_root}/profile.env"
+  [[ -f "${env_file}" ]] || die 4 "profile package is missing profile.env"
+  printf '%s\n' "${env_file}"
+}
+
+packaged_profile_scenario_dir() {
+  local package_root="$1"
+  local scenario_type="$2"
+  local rel_dir
+  rel_dir="$(scenario_rel_dir "${scenario_type}")" || die 4 "unsupported packaged profile scenario: ${scenario_type}"
+  [[ -d "${package_root}/${rel_dir}" ]] || die 4 "profile package scenario directory not found: ${rel_dir}"
+  printf '%s\n' "${package_root}/${rel_dir}"
+}
+
+run_packaged_profile_make() {
+  local package_root="$1"
+  local profile_env="$2"
+  local scenario_dir="$3"
+  local target="$4"
+  local make_mode="${5:-normal}"
+  local make_bin="${PK3S_PROFILE_MAKE_BIN:-${MAKE_BIN}}"
+
+  (
+    set -a
+    # shellcheck disable=SC1090
+    source "${profile_env}"
+    set +a
+    cd "${package_root}"
+    export REPO_ROOT="${package_root}"
+    export PRODUCTIVE_K3S_REPO="${PK3S_PROFILE_PACKAGE_PRODUCTIVE_K3S_REPO:-${package_root}}"
+    export PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-remote}"
+    if [[ "${make_mode}" == "dry-run" ]]; then
+      "${make_bin}" -n -C "${scenario_dir}" "${target}"
+    else
+      "${make_bin}" -C "${scenario_dir}" "${target}"
+    fi
+  )
+}
+
+run_install_profile_package() {
+  local tgz_path="$1"
+  local action="${2:-install}"
+  local tmp_dir manifest metadata install_script install_path manifest_dir package_root
+  local scenario_type engine_type scenario_dir profile_env target
+  tmp_dir="$(extract_tgz_to_temp "${tgz_path}")"
+  package_root="${tmp_dir}"
+  manifest="$(resolve_profile_manifest "${tmp_dir}")" || {
+    local rc=$?
+    rm -rf "${tmp_dir}"
+    return "${rc}"
+  }
+  metadata="$(validate_profile_package "${manifest}")" || {
+    local rc=$?
+    rm -rf "${tmp_dir}"
+    return "${rc}"
+  }
+  scenario_type="$(printf '%s\n' "${metadata}" | sed -n '2p')"
+  engine_type="$(printf '%s\n' "${metadata}" | sed -n '3p')"
+  install_script="$(printf '%s\n' "${metadata}" | sed -n '4p')"
+  manifest_dir="$(dirname "${manifest}")"
+  profile_env="$(packaged_profile_env_file "${package_root}")" || {
+    local rc=$?
+    rm -rf "${tmp_dir}"
+    return "${rc}"
+  }
+  scenario_dir="$(packaged_profile_scenario_dir "${package_root}" "${scenario_type}")" || {
+    local rc=$?
+    rm -rf "${tmp_dir}"
+    return "${rc}"
+  }
+  install_path="${manifest_dir}/${install_script}"
+
+  case "${action}" in
+    install|apply)
+      [[ -f "${install_path}" ]] || {
+        rm -rf "${tmp_dir}"
+        die 4 "profile package install script not found: ${install_script}"
+      }
+      log "INFO" "Executing packaged profile installer: ${install_script}"
+      (
+        cd "${manifest_dir}"
+        bash "${install_path}"
+      )
+      ;;
+    status)
+      log "INFO" "Executing packaged profile status via scenario make target"
+      run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "status"
+      ;;
+    destroy)
+      target="$(command_to_target "destroy" "${scenario_type}")" || {
+        rm -rf "${tmp_dir}"
+        die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
+      }
+      log "INFO" "Executing packaged profile destroy via scenario target: ${target}"
+      run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "${target}"
+      ;;
+    plan)
+      case "${engine_type}" in
+        opentofu)
+          log "INFO" "Executing packaged profile plan through embedded OpenTofu scenario"
+          run_opentofu_plan "${scenario_dir}"
+          ;;
+        ansible|shell)
+          target="$(command_to_target "apply" "${scenario_type}")" || {
+            rm -rf "${tmp_dir}"
+            die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
+          }
+          log "INFO" "Executing packaged profile plan via scenario make dry-run"
+          run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "${target}" "dry-run"
+          ;;
+      esac
+      ;;
+    *)
+      rm -rf "${tmp_dir}"
+      die 2 "unsupported packaged profile command: ${action}"
+      ;;
+  esac
+  local rc=$?
+  rm -rf "${tmp_dir}"
+  return "${rc}"
+}
+
+run_dev_profile_command() {
+  local action="$1"
+  [[ -n "${PROFILE_PATH}" ]] || die 3 "the 'dev profile ${action}' command requires --profile-env <file>"
+  case "${action}" in
+    validate)
+      run_validate_profile_only "${PROFILE_PATH}"
+      ;;
+    plan|apply|destroy|status)
+      profile_command_dispatch "${action}" "${PROFILE_PATH}"
+      ;;
+    *)
+      die 2 "unsupported dev profile command: ${action}"
+      ;;
+  esac
+}
+
 if (($# == 0)); then
   usage >&2
   exit 2
@@ -544,6 +806,16 @@ while (($# > 0)); do
     --profile)
       [[ $# -ge 2 ]] || die 2 "--profile requires a value"
       PROFILE_PATH="$2"
+      shift 2
+      ;;
+    --profile-env)
+      [[ $# -ge 2 ]] || die 2 "--profile-env requires a value"
+      PROFILE_PATH="$2"
+      shift 2
+      ;;
+    --tgz)
+      [[ $# -ge 2 ]] || die 2 "--tgz requires a value"
+      TGZ_PATH="$2"
       shift 2
       ;;
     --debug)
@@ -609,6 +881,25 @@ case "${COMMAND}" in
     ;;
   list-profiles)
     run_list_profiles || RC=$?
+    ;;
+  profile)
+    case "${2:-}" in
+      validate)
+        [[ -n "${TGZ_PATH}" ]] || die 3 "the 'profile validate' command requires --tgz <file>"
+        run_validate_profile_package "${TGZ_PATH}" || RC=$?
+        ;;
+      install|plan|apply|destroy|status)
+        [[ -n "${TGZ_PATH}" ]] || die 3 "the 'profile ${2:-}' command requires --tgz <file>"
+        run_install_profile_package "${TGZ_PATH}" "${2:-}" || RC=$?
+        ;;
+      *)
+        die 2 "unsupported profile command: ${2:-}"
+        ;;
+    esac
+    ;;
+  dev)
+    [[ "${2:-}" == "profile" ]] || die 2 "unsupported dev command: ${2:-}"
+    run_dev_profile_command "${3:-}" || RC=$?
     ;;
   validate-profile)
     [[ -n "${PROFILE_PATH}" ]] || die 3 "the '${COMMAND}' command requires --profile <file>"

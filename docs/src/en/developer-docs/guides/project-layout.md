@@ -7,10 +7,17 @@ The repository is organized around versioned profiles as the public configuratio
 ```text
 productive-k3s-infra/
   profiles/
+    cloud/
+    edge/
+    local/
   scenarios/
-    multipass/
-    onprem-basic/
-    aws-single-node/
+    cloud/
+      aws-single-node/
+    edge/
+      onprem-basic/
+      onprem-basic-arm/
+    local/
+      multipass/
   ansible/
     roles/
       remote_cluster/
@@ -44,3 +51,6 @@ These artifacts are part of the workflow because they expose the resolved runtim
 
 !!! note
     Public users should now start from `profiles/` and the profile-driven CLI. `scenarios/` remains the implementation layer behind those entry points.
+
+!!! note
+    Canonical paths are now category-oriented, such as `profiles/cloud/...` or `scenarios/edge/...`. Legacy top-level paths remain available as compatibility aliases.

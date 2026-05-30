@@ -1,9 +1,9 @@
 Describe 'AWS generated artifact refresh'
-  SCRIPT="$SHELLSPEC_PROJECT_ROOT/scenarios/aws-single-node/scripts/refresh-generated-artifacts.sh"
+  SCRIPT="$SHELLSPEC_PROJECT_ROOT/scenarios/cloud/aws-single-node/scripts/refresh-generated-artifacts.sh"
 
   It 'hydrates cluster metadata from tofu outputs'
     temp_root="$(mktemp -d)"
-    scenario_dir="${temp_root}/scenarios/aws-single-node"
+    scenario_dir="${temp_root}/scenarios/cloud/aws-single-node"
     shared_dir="${temp_root}/ansible/roles/remote_cluster/files"
     bin_dir="${temp_root}/bin"
     mkdir -p "${scenario_dir}/generated" "${scenario_dir}/opentofu" "${shared_dir}" "${bin_dir}"

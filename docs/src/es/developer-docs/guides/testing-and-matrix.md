@@ -66,9 +66,9 @@ make test-checkstatus
 Si querés revisar sólo un escenario, corré los mismos targets desde el directorio del escenario:
 
 ```bash
-make -C scenarios/multipass test-clean
-make -C scenarios/multipass test-static
-make -C scenarios/multipass test-checkstatus
+make -C scenarios/local/multipass test-clean
+make -C scenarios/local/multipass test-static
+make -C scenarios/local/multipass test-checkstatus
 ```
 
 Los targets locales `test-static`, `test-contract` y `test-live` pasan por `tests/run-scenario-test.sh`, así que también generan manifests que `make -C scenarios/<name> test-checkstatus` puede resumir inmediatamente después.

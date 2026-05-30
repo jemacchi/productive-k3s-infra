@@ -18,11 +18,11 @@ Este camino está separado a propósito de `onprem-basic` para que los usuarios 
 ## Comandos principales
 
 ```bash
-make -C scenarios/onprem-basic-arm preflight
-make -C scenarios/onprem-basic-arm up
-make -C scenarios/onprem-basic-arm validate
-make -C scenarios/onprem-basic-arm status
-make -C scenarios/onprem-basic-arm clean
+make -C scenarios/edge/onprem-basic-arm preflight
+make -C scenarios/edge/onprem-basic-arm up
+make -C scenarios/edge/onprem-basic-arm validate
+make -C scenarios/edge/onprem-basic-arm status
+make -C scenarios/edge/onprem-basic-arm clean
 ```
 
 ## Caso público validado

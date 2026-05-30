@@ -6,7 +6,7 @@ SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 CASE_PREFIX="${CASE_PREFIX:-AWS}"
 export SCENARIO_DIR CASE_PREFIX
 
-SHARED_DIR="${SCENARIO_DIR}/../../ansible/roles/remote_cluster/files"
+SHARED_DIR="${SCENARIO_DIR}/../../../ansible/roles/remote_cluster/files"
 GENERATED_DIR="${SCENARIO_DIR}/generated"
 OPENTOFU_DIR="${SCENARIO_DIR}/opentofu"
 TOFU_OUTPUTS_JSON="${GENERATED_DIR}/tofu-outputs.json"

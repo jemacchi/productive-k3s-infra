@@ -19,6 +19,7 @@ docs/src/assets/images/favicon.ico
 .live-onprem-basic.*/
 .live-onprem-basic-github-host.*/
 scenarios/*/generated/
+scenarios/*/*/generated/
 test-artifacts/
 tests/artifacts/*
 tests/coverage/*
@@ -39,3 +40,6 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+.tmp/
+.tmp-*/
+.live-*/

@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 GENERATED_DIR="${SCENARIO_DIR}/generated"
 LOG_DIR="${GENERATED_DIR}/logs"
-REPO_ROOT="${REPO_ROOT:-$(cd "${SCENARIO_DIR}/../.." && pwd)}"
+REPO_ROOT="${REPO_ROOT:-$(cd "${SCENARIO_DIR}/../../.." && pwd)}"
 if [[ -r "${REPO_ROOT}/scripts/release-config.sh" ]]; then
   # shellcheck disable=SC1091
   source "${REPO_ROOT}/scripts/release-config.sh"
@@ -14,7 +14,7 @@ else
   : "${PRODUCTIVE_K3S_CORE_VERSION_DEFAULT:=0.9.1}"
   : "${PRODUCTIVE_K3S_RELEASE_REPO_DEFAULT:=jemacchi/productive-k3s-core}"
 fi
-PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../productive-k3s-core" && pwd)}"
+PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../../productive-k3s-core" && pwd)}"
 PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-${PRODUCTIVE_K3S_SOURCE_DEFAULT}}"
 PRODUCTIVE_K3S_VERSION="${PRODUCTIVE_K3S_VERSION:-}"
 if [[ -z "${PRODUCTIVE_K3S_VERSION}" && "${PRODUCTIVE_K3S_SOURCE}" == "remote" ]]; then

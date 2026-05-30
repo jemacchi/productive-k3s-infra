@@ -86,6 +86,7 @@ nav:
           - Guides:
               - en/developer-docs/guides/index.md
               - Project layout: en/developer-docs/guides/project-layout.md
+              - TGZ package architecture: en/developer-docs/guides/tgz-package-architecture.md
               - Ansible layer: en/developer-docs/guides/ansible.md
               - OpenTofu usage: en/developer-docs/guides/opentofu.md
               - Testing and matrix: en/developer-docs/guides/testing-and-matrix.md
@@ -115,6 +116,7 @@ nav:
           - Guías:
               - es/developer-docs/guides/index.md
               - Organización del proyecto: es/developer-docs/guides/project-layout.md
+              - Arquitectura de paquetes TGZ: es/developer-docs/guides/tgz-package-architecture.md
               - Capa de Ansible: es/developer-docs/guides/ansible.md
               - Uso de OpenTofu: es/developer-docs/guides/opentofu.md
               - Tests y matriz: es/developer-docs/guides/testing-and-matrix.md
