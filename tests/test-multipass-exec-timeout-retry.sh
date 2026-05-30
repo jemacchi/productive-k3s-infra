@@ -2,12 +2,12 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOURCE_DIR="${ROOT_DIR}/scenarios/multipass"
+SOURCE_DIR="${ROOT_DIR}/scenarios/local/multipass"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
 TEST_REPO_DIR="${TMP_DIR}/repo"
-TEST_SCENARIO_DIR="${TEST_REPO_DIR}/scenarios/multipass"
+TEST_SCENARIO_DIR="${TEST_REPO_DIR}/scenarios/local/multipass"
 mkdir -p "${TEST_SCENARIO_DIR}"
 cp -R "${SOURCE_DIR}/scripts" "${TEST_SCENARIO_DIR}/scripts"
 mkdir -p "${TEST_REPO_DIR}/scripts"

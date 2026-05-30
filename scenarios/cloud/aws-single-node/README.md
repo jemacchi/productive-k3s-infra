@@ -11,10 +11,10 @@ This scenario is intentionally simple. It is for validation and operator testing
 1. Copy the example env file:
 
 ```bash
-cp scenarios/aws-single-node/aws.env.example scenarios/aws-single-node/aws.env
+cp scenarios/cloud/aws-single-node/aws.env.example scenarios/cloud/aws-single-node/aws.env
 ```
 
-2. Fill at least these values in `scenarios/aws-single-node/aws.env`:
+2. Fill at least these values in `scenarios/cloud/aws-single-node/aws.env`:
 
 - `AWS_REGION`
 - `AWS_PROFILE` or `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY`
@@ -84,7 +84,7 @@ Required in AWS:
 ## Files In This Scenario
 
 ```text
-scenarios/aws-single-node/
+scenarios/cloud/aws-single-node/
   README.md
   aws.env.example
   aws-env-guide.md
@@ -125,8 +125,8 @@ At minimum, review:
 If you want the shortest practical operator flow:
 
 ```bash
-cp scenarios/aws-single-node/aws.env.example scenarios/aws-single-node/aws.env
-$EDITOR scenarios/aws-single-node/aws.env
+cp scenarios/cloud/aws-single-node/aws.env.example scenarios/cloud/aws-single-node/aws.env
+$EDITOR scenarios/cloud/aws-single-node/aws.env
 make aws-single-node
 make scenario-status SCENARIO=aws-single-node
 make scenario-down SCENARIO=aws-single-node
@@ -170,9 +170,9 @@ make scenario-infra-up SCENARIO=aws-single-node
 Run directly inside the scenario directory if you need lower-level control:
 
 ```bash
-make -C scenarios/aws-single-node infra-up
-make -C scenarios/aws-single-node validate
-make -C scenarios/aws-single-node clean
+make -C scenarios/cloud/aws-single-node infra-up
+make -C scenarios/cloud/aws-single-node validate
+make -C scenarios/cloud/aws-single-node clean
 ```
 
 Use the local checkout of `productive-k3s-core` instead of a remote release:

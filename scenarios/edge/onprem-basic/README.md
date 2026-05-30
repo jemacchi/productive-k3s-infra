@@ -37,7 +37,7 @@ If a target host is reachable but its Linux runtime is outside that set, `make p
 ## Structure
 
 ```text
-scenarios/onprem-basic/
+scenarios/edge/onprem-basic/
   Makefile
   README.md
   onprem.env.example
@@ -77,7 +77,7 @@ Required on each target machine:
 Copy the example file:
 
 ```bash
-cp scenarios/onprem-basic/onprem.env.example scenarios/onprem-basic/onprem.env
+cp scenarios/edge/onprem-basic/onprem.env.example scenarios/edge/onprem-basic/onprem.env
 ```
 
 Then edit `onprem.env`.
@@ -138,37 +138,37 @@ ONPREM_AGENT_IPS=192.168.1.11
 Run preflight only:
 
 ```bash
-make -C scenarios/onprem-basic preflight
+make -C scenarios/edge/onprem-basic preflight
 ```
 
 Run the full cluster path:
 
 ```bash
-make -C scenarios/onprem-basic up
+make -C scenarios/edge/onprem-basic up
 ```
 
 Run the full cluster path using the latest remote release:
 
 ```bash
-make -C scenarios/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote
+make -C scenarios/edge/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote
 ```
 
 Run the full cluster path using a pinned release:
 
 ```bash
-make -C scenarios/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.1
+make -C scenarios/edge/onprem-basic up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.1
 ```
 
 Inspect the resolved metadata:
 
 ```bash
-make -C scenarios/onprem-basic status
+make -C scenarios/edge/onprem-basic status
 ```
 
 Remove local generated metadata:
 
 ```bash
-make -C scenarios/onprem-basic clean
+make -C scenarios/edge/onprem-basic clean
 ```
 
 ## After Provisioning

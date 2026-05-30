@@ -39,13 +39,13 @@ build_bundle "${INCOMPLETE_ARCHIVE}" "productive-k3s-core-0.9.1" \
 (
   unset PRODUCTIVE_K3S_SOURCE PRODUCTIVE_K3S_VERSION PRODUCTIVE_K3S_RELEASE_REPO
   # shellcheck disable=SC1090
-  source "${ROOT_DIR}/scenarios/multipass/scripts/common.sh"
+  source "${ROOT_DIR}/scenarios/local/multipass/scripts/common.sh"
   validate_productive_k3s_bundle_archive "${FULL_ARCHIVE}"
 )
 
 (
   unset PRODUCTIVE_K3S_SOURCE PRODUCTIVE_K3S_VERSION PRODUCTIVE_K3S_RELEASE_REPO
-  export SCENARIO_DIR="${ROOT_DIR}/scenarios/onprem-basic"
+  export SCENARIO_DIR="${ROOT_DIR}/scenarios/edge/onprem-basic"
   export CASE_PREFIX="ONPREM"
   # shellcheck disable=SC1090
   source "${ROOT_DIR}/ansible/roles/remote_cluster/files/common.sh"
@@ -55,14 +55,14 @@ build_bundle "${INCOMPLETE_ARCHIVE}" "productive-k3s-core-0.9.1" \
 (
   unset PRODUCTIVE_K3S_SOURCE PRODUCTIVE_K3S_VERSION PRODUCTIVE_K3S_RELEASE_REPO
   # shellcheck disable=SC1090
-  source "${ROOT_DIR}/scenarios/onprem-basic-arm/scripts/common.sh"
+  source "${ROOT_DIR}/scenarios/edge/onprem-basic-arm/scripts/common.sh"
   validate_productive_k3s_bundle_archive "${FULL_ARCHIVE}"
 )
 
 if (
   unset PRODUCTIVE_K3S_SOURCE PRODUCTIVE_K3S_VERSION PRODUCTIVE_K3S_RELEASE_REPO
   # shellcheck disable=SC1090
-  source "${ROOT_DIR}/scenarios/multipass/scripts/common.sh"
+  source "${ROOT_DIR}/scenarios/local/multipass/scripts/common.sh"
   validate_productive_k3s_bundle_archive "${INCOMPLETE_ARCHIVE}"
 ) >/dev/null 2>&1; then
   printf '[FAIL] expected multipass bundle validation to reject incomplete productive-k3s-core bundle\n' >&2
@@ -71,7 +71,7 @@ fi
 
 if (
   unset PRODUCTIVE_K3S_SOURCE PRODUCTIVE_K3S_VERSION PRODUCTIVE_K3S_RELEASE_REPO
-  export SCENARIO_DIR="${ROOT_DIR}/scenarios/onprem-basic"
+  export SCENARIO_DIR="${ROOT_DIR}/scenarios/edge/onprem-basic"
   export CASE_PREFIX="ONPREM"
   # shellcheck disable=SC1090
   source "${ROOT_DIR}/ansible/roles/remote_cluster/files/common.sh"
@@ -84,7 +84,7 @@ fi
 if (
   unset PRODUCTIVE_K3S_SOURCE PRODUCTIVE_K3S_VERSION PRODUCTIVE_K3S_RELEASE_REPO
   # shellcheck disable=SC1090
-  source "${ROOT_DIR}/scenarios/onprem-basic-arm/scripts/common.sh"
+  source "${ROOT_DIR}/scenarios/edge/onprem-basic-arm/scripts/common.sh"
   validate_productive_k3s_bundle_archive "${INCOMPLETE_ARCHIVE}"
 ) >/dev/null 2>&1; then
   printf '[FAIL] expected onprem-basic-arm bundle validation to reject incomplete productive-k3s-core bundle\n' >&2

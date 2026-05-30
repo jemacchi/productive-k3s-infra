@@ -6,7 +6,7 @@ SCENARIO_DIR="${SCENARIO_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
 GENERATED_DIR="${SCENARIO_DIR}/generated"
 OPENTOFU_DIR="${SCENARIO_DIR}/opentofu"
 LOG_DIR="${GENERATED_DIR}/logs"
-REPO_ROOT="${REPO_ROOT:-$(cd "${SCENARIO_DIR}/../.." && pwd)}"
+REPO_ROOT="${REPO_ROOT:-$(cd "${SCENARIO_DIR}/../../.." && pwd)}"
 if [[ -r "${REPO_ROOT}/scripts/release-config.sh" ]]; then
   # shellcheck disable=SC1091
   source "${REPO_ROOT}/scripts/release-config.sh"
@@ -15,7 +15,7 @@ else
   : "${PRODUCTIVE_K3S_CORE_VERSION_DEFAULT:=0.9.1}"
   : "${PRODUCTIVE_K3S_RELEASE_REPO_DEFAULT:=jemacchi/productive-k3s-core}"
 fi
-PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../productive-k3s-core" && pwd)}"
+PRODUCTIVE_K3S_REPO="${PRODUCTIVE_K3S_REPO:-$(cd "${SCENARIO_DIR}/../../../../productive-k3s-core" && pwd)}"
 PRODUCTIVE_K3S_SOURCE="${PRODUCTIVE_K3S_SOURCE:-${PRODUCTIVE_K3S_SOURCE_DEFAULT}}"
 PRODUCTIVE_K3S_VERSION="${PRODUCTIVE_K3S_VERSION:-}"
 if [[ -z "${PRODUCTIVE_K3S_VERSION}" && "${PRODUCTIVE_K3S_SOURCE}" == "remote" ]]; then
@@ -43,6 +43,7 @@ MULTIPASS_SSH_USER="${MULTIPASS_SSH_USER:-ubuntu}"
 MULTIPASS_SSH_PORT="${MULTIPASS_SSH_PORT:-22}"
 MULTIPASS_SSH_KEY_DIR="${MULTIPASS_SSH_KEY_DIR:-${GENERATED_DIR}/ssh}"
 MULTIPASS_SSH_KEY_PATH="${MULTIPASS_SSH_KEY_PATH:-${MULTIPASS_SSH_KEY_DIR}/id_ed25519}"
+MULTIPASS_SSH_KNOWN_HOSTS_PATH="${MULTIPASS_SSH_KNOWN_HOSTS_PATH:-${MULTIPASS_SSH_KEY_DIR}/known_hosts}"
 CLUSTER_JSON="${GENERATED_DIR}/cluster.json"
 HOSTS_YML="${GENERATED_DIR}/hosts.yml"
 NODES_ENV="${GENERATED_DIR}/nodes.env"
@@ -475,15 +476,27 @@ mp_transfer_to() {
 ssh_args_array() {
   local out_name="$1"
   local -n out_ref="${out_name}"
+  mkdir -p "${MULTIPASS_SSH_KEY_DIR}"
+  touch "${MULTIPASS_SSH_KNOWN_HOSTS_PATH}"
   out_ref=(
     -o BatchMode=yes
     -o StrictHostKeyChecking=accept-new
     -o ConnectTimeout=10
+    -o UserKnownHostsFile="${MULTIPASS_SSH_KNOWN_HOSTS_PATH}"
     -p "${SSH_PORT}"
   )
   if [[ -n "${SSH_KEY_PATH:-}" ]]; then
     out_ref+=(-i "${SSH_KEY_PATH}")
   fi
+}
+
+refresh_ssh_known_host() {
+  local ip="$1"
+  [[ -n "${ip}" ]] || return 0
+  mkdir -p "${MULTIPASS_SSH_KEY_DIR}"
+  touch "${MULTIPASS_SSH_KNOWN_HOSTS_PATH}"
+  ssh-keygen -R "${ip}" -f "${MULTIPASS_SSH_KNOWN_HOSTS_PATH}" >/dev/null 2>&1 || true
+  ssh-keygen -R "[${ip}]:${SSH_PORT}" -f "${MULTIPASS_SSH_KNOWN_HOSTS_PATH}" >/dev/null 2>&1 || true
 }
 
 ssh_target() {
@@ -495,6 +508,7 @@ ssh_exec() {
   local ip="$1"
   local script="$2"
   local ssh_args=()
+  refresh_ssh_known_host "${ip}"
   ssh_args_array ssh_args
   ssh "${ssh_args[@]}" "$(ssh_target "${ip}")" "bash -lc $(printf '%q' "${script}")"
 }
@@ -510,6 +524,7 @@ ssh_exec_with_timeout() {
   local ssh_args=()
 
   while (( attempt <= max_attempts )); do
+    refresh_ssh_known_host "${ip}"
     ssh_args_array ssh_args
     set +e
     timeout --foreground "${timeout_seconds}s" ssh "${ssh_args[@]}" "$(ssh_target "${ip}")" "bash -lc $(printf '%q' "${script}")"

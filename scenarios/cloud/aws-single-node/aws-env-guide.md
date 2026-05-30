@@ -1,6 +1,6 @@
 # AWS Env Guide
 
-This guide explains how to fill `scenarios/aws-single-node/aws.env`.
+This guide explains how to fill `scenarios/cloud/aws-single-node/aws.env`.
 
 Use it together with:
 

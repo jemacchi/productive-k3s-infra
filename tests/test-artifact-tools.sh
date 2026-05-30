@@ -116,11 +116,11 @@ assert_contains "${root_clean_recipe}" "scripts/productive-k3s-infra-dev.sh test
 root_checkstatus_recipe="$(make -C "${REPO_DIR}" -n test-checkstatus)"
 assert_contains "${root_checkstatus_recipe}" "scripts/productive-k3s-infra-dev.sh test-checkstatus"
 
-scenario_clean_recipe="$(make -C "${REPO_DIR}/scenarios/multipass" -n test-clean)"
+scenario_clean_recipe="$(make -C "${REPO_DIR}/scenarios/local/multipass" -n test-clean)"
 assert_contains "${scenario_clean_recipe}" "TEST_SCENARIO=multipass"
 assert_contains "${scenario_clean_recipe}" "../../scripts/productive-k3s-infra-dev.sh test-clean"
 
-scenario_checkstatus_recipe="$(make -C "${REPO_DIR}/scenarios/multipass" -n test-checkstatus)"
+scenario_checkstatus_recipe="$(make -C "${REPO_DIR}/scenarios/local/multipass" -n test-checkstatus)"
 assert_contains "${scenario_checkstatus_recipe}" "TEST_SCENARIO=multipass"
 assert_contains "${scenario_checkstatus_recipe}" "../../scripts/productive-k3s-infra-dev.sh test-checkstatus"
 

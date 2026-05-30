@@ -7,10 +7,17 @@ El repositorio está organizado alrededor de profiles versionados como entrypoin
 ```text
 productive-k3s-infra/
   profiles/
+    cloud/
+    edge/
+    local/
   scenarios/
-    multipass/
-    onprem-basic/
-    aws-single-node/
+    cloud/
+      aws-single-node/
+    edge/
+      onprem-basic/
+      onprem-basic-arm/
+    local/
+      multipass/
   ansible/
     roles/
       remote_cluster/
@@ -44,3 +51,6 @@ Estos artefactos son parte del flujo porque exponen la vista resuelta en runtime
 
 !!! note
     Los usuarios públicos deberían arrancar hoy desde `profiles/` y el CLI orientado a profiles. `scenarios/` queda como la capa de implementación detrás de esos entrypoints.
+
+!!! note
+    Los paths canónicos ahora están orientados por categoría, por ejemplo `profiles/cloud/...` o `scenarios/edge/...`. Los paths legacy de nivel superior siguen disponibles como aliases de compatibilidad.

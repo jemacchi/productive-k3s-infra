@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMMON_SCRIPT="${ROOT_DIR}/scenarios/multipass/scripts/common.sh"
+COMMON_SCRIPT="${ROOT_DIR}/scenarios/local/multipass/scripts/common.sh"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
@@ -34,7 +34,7 @@ assert_file_equals() {
   fi
 }
 
-mkdir -p "${TMP_DIR}/bin" "${TMP_DIR}/requests" "${TMP_DIR}/repo/scenarios/multipass/generated"
+mkdir -p "${TMP_DIR}/bin" "${TMP_DIR}/requests" "${TMP_DIR}/repo/scenarios/local/multipass/generated"
 mkdir -p "${TMP_DIR}/repo/productive-k3s-core"
 
 cat > "${TMP_DIR}/bin/curl" <<'EOF'
@@ -76,7 +76,7 @@ export FAKE_CURL_COUNT_FILE="${TMP_DIR}/curl-count"
 export FAKE_CURL_REQUESTS_DIR="${TMP_DIR}/requests"
 printf '0' > "${FAKE_CURL_COUNT_FILE}"
 
-export SCENARIO_DIR="${TMP_DIR}/repo/scenarios/multipass"
+export SCENARIO_DIR="${TMP_DIR}/repo/scenarios/local/multipass"
 export REPO_ROOT="${ROOT_DIR}"
 export PRODUCTIVE_K3S_REPO="${TMP_DIR}/repo/productive-k3s-core"
 export TELEMETRY_ENABLED="true"

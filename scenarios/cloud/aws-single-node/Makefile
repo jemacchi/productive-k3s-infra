@@ -7,8 +7,9 @@ export SCENARIO_DIR
 export CASE_PREFIX := AWS
 GENERATED_DIR := $(SCENARIO_DIR)/generated
 SCRIPTS_DIR := $(SCENARIO_DIR)/scripts
-SHARED_SCRIPTS_DIR := $(SCENARIO_DIR)/../../ansible/roles/remote_cluster/files
-TESTS_DIR := $(SCENARIO_DIR)/../../tests
+SHARED_SCRIPTS_DIR := $(SCENARIO_DIR)/../../../ansible/roles/remote_cluster/files
+TESTS_DIR := $(SCENARIO_DIR)/../../../tests
+DEV_SCRIPTS_DIR := $(SCENARIO_DIR)/../../../scripts
 export REMOTE_CLUSTER_REFRESH_SCRIPT := $(SCRIPTS_DIR)/refresh-generated-artifacts.sh
 OPENTOFU_DIR := $(SCENARIO_DIR)/opentofu
 AWS_ENV_FILE ?= $(SCENARIO_DIR)/aws.env
@@ -99,19 +100,19 @@ status:
 	@cat $(GENERATED_DIR)/cluster.json
 
 test-clean:
-	TEST_SCENARIO=aws-single-node ../../scripts/productive-k3s-infra-dev.sh test-clean
+	TEST_SCENARIO=aws-single-node $(DEV_SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-clean
 
 test-checkstatus:
-	TEST_SCENARIO=aws-single-node ../../scripts/productive-k3s-infra-dev.sh test-checkstatus
+	TEST_SCENARIO=aws-single-node $(DEV_SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-checkstatus
 
 test-static:
-	bash ../../tests/run-scenario-test.sh static aws-single-node $(SCENARIO_DIR) scenario-test-static
+	bash $(TESTS_DIR)/run-scenario-test.sh static aws-single-node $(SCENARIO_DIR) scenario-test-static
 
 test-contract:
-	bash ../../tests/run-scenario-test.sh contract aws-single-node $(SCENARIO_DIR) scenario-test-contract
+	bash $(TESTS_DIR)/run-scenario-test.sh contract aws-single-node $(SCENARIO_DIR) scenario-test-contract
 
 test-live:
-	bash ../../tests/run-scenario-test.sh live aws-single-node $(SCENARIO_DIR) scenario-test-live
+	bash $(TESTS_DIR)/run-scenario-test.sh live aws-single-node $(SCENARIO_DIR) scenario-test-live
 
 scenario-test-static: tofu-init
 	bash -n $(SHARED_SCRIPTS_DIR)/*.sh $(SCRIPTS_DIR)/*.sh

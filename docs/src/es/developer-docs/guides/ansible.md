@@ -8,8 +8,8 @@ A pesar del nombre del directorio, la interfaz pública actual no es todavía un
 
 Consumidores actuales:
 
-- `scenarios/onprem-basic`
-- `scenarios/aws-single-node`
+- `scenarios/edge/onprem-basic`
+- `scenarios/cloud/aws-single-node`
 
 ## Qué cubre
 

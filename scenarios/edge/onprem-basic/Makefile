@@ -6,14 +6,15 @@ SCENARIO_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 export SCENARIO_DIR
 export CASE_PREFIX := ONPREM
 GENERATED_DIR := $(SCENARIO_DIR)/generated
-SCRIPTS_DIR := $(SCENARIO_DIR)/../../ansible/roles/remote_cluster/files
+SCRIPTS_DIR := $(SCENARIO_DIR)/../../../ansible/roles/remote_cluster/files
 LOCAL_SCRIPTS_DIR := $(SCENARIO_DIR)/scripts
-TESTS_DIR := $(SCENARIO_DIR)/../../tests
+TESTS_DIR := $(SCENARIO_DIR)/../../../tests
+DEV_SCRIPTS_DIR := $(SCENARIO_DIR)/../../../scripts
 ONPREM_ENV_FILE ?= $(SCENARIO_DIR)/onprem.env
 
 -include $(ONPREM_ENV_FILE)
 
-PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../productive-k3s-core)
+PRODUCTIVE_K3S_REPO ?= $(abspath $(SCENARIO_DIR)/../../../../productive-k3s-core)
 PRODUCTIVE_K3S_SOURCE ?= remote
 PRODUCTIVE_K3S_VERSION ?=
 PRODUCTIVE_K3S_RELEASE_REPO ?= jemacchi/productive-k3s-core
@@ -103,19 +104,19 @@ status:
 	@cat $(GENERATED_DIR)/cluster.json
 
 test-clean:
-	TEST_SCENARIO=onprem-basic ../../scripts/productive-k3s-infra-dev.sh test-clean
+	TEST_SCENARIO=onprem-basic $(DEV_SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-clean
 
 test-checkstatus:
-	TEST_SCENARIO=onprem-basic ../../scripts/productive-k3s-infra-dev.sh test-checkstatus
+	TEST_SCENARIO=onprem-basic $(DEV_SCRIPTS_DIR)/productive-k3s-infra-dev.sh test-checkstatus
 
 test-static:
-	bash ../../tests/run-scenario-test.sh static onprem-basic $(SCENARIO_DIR) scenario-test-static
+	bash $(TESTS_DIR)/run-scenario-test.sh static onprem-basic $(SCENARIO_DIR) scenario-test-static
 
 test-contract:
-	bash ../../tests/run-scenario-test.sh contract onprem-basic $(SCENARIO_DIR) scenario-test-contract
+	bash $(TESTS_DIR)/run-scenario-test.sh contract onprem-basic $(SCENARIO_DIR) scenario-test-contract
 
 test-live:
-	bash ../../tests/run-scenario-test.sh live onprem-basic $(SCENARIO_DIR) scenario-test-live
+	bash $(TESTS_DIR)/run-scenario-test.sh live onprem-basic $(SCENARIO_DIR) scenario-test-live
 
 scenario-test-static:
 	bash -n $(SCRIPTS_DIR)/*.sh

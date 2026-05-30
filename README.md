@@ -14,13 +14,18 @@ The current public scope includes:
 - reusable OpenTofu modules
 - reusable Ansible-side bootstrap assets
 
-The main implementation units are still organized as `scenarios/`, but user-facing configuration can now be expressed through versioned profiles under `profiles/`.
+The main implementation units are still organized as `scenarios/`, but public distribution is now package-first through self-contained `profile.tgz` artifacts. Source-based profiles under `profiles/` remain part of the repository authoring and testing workflow.
 
-The repository also exposes a public release CLI entrypoint:
+The repository now exposes two distinct surfaces:
+
+- public runtime surface: packaged `profile.tgz`
+- development surface: source-based `.env` profiles plus the scenario tree
+
+Public runtime examples:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate-profile --profile ./profiles/on-prem/basic.env
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/multipass/1-server-2-agents.env
+./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
 ```
 
 Release tags are composite:
@@ -30,12 +35,12 @@ Release tags are composite:
 
 When you execute `productive-k3s-infra-cli.sh` from a GitHub Release, it defaults to `PRODUCTIVE_K3S_SOURCE=remote` and enforces the bound `productive-k3s-core` version from the tag.
 
-For local operator convenience, the root `Makefile` now also exposes:
+For local development convenience, the root `Makefile` still exposes source-based flows such as:
 
 - `make infra-list-profiles`
-- `make infra-validate-profile PROFILE=profiles/on-prem/basic.env`
-- `make infra-validate PROFILE=profiles/on-prem/basic.env`
-- `make infra-apply PROFILE=profiles/multipass/1-server-2-agents.env`
+- `make infra-validate-profile PROFILE=profiles/edge/on-prem/basic.env`
+- `make infra-validate PROFILE=profiles/edge/on-prem/basic.env`
+- `make infra-apply PROFILE=profiles/local/multipass/1-server-2-agents.env`
 - generic scenario dispatch such as `make scenario-up SCENARIO=aws-single-node`
 - scenario shortcuts such as `make multipass`, `make onprem`, and `make aws-single-node` for direct `up` workflows
 

@@ -26,6 +26,22 @@ passes=()
 skips=()
 fails=()
 
+scenario_rel_dir() {
+  case "$1" in
+    multipass) printf 'scenarios/local/multipass\n' ;;
+    onprem-basic) printf 'scenarios/edge/onprem-basic\n' ;;
+    onprem-basic-arm) printf 'scenarios/edge/onprem-basic-arm\n' ;;
+    aws-single-node) printf 'scenarios/cloud/aws-single-node\n' ;;
+    *)
+      if [[ -d "${ROOT_DIR}/scenarios/$1" ]]; then
+        printf 'scenarios/%s\n' "$1"
+      else
+        return 1
+      fi
+      ;;
+  esac
+}
+
 json_escape() {
   printf '%s' "$1" | sed \
     -e 's/\\/\\\\/g' \
@@ -221,7 +237,7 @@ write_run_manifest() {
   local skip_reason="${7:-}"
 
   scenario_metadata "${scenario}" "${LEVEL}"
-  resolve_effective_productive_k3s_metadata "${ROOT_DIR}/scenarios/${scenario}"
+  resolve_effective_productive_k3s_metadata "${ROOT_DIR}/$(scenario_rel_dir "${scenario}")"
 
   mkdir -p "${RUNS_DIR}"
   {
@@ -279,7 +295,7 @@ write_run_manifest() {
 
 for scenario in "$@"; do
   target="scenario-test-${LEVEL}"
-  scenario_dir="${ROOT_DIR}/scenarios/${scenario}"
+  scenario_dir="${ROOT_DIR}/$(scenario_rel_dir "${scenario}")"
   log_file="$(mktemp)"
   manifest_file="${RUNS_DIR}/${MATRIX_RUN_ID}-${scenario}.json"
   started_at="$(date -Iseconds)"
@@ -350,7 +366,7 @@ summary_engine_mode="native"
 summary_resolved_from_cluster_json="false"
 first_pass_scenario="${passes[0]:-}"
 if [[ -n "${first_pass_scenario}" ]]; then
-  resolve_effective_productive_k3s_metadata "${ROOT_DIR}/scenarios/${first_pass_scenario}"
+  resolve_effective_productive_k3s_metadata "${ROOT_DIR}/$(scenario_rel_dir "${first_pass_scenario}")"
   summary_source_mode="${EFFECTIVE_PRODUCTIVE_K3S_SOURCE}"
   summary_source_version="${EFFECTIVE_PRODUCTIVE_K3S_VERSION}"
   summary_release_repo="${EFFECTIVE_PRODUCTIVE_K3S_RELEASE_REPO}"

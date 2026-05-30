@@ -249,5 +249,5 @@ jobs:
           name: pr-validation-live-onprem-github-host-artifacts
           path: |
             productive-k3s-infra/test-artifacts
-            productive-k3s-infra/scenarios/onprem-basic/generated
+            productive-k3s-infra/scenarios/edge/onprem-basic/generated
           if-no-files-found: ignore

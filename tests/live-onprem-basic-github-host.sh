@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCENARIO_DIR="${ROOT_DIR}/scenarios/onprem-basic"
+SCENARIO_DIR="${ROOT_DIR}/scenarios/edge/onprem-basic"
 SCENARIO_SCRIPTS_DIR="${SCENARIO_DIR}/scripts"
 WORK_DIR="$(mktemp -d "${ROOT_DIR}/.live-onprem-basic-github-host.XXXXXX")"
 ENV_FILE="${WORK_DIR}/onprem.env"

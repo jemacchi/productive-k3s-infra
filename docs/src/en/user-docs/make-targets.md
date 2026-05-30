@@ -1,12 +1,15 @@
 # Make Targets
 
-`make` is the public operator interface of this repository.
+`make` is the main development and source-based operator interface of this repository.
 
-The public release artifact now exposes the profile-driven contract through:
+The public runtime contract is package-first:
 
 ```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- <command> --profile <file>
+./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
 ```
+
+The `make infra-*` targets below remain intentionally source-based and are aimed at repository development and testing.
 
 ## Root-level targets
 
@@ -21,7 +24,7 @@ curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/produ
 | `make test-static` | Run static checks across all public scenarios |
 | `make test-contract` | Run contract checks across all public scenarios |
 | `make test-live` | Run live validations across all public scenarios |
-| `make test-live-onprem-arm` | Run only the public ARM live validation through `scenarios/onprem-basic-arm` |
+| `make test-live-onprem-arm` | Run only the public ARM live validation through `scenarios/edge/onprem-basic-arm` |
 | `make test-live-gha-onprem` | Run the GitHub-hosted single-node `onprem-basic` live validation |
 | `make test-aws-localstack-contract` | Run the AWS single-node infrastructure contract validation against LocalStack |
 | `make test-matrix` | Run `static`, `contract`, and `live` in sequence |

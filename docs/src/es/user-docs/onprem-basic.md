@@ -14,11 +14,11 @@
 ## Comandos principales
 
 ```bash
-make -C scenarios/onprem-basic preflight
-make -C scenarios/onprem-basic up
-make -C scenarios/onprem-basic validate
-make -C scenarios/onprem-basic status
-make -C scenarios/onprem-basic clean
+make -C scenarios/edge/onprem-basic preflight
+make -C scenarios/edge/onprem-basic up
+make -C scenarios/edge/onprem-basic validate
+make -C scenarios/edge/onprem-basic status
+make -C scenarios/edge/onprem-basic clean
 ```
 
 ## Qué hace `make up`

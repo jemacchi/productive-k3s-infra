@@ -40,7 +40,7 @@ The broader shared remote bootstrap matrix still includes:
 ## Structure
 
 ```text
-scenarios/onprem-basic-arm/
+scenarios/edge/onprem-basic-arm/
   Makefile
   README.md
   onprem.env.example
@@ -83,7 +83,7 @@ For Raspberry Pi and similar ARM hosts, see `docs/src/en/user-docs/arm-support.m
 Copy the example file:
 
 ```bash
-cp scenarios/onprem-basic-arm/onprem.env.example scenarios/onprem-basic-arm/onprem.env
+cp scenarios/edge/onprem-basic-arm/onprem.env.example scenarios/edge/onprem-basic-arm/onprem.env
 ```
 
 Then edit `onprem.env`.
@@ -114,37 +114,37 @@ When this scenario is executed through a published `productive-k3s-infra-cli.sh`
 Run preflight only:
 
 ```bash
-make -C scenarios/onprem-basic-arm preflight
+make -C scenarios/edge/onprem-basic-arm preflight
 ```
 
 Run the full cluster path:
 
 ```bash
-make -C scenarios/onprem-basic-arm up
+make -C scenarios/edge/onprem-basic-arm up
 ```
 
 Run the full cluster path using the latest remote release:
 
 ```bash
-make -C scenarios/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote
+make -C scenarios/edge/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote
 ```
 
 Pin a specific remote `productive-k3s-core` release:
 
 ```bash
-make -C scenarios/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.1
+make -C scenarios/edge/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.1
 ```
 
 Inspect the resolved metadata:
 
 ```bash
-make -C scenarios/onprem-basic-arm status
+make -C scenarios/edge/onprem-basic-arm status
 ```
 
 Remove local generated metadata:
 
 ```bash
-make -C scenarios/onprem-basic-arm clean
+make -C scenarios/edge/onprem-basic-arm clean
 ```
 
 ## Notes

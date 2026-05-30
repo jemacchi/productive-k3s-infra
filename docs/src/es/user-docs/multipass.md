@@ -11,13 +11,13 @@
 ## Comandos principales
 
 ```bash
-make -C scenarios/multipass infra-up
-make -C scenarios/multipass cluster-up
-make -C scenarios/multipass up
-make -C scenarios/multipass validate
-make -C scenarios/multipass status
-make -C scenarios/multipass down
-make -C scenarios/multipass clean
+make -C scenarios/local/multipass infra-up
+make -C scenarios/local/multipass cluster-up
+make -C scenarios/local/multipass up
+make -C scenarios/local/multipass validate
+make -C scenarios/local/multipass status
+make -C scenarios/local/multipass down
+make -C scenarios/local/multipass clean
 ```
 
 ## Qué hace `make up`

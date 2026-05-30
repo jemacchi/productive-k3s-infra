@@ -2,19 +2,19 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOURCE_DIR="${ROOT_DIR}/scenarios/multipass"
+SOURCE_DIR="${ROOT_DIR}/scenarios/local/multipass"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
 TEST_REPO_DIR="${TMP_DIR}/repo"
-TEST_SCENARIO_DIR="${TEST_REPO_DIR}/scenarios/multipass"
+TEST_SCENARIO_DIR="${TEST_REPO_DIR}/scenarios/local/multipass"
 mkdir -p "${TEST_SCENARIO_DIR}"
 cp -R "${SOURCE_DIR}/scripts" "${TEST_SCENARIO_DIR}/scripts"
 mkdir -p "${TEST_REPO_DIR}/scripts"
 cp "${ROOT_DIR}/scripts/release-config.sh" "${TEST_REPO_DIR}/scripts/release-config.sh"
 mkdir -p "${TMP_DIR}/productive-k3s-core"
 
-FAKE_CLOUD_INIT_DIR="${TMP_DIR}/cache/pk3s/bundles/infra/0.9.3-0.9.1/productive-k3s-infra-0.9.3-0.9.1/scenarios/multipass/opentofu/cloud-init"
+FAKE_CLOUD_INIT_DIR="${TMP_DIR}/cache/pk3s/bundles/infra/0.9.3-0.9.1/productive-k3s-infra-0.9.3-0.9.1/scenarios/local/multipass/opentofu/cloud-init"
 mkdir -p "${FAKE_CLOUD_INIT_DIR}"
 FAKE_CLOUD_INIT_FILE="${FAKE_CLOUD_INIT_DIR}/server.yaml"
 cat > "${FAKE_CLOUD_INIT_FILE}" <<'EOF'

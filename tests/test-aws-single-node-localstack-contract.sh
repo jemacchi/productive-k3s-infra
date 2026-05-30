@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCENARIO_SRC_DIR="${ROOT_DIR}/scenarios/aws-single-node"
+SCENARIO_SRC_DIR="${ROOT_DIR}/scenarios/cloud/aws-single-node"
 TOFU_BIN="${TOFU_BIN:-$(command -v tofu || command -v terraform || true)}"
 LOCALSTACK_ENDPOINT="${LOCALSTACK_ENDPOINT:-http://localhost:4566}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
@@ -57,8 +57,8 @@ PY
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 TEMP_REPO_ROOT="${TMP_DIR}/repo"
-SCENARIO_DIR="${TEMP_REPO_ROOT}/scenarios/aws-single-node"
-mkdir -p "${TEMP_REPO_ROOT}/scenarios/aws-single-node" "${TEMP_REPO_ROOT}/ansible/roles/remote_cluster"
+SCENARIO_DIR="${TEMP_REPO_ROOT}/scenarios/cloud/aws-single-node"
+mkdir -p "${TEMP_REPO_ROOT}/scenarios/cloud/aws-single-node" "${TEMP_REPO_ROOT}/ansible/roles/remote_cluster"
 cp -R "${SCENARIO_SRC_DIR}/." "${SCENARIO_DIR}/"
 cp -R "${ROOT_DIR}/ansible/roles/remote_cluster/files" "${TEMP_REPO_ROOT}/ansible/roles/remote_cluster/"
 

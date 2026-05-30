@@ -81,7 +81,7 @@ Ese workflow corre cuando un pull request apuntando a `main` se cierra en estado
 3. hace checkout del repo hermano `productive-k3s-core`
 4. ejecuta `make test-live-gha-onprem`
 
-El job live prepara `openssh-server` sobre el runner hospedado por GitHub y luego ejercita `scenarios/onprem-basic` contra `127.0.0.1` como host remoto single-node.
+El job live prepara `openssh-server` sobre el runner hospedado por GitHub y luego ejercita `scenarios/edge/onprem-basic` contra `127.0.0.1` como host remoto single-node.
 
 Cuando la revisión checkout del repo hermano `productive-k3s-core` ya incluye `scripts/preflight-host.sh`, ese mismo camino hosted también ejercita el host preflight remoto de Productive K3S Core antes de que empiece el bootstrap.
 

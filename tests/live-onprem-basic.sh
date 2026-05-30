@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCENARIO_DIR="${SCENARIO_DIR:-${ROOT_DIR}/scenarios/onprem-basic}"
+SCENARIO_DIR="${SCENARIO_DIR:-${ROOT_DIR}/scenarios/edge/onprem-basic}"
 WORK_DIR="$(mktemp -d "${ROOT_DIR}/.live-onprem-basic.XXXXXX")"
 STAMP="$(date +%Y%m%d%H%M%S)"
 SERVER_NAME="productive-k3s-core-test-onprem-server-${STAMP}"
@@ -114,8 +114,13 @@ launch_instance() {
       return 0
     fi
 
-    if grep -Fq 'Remote "" is unknown or unreachable.' "${stderr_file}" && (( attempt < attempts )); then
-      warn "multipass launch hit a transient remote resolution error for ${name}; retrying (${attempt}/${attempts})"
+    if (( attempt < attempts )); then
+      if grep -Fq 'Remote "" is unknown or unreachable.' "${stderr_file}"; then
+        warn "multipass launch hit a transient remote resolution error for ${name}; retrying (${attempt}/${attempts})"
+      else
+        warn "multipass launch failed for ${name}; retrying (${attempt}/${attempts})"
+        cat "${stderr_file}" >&2
+      fi
       multipass list >/dev/null 2>&1 || true
       sleep "${MULTIPASS_LAUNCH_RETRY_DELAY_SECONDS}"
       ((attempt++))

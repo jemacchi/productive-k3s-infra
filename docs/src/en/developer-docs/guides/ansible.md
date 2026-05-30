@@ -8,8 +8,8 @@ Despite the directory name, the current public interface is not a full playbook-
 
 Current consumers:
 
-- `scenarios/onprem-basic`
-- `scenarios/aws-single-node`
+- `scenarios/edge/onprem-basic`
+- `scenarios/cloud/aws-single-node`
 
 ## What it covers
 

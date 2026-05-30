@@ -4,9 +4,9 @@
 
 ## Elegí el profile correcto
 
-- `profiles/multipass/...`: clúster local de tres nodos sobre VMs de Multipass
-- `profiles/on-prem/...`: bootstrap de hosts existentes por `SSH`
-- `profiles/aws-single-node/...`: provisioning de una instancia `EC2` con `OpenTofu` y bootstrap remoto
+- `multipass-1-server-2-agents`: clúster local de tres nodos sobre VMs de Multipass
+- `on-prem-basic` / `on-prem-arm`: bootstrap de hosts existentes por `SSH`
+- `aws-single-node-basic`: provisioning de una instancia `EC2` con `OpenTofu` y bootstrap remoto
 
 ## Entendé el contrato de ejecución
 
@@ -66,29 +66,33 @@ El segmento `A.B.C` sale del tag de release de infra `X.Y.Z-A.B.C`.
 
 La interfaz pública para operar el repo es:
 
-- el CLI de release: `productive-k3s-infra-cli.sh`
-- atajos locales `make infra-*` en el root del repositorio
-- comandos directos `make -C scenarios/...` cuando quieras trabajar explícitamente dentro de un escenario
+- comandos runtime basados en paquetes sobre `productive-k3s-infra.sh`
+- resolución de paquetes desde herramientas de nivel superior como `pk3s`
 
-Ejemplos con el CLI de release:
-
-```bash
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- validate-profile --profile ./profiles/on-prem/basic.env
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- plan --profile ./profiles/multipass/1-server-2-agents.env
-curl -fsSL https://github.com/<owner>/<repo>/releases/download/X.Y.Z-A.B.C/productive-k3s-infra-cli.sh | bash -s -- apply --profile ./profiles/aws-single-node/basic.env
-```
-
-Atajos del Makefile root:
+Ejemplos de runtime público:
 
 ```bash
-make infra-list-profiles
-make infra-validate-profile PROFILE=profiles/on-prem/basic.env
-make infra-validate PROFILE=profiles/on-prem/basic.env
-make infra-plan PROFILE=profiles/multipass/1-server-2-agents.env
-make infra-apply PROFILE=profiles/aws-single-node/basic.env
+./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
+pk3s profile validate multipass-1-server-2-agents
+pk3s infra install aws-single-node-basic
 ```
 
-Usá `validate-profile` cuando sólo quieras chequear que el contrato del `.env` sea válido. Usá `validate` cuando quieras la validación específica del escenario después del provisioning, que puede requerir estado generado como inventarios o metadata del clúster.
+## Usá los entrypoints de desarrollo
+
+Los profiles `.env` siguen siendo válidos para desarrollo del repositorio, CI y workflows de authoring.
+
+Ejemplos de desarrollo:
+
+```bash
+./productive-k3s-infra.sh dev profile validate --profile-env ./profiles/edge/on-prem/basic.env
+./productive-k3s-infra.sh dev profile plan --profile-env ./profiles/local/multipass/1-server-2-agents.env
+./productive-k3s-infra.sh dev profile apply --profile-env ./profiles/cloud/aws-single-node/basic.env
+make infra-validate PROFILE=profiles/edge/on-prem/basic.env
+make infra-plan PROFILE=profiles/local/multipass/1-server-2-agents.env
+```
+
+Usá `dev profile validate` cuando sólo quieras chequear que el contrato del `.env` sea válido. Usá `validate` del escenario o el target correspondiente de `make` cuando quieras la validación específica del escenario después del provisioning, que puede requerir estado generado como inventarios o metadata del clúster.
 
 Patrones habituales de comandos por escenario:
 

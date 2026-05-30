@@ -109,7 +109,7 @@ EOF
 printf "%s\n" "$*"
 EOF
       chmod +x "${mock_bin}/make"
-      mkdir -p "${repo_dir}/scenarios/multipass"
+      mkdir -p "${repo_dir}/scenarios/local/multipass"
       export PATH="${mock_bin}:${PATH}"
       MAKE_BIN=make
       REPO_DIR="${repo_dir}"
@@ -118,7 +118,7 @@ EOF
       printf "\n__CTX__%s|%s|%s" "$TELEMETRY_PARENT_RUN_ID" "$TELEMETRY_RUN_ID" "$TELEMETRY_COMPONENT"'
     The status should equal 0
     The output should include '-C '
-    The output should include 'scenarios/multipass'
+    The output should include 'scenarios/local/multipass'
     The output should include 'down'
     The output should include '--foo'
     The output should include '__CTX__run-123||infra'

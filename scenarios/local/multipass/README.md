@@ -29,7 +29,7 @@ Networking model:
 ## Structure
 
 ```text
-scenarios/multipass/
+scenarios/local/multipass/
   Makefile
   README.md
   generated/
