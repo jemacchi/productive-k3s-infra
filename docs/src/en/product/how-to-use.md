@@ -73,10 +73,12 @@ Public runtime examples:
 
 ```bash
 ./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
-./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz --env-file ./aws.env
 pk3s profile validate multipass-1-server-2-agents
-pk3s infra install aws-single-node-basic
+pk3s infra install aws-single-node-basic --env-file ./aws.env
 ```
+
+The `profile.env` embedded in a public `profile.tgz` is treated as the package base/default file, not as the final installation-specific configuration. `profile.yaml` declares `spec.inputs` metadata so the runtime can enforce which values may come from package defaults and which ones must come from the invoking machine. Using a packaged profile without local overrides only makes sense for self-contained targets such as local host-driven scenarios. For real installations, especially cloud and on-prem targets, provide local overrides from the invoking machine through `--env-file`.
 
 ## Use the development entry points
 

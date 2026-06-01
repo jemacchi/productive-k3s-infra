@@ -75,6 +75,26 @@ assert_json_field "$BUNDLE_INFO" '.cli_entrypoint' 'productive-k3s-infra.sh'
 assert_json_field "$BUNDLE_INFO" '.platform' 'any'
 assert_json_field "$BUNDLE_INFO" '.api_compatibility.contract' 'productive-k3s-cli-bundle-info/v1'
 
+BOM_INFO="$(bash "$CLI" bom --json)"
+assert_json_field "$BOM_INFO" '.schema_version' '1'
+assert_json_field "$BOM_INFO" '.bom_type' 'productive-k3s-cli-bom/v1'
+assert_json_field "$BOM_INFO" '.cli.name' 'productive-k3s-infra'
+assert_json_field "$BOM_INFO" '.cli.entrypoint' 'productive-k3s-infra.sh'
+assert_json_field "$BOM_INFO" '.implementation.language' 'bash'
+assert_json_field "$BOM_INFO" '.bundle.bundle_name' 'productive-k3s-infra'
+assert_json_field "$BOM_INFO" '.bundle.api_compatibility.contract' 'productive-k3s-cli-bundle-info/v1'
+assert_json_field "$BOM_INFO" '.productive_k3s.default_source' 'remote'
+assert_json_field "$BOM_INFO" '.productive_k3s.default_core_version' '0.9.2'
+assert_contains "$BOM_INFO" '"name": "bash"'
+assert_contains "$BOM_INFO" '"min_version": "5.1"'
+assert_contains "$BOM_INFO" '"name": "make"'
+assert_contains "$BOM_INFO" '"min_version": "4.3"'
+assert_contains "$BOM_INFO" '"name": "multipass"'
+assert_contains "$BOM_INFO" '"min_version": "1.14"'
+assert_contains "$BOM_INFO" '"runtime_targets"'
+assert_contains "$BOM_INFO" '"onprem-basic"'
+assert_contains "$BOM_INFO" '"aws-single-node"'
+
 OUTPUT_FILE="${TMP_DIR}/multipass.out"
 PRODUCTIVE_K3S_INFRA_MAKE_BIN="$STUB_MAKE" \
 PRODUCTIVE_K3S_INFRA_TEST_OUTPUT="$OUTPUT_FILE" \
@@ -256,6 +276,10 @@ assert_contains "$(cat "$OUTPUT_FILE")" "PRODUCTIVE_K3S_SOURCE=remote"
 
 RELEASE_BUNDLE_INFO="$(PRODUCTIVE_K3S_INFRA_REPO_DIR="${RELEASE_REPO}" bash "${RELEASE_REPO}/productive-k3s-infra.sh" bundle info --json)"
 assert_json_field "$RELEASE_BUNDLE_INFO" '.bundle_version' '1.2.3-4.5.6'
+
+RELEASE_BOM_INFO="$(PRODUCTIVE_K3S_INFRA_REPO_DIR="${RELEASE_REPO}" bash "${RELEASE_REPO}/productive-k3s-infra.sh" bom --json)"
+assert_json_field "$RELEASE_BOM_INFO" '.bundle.bundle_version' '1.2.3-4.5.6'
+assert_json_field "$RELEASE_BOM_INFO" '.productive_k3s.bound_core_version' '4.5.6'
 
 if PRODUCTIVE_K3S_INFRA_REPO_DIR="${RELEASE_REPO}" \
   PRODUCTIVE_K3S_INFRA_MAKE_BIN="$STUB_MAKE" \

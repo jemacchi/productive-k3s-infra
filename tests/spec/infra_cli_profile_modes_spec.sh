@@ -168,6 +168,7 @@ EOF
     pkg_dir="${work_dir}/pkg"
     archive="${work_dir}/demo-profile.tgz"
     marker="${work_dir}/installed.txt"
+    state_dir="${work_dir}/state"
     mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
     cat >"${pkg_dir}/profile.env" <<'EOF'
 PK3S_INFRA_PROFILE_NAME=demo
@@ -176,6 +177,20 @@ PK3S_INFRA_ENGINE=ansible
 ONPREM_SERVER_IP=10.0.0.10
 ONPREM_SSH_USER=ubuntu
 ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic/generated"
+    cat >"${pkg_dir}/scenarios/edge/onprem-basic/generated/cluster.json" <<'EOF'
+{
+  "server_url": "https://10.0.0.10:6443",
+  "ssh": {
+    "user": "ubuntu",
+    "port": 22,
+    "key_path": "/tmp/id_ed25519"
+  },
+  "server": {
+    "ipv4": "10.0.0.10"
+  }
+}
 EOF
     cat >"${pkg_dir}/profile.yaml" <<EOF
 apiVersion: infra.productive-k3s.io/v1
@@ -198,10 +213,249 @@ EOF
     chmod +x "${pkg_dir}/scripts/install.sh"
     tar -czf "${archive}" -C "${pkg_dir}" .
 
-    When run bash -lc '"$1" profile install --tgz "$2"; test -f "$3" && printf "\n__MARKER__\n" && cat "$3"' bash "$SCRIPT" "$archive" "$marker"
+    When run bash -lc 'PK3S_PROFILE_STATE_DIR="$4" "$1" profile install --tgz "$2"; test -f "$3" && printf "\n__MARKER__\n" && cat "$3"; test -f "$4/demo.json" && printf "\n__STATE__\n" && cat "$4/demo.json"' bash "$SCRIPT" "$archive" "$marker" "$state_dir"
     The status should equal 0
     The output should include '__MARKER__'
     The output should include 'installed'
+    The output should include '__STATE__'
+    The output should include '"server_url": "https://10.0.0.10:6443"'
+  End
+
+  It 'lets a local env file override packaged profile env values'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/installed.txt"
+    override_env="${work_dir}/override.env"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+EOF
+    cat >"${override_env}" <<'EOF'
+ONPREM_SERVER_IP=10.9.9.9
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' "\${ONPREM_SERVER_IP}" >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2" --env-file "$3"; cat "$4"' bash "$SCRIPT" "$archive" "$override_env" "$marker"
+    The status should equal 0
+    The output should include '10.9.9.9'
+  End
+
+  It 'accepts profile override env from the pk3s forwarded environment variable'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/installed.txt"
+    override_env="${work_dir}/override.env"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+EOF
+    cat >"${override_env}" <<'EOF'
+ONPREM_SERVER_IP=10.8.8.8
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' "\${ONPREM_SERVER_IP}" >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PK3S_PROFILE_OVERRIDE_ENV_FILE="$3" "$1" profile install --tgz "$2"; cat "$4"' bash "$SCRIPT" "$archive" "$override_env" "$marker"
+    The status should equal 0
+    The output should include '10.8.8.8'
+  End
+
+  It 'warns when a non-local packaged profile is executed without local overrides'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/installed.txt"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  inputs:
+    - name: ONPREM_SERVER_IP
+      required: false
+      sensitive: false
+      source: local-override
+      description: Server host or IP for the on-prem cluster
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf 'installed\n' >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include "Running packaged profile 'demo' without local overrides"
+    The output should include 'pass installation-specific values from the invoking machine with --env-file <file>'
+  End
+
+  It 'rejects packaged profile install when a required local-override input is not provided'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mkdir -p "${pkg_dir}/scenarios/cloud/aws-single-node" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=aws-single-node
+PK3S_INFRA_ENGINE=opentofu
+AWS_REGION=us-east-1
+AWS_KEY_PAIR_NAME=your-existing-keypair
+AWS_SSH_KEY_PATH=/absolute/path/to/your-key.pem
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: aws-single-node
+  engine:
+    type: opentofu
+  inputs:
+    - name: AWS_KEY_PAIR_NAME
+      required: true
+      sensitive: false
+      source: local-override
+      description: Existing AWS key pair name
+    - name: AWS_SSH_KEY_PATH
+      required: true
+      sensitive: false
+      source: local-override
+      description: Local absolute path to the matching private key
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2"' bash "$SCRIPT" "$archive"
+    The status should equal 4
+    The stderr should include 'required packaged profile inputs must be provided through --env-file'
+    The stderr should include 'AWS_KEY_PAIR_NAME'
+    The stderr should include 'AWS_SSH_KEY_PATH'
+  End
+
+  It 'accepts packaged profile install when required local-override inputs are provided'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/installed.txt"
+    override_env="${work_dir}/override.env"
+    mkdir -p "${pkg_dir}/scenarios/cloud/aws-single-node" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=aws-single-node
+PK3S_INFRA_ENGINE=opentofu
+AWS_REGION=us-east-1
+AWS_KEY_PAIR_NAME=your-existing-keypair
+AWS_SSH_KEY_PATH=/absolute/path/to/your-key.pem
+EOF
+    cat >"${override_env}" <<'EOF'
+AWS_KEY_PAIR_NAME=real-keypair
+AWS_SSH_KEY_PATH=/tmp/real.pem
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: aws-single-node
+  engine:
+    type: opentofu
+  inputs:
+    - name: AWS_KEY_PAIR_NAME
+      required: true
+      sensitive: false
+      source: local-override
+      description: Existing AWS key pair name
+    - name: AWS_SSH_KEY_PATH
+      required: true
+      sensitive: false
+      source: local-override
+      description: Local absolute path to the matching private key
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf '%s|%s\n' "\${AWS_KEY_PAIR_NAME}" "\${AWS_SSH_KEY_PATH}" >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc '"$1" profile install --tgz "$2" --env-file "$3"; cat "$4"' bash "$SCRIPT" "$archive" "$override_env" "$marker"
+    The status should equal 0
+    The output should include 'real-keypair|/tmp/real.pem'
   End
 
   It 'executes profile apply from a tgz package through the packaged installer'

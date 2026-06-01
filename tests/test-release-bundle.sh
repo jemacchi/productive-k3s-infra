@@ -19,6 +19,7 @@ git -C "${ROOT_DIR}" tag "${TAG_NAME}" HEAD
 
 ARCHIVE_PATH="$(bash "${ROOT_DIR}/scripts/build-release-bundle.sh" "${TAG_NAME}" "${TMP_DIR}")"
 ARCHIVE_NAME="$(basename "${ARCHIVE_PATH}")"
+tar -xzf "${ARCHIVE_PATH}" -C "${TMP_DIR}"
 
 assert_contains() {
   local haystack="$1"
@@ -44,34 +45,19 @@ assert_not_contains() {
 }
 
 LISTING="$(tar -tzf "${ARCHIVE_PATH}")"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/Makefile"
 assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/README.md"
 assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/LICENSE"
 assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/productive-k3s-infra.sh"
 assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/productive-k3s-infra.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/productive-k3s-infra-dev.sh"
 assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/release-config.sh"
 assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/release.env"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/profiles/edge/on-prem/basic.env"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scenarios/local/multipass/Makefile"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scenarios/local/multipass/opentofu/cloud-init/server.yaml"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scenarios/local/multipass/opentofu/cloud-init/agent-1.yaml"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scenarios/local/multipass/opentofu/cloud-init/agent-2.yaml"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/bootstrap-agents.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/bootstrap-server.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/bootstrap-stack.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/cluster-up.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/common.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/preflight-productive-k3s-core.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/preflight.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/push-productive-k3s-core.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/reconcile-cluster-defaults.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/refresh-generated-artifacts.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/run_remote_bootstrap_session.py"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/sync-hosts.sh"
-assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/roles/remote_cluster/files/validate-cluster.sh"
+assert_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/send-telemetry-event.sh"
 assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/.github/"
-assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/install-release-template.sh"
+assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/Makefile"
+assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/profiles/"
+assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scenarios/"
+assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/ansible/"
+assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/scripts/productive-k3s-infra-dev.sh"
 assert_not_contains "${LISTING}" "productive-k3s-infra-1.2.3-4.5.6/tests/"
 
 RELEASE_ENV="$(tar -xOf "${ARCHIVE_PATH}" "productive-k3s-infra-1.2.3-4.5.6/scripts/release.env")"
@@ -80,5 +66,16 @@ assert_contains "${RELEASE_ENV}" "PK3S_INFRA_SEMVER=1.2.3"
 assert_contains "${RELEASE_ENV}" "PK3S_CORE_SEMVER=4.5.6"
 assert_contains "${RELEASE_ENV}" "PRODUCTIVE_K3S_SOURCE=remote"
 assert_contains "${RELEASE_ENV}" "PRODUCTIVE_K3S_VERSION=4.5.6"
+assert_contains "${RELEASE_ENV}" "PK3S_INFRA_RUNTIME_SURFACE=package-only"
+
+if PRODUCTIVE_K3S_INFRA_REPO_DIR="${TMP_DIR}/productive-k3s-infra-1.2.3-4.5.6" \
+  bash "${TMP_DIR}/productive-k3s-infra-1.2.3-4.5.6/productive-k3s-infra.sh" list-profiles >/tmp/pk3s-infra-release-list.out 2>&1; then
+  printf '[FAIL] package-only release unexpectedly allowed list-profiles\n' >&2
+  exit 1
+fi
+grep -q "package-only release surface" /tmp/pk3s-infra-release-list.out || {
+  printf '[FAIL] package-only release did not explain rejected list-profiles\n' >&2
+  exit 1
+}
 
 printf '[PASS] release bundle contains the curated public payload\n'

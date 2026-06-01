@@ -209,14 +209,27 @@ spec:
       - ubuntu-24.04
     architectures:
       - amd64
-  variables:
-    required:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_REGION
+  inputs:
+    - name: AWS_REGION
+      required: true
+      sensitive: false
+      source: package-default
+      description: Default AWS region used for provisioning
+    - name: AWS_KEY_PAIR_NAME
+      required: true
+      sensitive: false
+      source: local-override
+      description: Existing AWS EC2 key pair name
+    - name: AWS_SSH_KEY_PATH
+      required: true
+      sensitive: false
+      source: local-override
+      description: Absolute local path to the matching private key
   execution:
     installScript: scenario/install.sh
 ```
+
+`profile.env` remains part of the package, but it is treated as the base/default contract of the package, not as the final installation-specific configuration. `spec.inputs` defines which values may come from package defaults and which values must be supplied from the invoking machine through `--env-file`.
 
 ## Infra install flow
 

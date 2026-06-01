@@ -21,12 +21,19 @@ The repository now exposes two distinct surfaces:
 - public runtime surface: packaged `profile.tgz`
 - development surface: source-based `.env` profiles plus the scenario tree
 
+Published release bundles now ship only the package-oriented runtime surface. They do not carry source authoring assets such as `profiles/`, `scenarios/`, or the embedded Ansible scenario tree; those live in the repository and in the generated `profile.tgz` artifacts instead.
+
 Public runtime examples:
 
 ```bash
+./productive-k3s-infra.sh bom --json
 ./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
-./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz --env-file ./aws.env
 ```
+
+For packaged runtime installs, the `profile.env` embedded in the TGZ is only the base/default contract of the package. `profile.yaml` now carries `spec.inputs` metadata that declares which values can come from package defaults and which values must be supplied locally. Using a packaged profile without local overrides only makes sense for self-contained targets such as local host-driven scenarios. Installation-specific values should be passed from the invoking machine through `--env-file`, especially for cloud and on-prem profiles.
+
+Telemetry consent is only relevant for mutating public CLI flows such as `profile install`, `apply`, and `destroy`. Read-only commands like `help`, `version`, `bundle info --json`, `bom --json`, and source-surface listing/validation commands do not prompt for telemetry and do not emit command-level telemetry events.
 
 Release tags are composite:
 
