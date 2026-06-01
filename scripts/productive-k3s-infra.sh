@@ -19,9 +19,11 @@ VERSION="${PRODUCTIVE_K3S_INFRA_VERSION:-${PK3S_INFRA_RELEASE_TAG:-dev}}"
 PROFILES_DIR="${REPO_DIR}/profiles"
 TELEMETRY_EVENT_SENDER="${SCRIPT_DIR}/send-telemetry-event.sh"
 TELEMETRY_MARKER="${TELEMETRY_MARKER:-pk3s-public-v1}"
+RUNTIME_SURFACE="${PK3S_INFRA_RUNTIME_SURFACE:-source-plus-package}"
 
 PROFILE_PATH=""
 TGZ_PATH=""
+OVERRIDE_ENV_PATH="${PK3S_PROFILE_OVERRIDE_ENV_FILE:-}"
 GLOBAL_DEBUG=0
 GLOBAL_YES=0
 GLOBAL_DRY_RUN=0
@@ -92,6 +94,33 @@ prepare_telemetry_context() {
   export TELEMETRY_COMPONENT="infra"
 }
 
+infra_command_emits_telemetry() {
+  local command="${1:-}"
+  local subcommand="${2:-}"
+  case "${command}" in
+    apply|destroy)
+      return 0
+      ;;
+    profile)
+      [[ "${subcommand}" == "install" || "${subcommand}" == "apply" || "${subcommand}" == "destroy" ]]
+      return
+      ;;
+    multipass|onprem|onprem-basic|on-prem|onprem-arm|onprem-basic-arm|on-prem-arm|aws-single-node)
+      case "${subcommand:-up}" in
+        up|destroy)
+          return 0
+          ;;
+        *)
+          return 1
+          ;;
+      esac
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 write_generic_telemetry_event() {
   local event_name="$1"
   local command_name="$2"
@@ -132,6 +161,36 @@ write_generic_telemetry_event() {
 }
 
 usage() {
+  if [[ "${RUNTIME_SURFACE}" == "package-only" ]]; then
+    cat <<'EOF'
+Usage:
+  ./productive-k3s-infra.sh <command> [flags]
+  ./productive-k3s-infra.sh profile <validate|install|plan|apply|destroy|status> --tgz <file> [flags]
+
+Package-oriented commands:
+  help
+  version
+  bundle info --json
+  bom --json
+  doctor
+  profile validate --tgz <file>
+  profile install --tgz <file>
+  profile plan --tgz <file>
+  profile apply --tgz <file>
+  profile destroy --tgz <file>
+  profile status --tgz <file>
+
+Supported global flags:
+  --tgz <file>
+  --env-file <file>
+  --debug
+  --yes
+  --dry-run
+  --json
+EOF
+    return 0
+  fi
+
   cat <<'EOF'
 Usage:
   ./productive-k3s-infra.sh <command> --profile <file> [flags]
@@ -143,6 +202,7 @@ Profile-driven commands:
   help
   version
   bundle info --json
+  bom --json
   doctor
   list-profiles
   profile validate --tgz <file>
@@ -173,6 +233,17 @@ Supported global flags:
   --dry-run
   --json
 EOF
+}
+
+is_package_only_runtime() {
+  [[ "${RUNTIME_SURFACE}" == "package-only" ]]
+}
+
+require_source_surface() {
+  local command_label="$1"
+  if is_package_only_runtime; then
+    die 2 "the '${command_label}' command is not available in the package-only release surface; use 'profile <validate|install|plan|apply|destroy|status> --tgz <file>' or a source checkout"
+  fi
 }
 
 log() {
@@ -242,6 +313,120 @@ render_bundle_info_json() {
   "platform": "any",
   "api_compatibility": {
     "contract": "productive-k3s-cli-bundle-info/v1"
+  }
+}
+EOF
+}
+
+resolve_default_core_version() {
+  local defaults_script="${SCRIPT_DIR}/release-config.sh"
+  local default_core_version=""
+  if [[ -f "${defaults_script}" ]]; then
+    # shellcheck disable=SC1090
+    default_core_version="$(
+      set -a
+      source "${defaults_script}"
+      set +a
+      printf '%s' "${PRODUCTIVE_K3S_CORE_VERSION_DEFAULT:-}"
+    )"
+  fi
+  printf '%s\n' "${default_core_version}"
+}
+
+resolve_default_source_mode() {
+  local defaults_script="${SCRIPT_DIR}/release-config.sh"
+  local default_source=""
+  if [[ -f "${defaults_script}" ]]; then
+    # shellcheck disable=SC1090
+    default_source="$(
+      set -a
+      source "${defaults_script}"
+      set +a
+      printf '%s' "${PRODUCTIVE_K3S_SOURCE_DEFAULT:-}"
+    )"
+  fi
+  printf '%s\n' "${default_source:-remote}"
+}
+
+resolve_default_release_repo() {
+  local defaults_script="${SCRIPT_DIR}/release-config.sh"
+  local default_repo=""
+  if [[ -f "${defaults_script}" ]]; then
+    # shellcheck disable=SC1090
+    default_repo="$(
+      set -a
+      source "${defaults_script}"
+      set +a
+      printf '%s' "${PRODUCTIVE_K3S_RELEASE_REPO_DEFAULT:-}"
+    )"
+  fi
+  printf '%s\n' "${default_repo}"
+}
+
+render_bom_json() {
+  local bundle_json bundle_version default_core_version default_source_mode default_release_repo bound_core_version
+  bundle_json="$(render_bundle_info_json)"
+  bundle_version="${PK3S_INFRA_RELEASE_TAG:-${VERSION:-}}"
+  default_core_version="$(resolve_default_core_version)"
+  default_source_mode="$(resolve_default_source_mode)"
+  default_release_repo="$(resolve_default_release_repo)"
+  bound_core_version="${PK3S_CORE_SEMVER:-}"
+
+  cat <<EOF
+{
+  "schema_version": "1",
+  "bom_type": "productive-k3s-cli-bom/v1",
+  "cli": {
+    "name": "productive-k3s-infra",
+    "version": "${bundle_version}",
+    "entrypoint": "productive-k3s-infra.sh"
+  },
+  "implementation": {
+    "language": "bash",
+    "bash_version": "$(json_escape "${BASH_VERSION:-unknown}")"
+  },
+  "bundle": ${bundle_json},
+  "platform_support": {
+    "developer_hosts": ["linux", "macos", "windows-wsl-or-powershell"],
+    "runtime_targets": [
+      {"profile_category": "local", "path": "scenarios/local/multipass", "host": "local workstation", "driver": "multipass"},
+      {"profile_category": "edge", "path": "scenarios/edge/onprem-basic", "host": "remote linux over ssh", "driver": "ansible|shell"},
+      {"profile_category": "cloud", "path": "scenarios/cloud/aws-single-node", "host": "aws ec2 over ssh", "driver": "opentofu"}
+    ]
+  },
+  "productive_k3s": {
+    "default_source": "${default_source_mode}",
+    "default_core_version": "${default_core_version}",
+    "default_release_repo": "$(json_escape "${default_release_repo}")",
+    "bound_core_version": $(if [[ -n "${bound_core_version}" ]]; then printf '"%s"' "$(json_escape "${bound_core_version}")"; else printf 'null'; fi)
+  },
+  "requirements": {
+    "required_commands": [
+      {"name": "bash", "min_version": "5.1", "reason": "public CLI and scenario wrapper runtime"},
+      {"name": "make", "min_version": "4.3", "reason": "scenario dispatch and orchestration entrypoint"},
+      {"name": "tar", "min_version": "1.34", "reason": "profile package extraction"},
+      {"name": "mktemp", "min_version": "8.32", "reason": "temporary package and merge workspaces"}
+    ],
+    "optional_commands": [
+      {"name": "tofu", "min_version": "1.8.0", "reason": "preferred OpenTofu engine for local and cloud scenarios"},
+      {"name": "terraform", "min_version": "1.8.0", "reason": "fallback CLI when OpenTofu is unavailable"},
+      {"name": "jq", "min_version": "1.6", "reason": "JSON inspection and generated artifact helpers"},
+      {"name": "multipass", "min_version": "1.14", "reason": "local multipass scenario execution and live validation"},
+      {"name": "ansible-playbook", "min_version": "2.15", "reason": "remote on-prem scenario orchestration"},
+      {"name": "curl", "min_version": "7.81", "reason": "release artifact and helper downloads"}
+    ]
+  },
+  "scenarios": [
+    {"name": "multipass", "category": "local", "engine": "opentofu", "path": "scenarios/local/multipass"},
+    {"name": "onprem-basic", "category": "edge", "engine": "ansible|shell", "path": "scenarios/edge/onprem-basic"},
+    {"name": "onprem-basic-arm", "category": "edge", "engine": "ansible|shell", "path": "scenarios/edge/onprem-basic-arm"},
+    {"name": "aws-single-node", "category": "cloud", "engine": "opentofu", "path": "scenarios/cloud/aws-single-node"}
+  ],
+  "package_contract": {
+    "profile_tgz_supported": true,
+    "profile_env_role": "package-defaults",
+    "input_metadata": "spec.inputs",
+    "local_override_flag": "--env-file"
   }
 }
 EOF
@@ -590,6 +775,105 @@ profile_yaml_get() {
   ' "${file}"
 }
 
+profile_input_records() {
+  local file="$1"
+  awk '
+    function emit() {
+      if (name != "") {
+        print name "|" required "|" sensitive "|" source "|" description
+        name=""
+      }
+    }
+    /^spec:/ { in_spec=1; in_inputs=0; next }
+    in_spec && /^  inputs:/ { in_inputs=1; next }
+    in_inputs && /^  [a-zA-Z]/ { emit(); done=1; exit }
+    in_inputs && /^    - name:/ {
+      emit()
+      name=$3
+      required="false"
+      sensitive="false"
+      source="either"
+      description=""
+      next
+    }
+    in_inputs && /^      required:/ { required=$2; next }
+    in_inputs && /^      sensitive:/ { sensitive=$2; next }
+    in_inputs && /^      source:/ { source=$2; next }
+    in_inputs && /^      description:/ {
+      description=substr($0, index($0, ":") + 2)
+      gsub(/^"/, "", description)
+      gsub(/"$/, "", description)
+      next
+    }
+    END { if (!done) emit() }
+  ' "${file}"
+}
+
+validate_profile_input_metadata() {
+  local manifest="$1"
+  local record name required sensitive source description
+  while IFS= read -r record; do
+    [[ -n "${record}" ]] || continue
+    IFS='|' read -r name required sensitive source description <<<"${record}"
+    [[ -n "${name}" ]] || die 4 "profile package input name is required"
+    case "${required}" in
+      true|false) ;;
+      *) die 4 "profile package input '${name}' has invalid required value: ${required}" ;;
+    esac
+    case "${sensitive}" in
+      true|false) ;;
+      *) die 4 "profile package input '${name}' has invalid sensitive value: ${sensitive}" ;;
+    esac
+    case "${source}" in
+      either|package-default|local-override) ;;
+      *) die 4 "profile package input '${name}' has invalid source value: ${source}" ;;
+    esac
+  done < <(profile_input_records "${manifest}")
+}
+
+env_file_var_has_value() {
+  local env_file="$1"
+  local var_name="$2"
+  [[ -n "${env_file}" && -f "${env_file}" ]] || return 1
+  (
+    set -a
+    # shellcheck disable=SC1090
+    source "${env_file}"
+    set +a
+    [[ -n "${!var_name:-}" ]]
+  )
+}
+
+validate_profile_runtime_inputs() {
+  local manifest="$1"
+  local merged_env="$2"
+  local override_env="${3:-}"
+  local missing_local_override=()
+  local missing_defaults=()
+  local record name required sensitive source description
+
+  while IFS= read -r record; do
+    [[ -n "${record}" ]] || continue
+    IFS='|' read -r name required sensitive source description <<<"${record}"
+    [[ "${required}" == "true" ]] || continue
+    case "${source}" in
+      local-override)
+        env_file_var_has_value "${override_env}" "${name}" || missing_local_override+=("${name}")
+        ;;
+      package-default|either)
+        env_file_var_has_value "${merged_env}" "${name}" || missing_defaults+=("${name}")
+        ;;
+    esac
+  done < <(profile_input_records "${manifest}")
+
+  if ((${#missing_local_override[@]} > 0)); then
+    die 4 "required packaged profile inputs must be provided through --env-file: ${missing_local_override[*]}"
+  fi
+  if ((${#missing_defaults[@]} > 0)); then
+    die 4 "required packaged profile inputs are missing from package defaults or local overrides: ${missing_defaults[*]}"
+  fi
+}
+
 extract_tgz_to_temp() {
   local archive="$1"
   [[ -f "${archive}" ]] || die 3 "tgz package not found: ${archive}"
@@ -624,6 +908,8 @@ validate_profile_package() {
     opentofu|ansible|shell) ;;
     *) die 4 "unsupported profile package engine: ${engine_type}" ;;
   esac
+
+  validate_profile_input_metadata "${manifest}"
 
   printf '%s\n%s\n%s\n%s\n' "${profile_name}" "${scenario_type}" "${engine_type}" "${install_script}"
 }
@@ -662,6 +948,54 @@ packaged_profile_env_file() {
   printf '%s\n' "${env_file}"
 }
 
+merged_packaged_profile_env_file() {
+  local package_root="$1"
+  local override_env="${2:-}"
+  local base_env merged_env
+  base_env="$(packaged_profile_env_file "${package_root}")" || return $?
+  if [[ -z "${override_env}" ]]; then
+    printf '%s\n' "${base_env}"
+    return 0
+  fi
+  [[ -f "${override_env}" ]] || die 4 "override env file not found: ${override_env}"
+  merged_env="$(mktemp)"
+  cat "${base_env}" > "${merged_env}"
+  printf '\n' >> "${merged_env}"
+  cat "${override_env}" >> "${merged_env}"
+  printf '%s\n' "${merged_env}"
+}
+
+warn_if_packaged_profile_uses_embedded_env_only() {
+  local profile_name="$1"
+  local scenario_type="$2"
+  local override_env="${3:-}"
+  local manifest="${4:-}"
+
+  if [[ -n "${override_env}" ]]; then
+    return 0
+  fi
+
+  case "${scenario_type}" in
+    multipass)
+      return 0
+      ;;
+  esac
+
+  if [[ -n "${manifest}" ]]; then
+    while IFS= read -r record; do
+      [[ -n "${record}" ]] || continue
+      IFS='|' read -r _name _required _sensitive source _description <<<"${record}"
+      if [[ "${source}" == "local-override" ]]; then
+        break
+      fi
+    done < <(profile_input_records "${manifest}")
+    [[ "${source:-}" == "local-override" ]] || return 0
+  fi
+
+  log "WARN" "Running packaged profile '${profile_name}' without local overrides; embedded profile.env defaults will be used as-is."
+  log "WARN" "For real cloud and on-prem installs, pass installation-specific values from the invoking machine with --env-file <file>."
+}
+
 packaged_profile_scenario_dir() {
   local package_root="$1"
   local scenario_type="$2"
@@ -669,6 +1003,41 @@ packaged_profile_scenario_dir() {
   rel_dir="$(scenario_rel_dir "${scenario_type}")" || die 4 "unsupported packaged profile scenario: ${scenario_type}"
   [[ -d "${package_root}/${rel_dir}" ]] || die 4 "profile package scenario directory not found: ${rel_dir}"
   printf '%s\n' "${package_root}/${rel_dir}"
+}
+
+profile_state_dir() {
+  if [[ -n "${PK3S_PROFILE_STATE_DIR:-}" ]]; then
+    printf '%s\n' "${PK3S_PROFILE_STATE_DIR}"
+    return 0
+  fi
+  if [[ -n "${XDG_CACHE_HOME:-}" ]]; then
+    printf '%s\n' "${XDG_CACHE_HOME}/pk3s/profiles"
+    return 0
+  fi
+  printf '%s\n' "${HOME}/.cache/pk3s/profiles"
+}
+
+profile_state_path() {
+  local profile_name="$1"
+  printf '%s/%s.json\n' "$(profile_state_dir)" "${profile_name}"
+}
+
+persist_profile_state() {
+  local profile_name="$1"
+  local scenario_dir="$2"
+  local cluster_json="${scenario_dir}/generated/cluster.json"
+  [[ -f "${cluster_json}" ]] || return 0
+  local state_dir state_path
+  state_dir="$(profile_state_dir)"
+  state_path="$(profile_state_path "${profile_name}")"
+  mkdir -p "${state_dir}"
+  cp "${cluster_json}" "${state_path}"
+  log "INFO" "Persisted profile state: ${state_path}"
+}
+
+remove_profile_state() {
+  local profile_name="$1"
+  rm -f "$(profile_state_path "${profile_name}")"
 }
 
 run_packaged_profile_make() {
@@ -700,7 +1069,7 @@ run_install_profile_package() {
   local tgz_path="$1"
   local action="${2:-install}"
   local tmp_dir manifest metadata install_script install_path manifest_dir package_root
-  local scenario_type engine_type scenario_dir profile_env target
+  local profile_name scenario_type engine_type scenario_dir profile_env target cleanup_env=0
   tmp_dir="$(extract_tgz_to_temp "${tgz_path}")"
   package_root="${tmp_dir}"
   manifest="$(resolve_profile_manifest "${tmp_dir}")" || {
@@ -713,17 +1082,22 @@ run_install_profile_package() {
     rm -rf "${tmp_dir}"
     return "${rc}"
   }
+  profile_name="$(printf '%s\n' "${metadata}" | sed -n '1p')"
   scenario_type="$(printf '%s\n' "${metadata}" | sed -n '2p')"
   engine_type="$(printf '%s\n' "${metadata}" | sed -n '3p')"
   install_script="$(printf '%s\n' "${metadata}" | sed -n '4p')"
   manifest_dir="$(dirname "${manifest}")"
-  profile_env="$(packaged_profile_env_file "${package_root}")" || {
+  profile_env="$(merged_packaged_profile_env_file "${package_root}" "${OVERRIDE_ENV_PATH}")" || {
     local rc=$?
     rm -rf "${tmp_dir}"
     return "${rc}"
   }
+  if [[ "${profile_env}" != "${package_root}/profile.env" ]]; then
+    cleanup_env=1
+  fi
   scenario_dir="$(packaged_profile_scenario_dir "${package_root}" "${scenario_type}")" || {
     local rc=$?
+    if [[ "${cleanup_env}" -eq 1 ]]; then rm -f "${profile_env}"; fi
     rm -rf "${tmp_dir}"
     return "${rc}"
   }
@@ -732,30 +1106,46 @@ run_install_profile_package() {
   case "${action}" in
     install|apply)
       [[ -f "${install_path}" ]] || {
+        if [[ "${cleanup_env}" -eq 1 ]]; then rm -f "${profile_env}"; fi
         rm -rf "${tmp_dir}"
         die 4 "profile package install script not found: ${install_script}"
       }
+      validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
+      warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
       log "INFO" "Executing packaged profile installer: ${install_script}"
       (
+        set -a
+        # shellcheck disable=SC1090
+        source "${profile_env}"
+        set +a
         cd "${manifest_dir}"
         bash "${install_path}"
       )
+      persist_profile_state "${profile_name}" "${scenario_dir}"
       ;;
     status)
+      validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
+      warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
       log "INFO" "Executing packaged profile status via scenario make target"
       run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "status"
+      persist_profile_state "${profile_name}" "${scenario_dir}"
       ;;
     destroy)
       target="$(command_to_target "destroy" "${scenario_type}")" || {
         rm -rf "${tmp_dir}"
         die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
       }
+      validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
+      warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
       log "INFO" "Executing packaged profile destroy via scenario target: ${target}"
       run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "${target}"
+      remove_profile_state "${profile_name}"
       ;;
     plan)
       case "${engine_type}" in
         opentofu)
+          validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
+          warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
           log "INFO" "Executing packaged profile plan through embedded OpenTofu scenario"
           run_opentofu_plan "${scenario_dir}"
           ;;
@@ -764,6 +1154,8 @@ run_install_profile_package() {
             rm -rf "${tmp_dir}"
             die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
           }
+          validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
+          warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
           log "INFO" "Executing packaged profile plan via scenario make dry-run"
           run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "${target}" "dry-run"
           ;;
@@ -775,6 +1167,9 @@ run_install_profile_package() {
       ;;
   esac
   local rc=$?
+  if [[ "${cleanup_env}" -eq 1 ]]; then
+    rm -f "${profile_env}"
+  fi
   rm -rf "${tmp_dir}"
   return "${rc}"
 }
@@ -818,6 +1213,11 @@ while (($# > 0)); do
       TGZ_PATH="$2"
       shift 2
       ;;
+    --env-file)
+      [[ $# -ge 2 ]] || die 2 "--env-file requires a value"
+      OVERRIDE_ENV_PATH="$2"
+      shift 2
+      ;;
     --debug)
       GLOBAL_DEBUG=1
       shift
@@ -849,7 +1249,7 @@ fi
 COMMAND="${1:-help}"
 RC=0
 TELEMETRY_SCENARIO="${PK3S_INFRA_SCENARIO:-}"
-if [[ "${COMMAND}" != "help" && "${COMMAND}" != "-h" && "${COMMAND}" != "--help" && "${COMMAND}" != "version" && "${COMMAND}" != "bundle" ]]; then
+if infra_command_emits_telemetry "${1:-help}" "${2:-}"; then
   prepare_telemetry_context
   if [[ -n "${PROFILE_PATH}" && -f "${PROFILE_PATH}" ]]; then
     source_profile "${PROFILE_PATH}"
@@ -871,6 +1271,10 @@ case "${COMMAND}" in
     fi
     printf '%s\n' "${VERSION}"
     ;;
+  bom)
+    [[ "${GLOBAL_JSON}" -eq 1 ]] || die 2 "bom requires --json"
+    render_bom_json
+    ;;
   bundle)
     [[ "${2:-}" == "info" ]] || die 2 "unsupported bundle command: ${2:-}"
     [[ "${GLOBAL_JSON}" -eq 1 ]] || die 2 "bundle info requires --json"
@@ -880,6 +1284,7 @@ case "${COMMAND}" in
     run_doctor || RC=$?
     ;;
   list-profiles)
+    require_source_surface "list-profiles"
     run_list_profiles || RC=$?
     ;;
   profile)
@@ -898,18 +1303,22 @@ case "${COMMAND}" in
     esac
     ;;
   dev)
+    require_source_surface "dev"
     [[ "${2:-}" == "profile" ]] || die 2 "unsupported dev command: ${2:-}"
     run_dev_profile_command "${3:-}" || RC=$?
     ;;
   validate-profile)
+    require_source_surface "${COMMAND}"
     [[ -n "${PROFILE_PATH}" ]] || die 3 "the '${COMMAND}' command requires --profile <file>"
     run_validate_profile_only "${PROFILE_PATH}" || RC=$?
     ;;
   validate|plan|apply|destroy|status)
+    require_source_surface "${COMMAND}"
     [[ -n "${PROFILE_PATH}" ]] || die 3 "the '${COMMAND}' command requires --profile <file>"
     profile_command_dispatch "${COMMAND}" "${PROFILE_PATH}" || RC=$?
     ;;
   multipass|onprem|onprem-basic|on-prem|onprem-arm|onprem-basic-arm|on-prem-arm|aws-single-node)
+    require_source_surface "${COMMAND}"
     TELEMETRY_SCENARIO="$(resolve_scenario "${COMMAND}")"
     legacy_dispatch "$@" || RC=$?
     ;;
@@ -918,7 +1327,7 @@ case "${COMMAND}" in
     ;;
 esac
 
-if [[ "${COMMAND}" != "help" && "${COMMAND}" != "-h" && "${COMMAND}" != "--help" && "${COMMAND}" != "version" && "${COMMAND}" != "bundle" ]] && is_truthy "${TELEMETRY_ENABLED:-false}"; then
+if infra_command_emits_telemetry "${1:-help}" "${2:-}" && is_truthy "${TELEMETRY_ENABLED:-false}"; then
   if (( RC == 0 )); then
     write_generic_telemetry_event "infra.command.completed" "${COMMAND}" "success" "${TELEMETRY_SCENARIO}"
   else

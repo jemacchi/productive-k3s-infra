@@ -73,10 +73,12 @@ Ejemplos de runtime público:
 
 ```bash
 ./productive-k3s-infra.sh profile validate --tgz ./multipass-1-server-2-agents.tgz
-./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz
+./productive-k3s-infra.sh profile install --tgz ./aws-single-node-basic.tgz --env-file ./aws.env
 pk3s profile validate multipass-1-server-2-agents
-pk3s infra install aws-single-node-basic
+pk3s infra install aws-single-node-basic --env-file ./aws.env
 ```
+
+El `profile.env` embebido en un `profile.tgz` público se trata como archivo base/default del paquete, no como la configuración final específica de la instalación. `profile.yaml` declara metadata `spec.inputs` para que el runtime pueda forzar qué valores pueden salir de los defaults del paquete y cuáles deben venir desde la máquina que invoca. Usar un profile empaquetado sin overrides locales solo tiene sentido para targets autocontenidos, como escenarios locales guiados por el host. Para instalaciones reales, especialmente en cloud y on-prem, pasá overrides locales desde la máquina que invoca mediante `--env-file`.
 
 ## Usá los entrypoints de desarrollo
 
