@@ -652,6 +652,79 @@ EOF
     The output should include 'status'
   End
 
+  It 'restores persisted runtime state before packaged multipass status'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    state_dir="$(mktemp -d)"
+    mock_bin="$(mktemp -d)"
+    log_file="$(mktemp)"
+    mkdir -p "${pkg_dir}/scenarios/local/multipass/opentofu" "${pkg_dir}/scripts"
+    mkdir -p "${state_dir}/demo.runtime/generated"
+    cat >"${state_dir}/demo.runtime/generated/cluster.json" <<'EOF'
+{"cluster_name":"demo"}
+EOF
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=multipass
+PK3S_INFRA_ENGINE=opentofu
+TF_VAR_cluster_name=demo
+TF_VAR_image=ubuntu-24.04
+TF_VAR_base_domain=k3s.lab.internal
+TF_VAR_remote_dir=/srv/productive-k3s-core
+TF_VAR_server_cpus=4
+TF_VAR_server_memory=4096
+TF_VAR_server_disk=30
+TF_VAR_agent_cpus=2
+TF_VAR_agent_memory=2048
+TF_VAR_agent_disk=20
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: multipass
+  engine:
+    type: opentofu
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    cat >"${mock_bin}/make" <<'EOF'
+#!/usr/bin/env bash
+scenario_dir=""
+prev=""
+for arg in "$@"; do
+  if [ "$prev" = "-C" ]; then
+    scenario_dir="$arg"
+    break
+  fi
+  prev="$arg"
+done
+[ -f "${scenario_dir}/generated/cluster.json" ] || exit 9
+printf 'restored-state\n' >>"${MOCK_MAKE_LOG}"
+printf '%s\n' "$*" >>"${MOCK_MAKE_LOG}"
+exit 0
+EOF
+    chmod +x "${mock_bin}/make"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PATH="$1:$PATH" MOCK_MAKE_LOG="$2" PK3S_PROFILE_STATE_DIR="$3" "$4" profile status --tgz "$5"; printf "\n__MAKE__\n"; cat "$2"' bash "$mock_bin" "$log_file" "$state_dir" "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include '__MAKE__'
+    The output should include 'restored-state'
+    The output should include 'scenarios/local/multipass'
+    The output should include 'status'
+  End
+
   It 'executes package plan for an opentofu profile through embedded OpenTofu'
     work_dir="$(mktemp -d)"
     pkg_dir="${work_dir}/pkg"
