@@ -1022,6 +1022,20 @@ profile_state_path() {
   printf '%s/%s.json\n' "$(profile_state_dir)" "${profile_name}"
 }
 
+profile_runtime_state_dir() {
+  local profile_name="$1"
+  printf '%s/%s.runtime\n' "$(profile_state_dir)" "${profile_name}"
+}
+
+copy_if_exists() {
+  local source_path="$1"
+  local dest_path="$2"
+  [[ -e "${source_path}" ]] || return 0
+  mkdir -p "$(dirname "${dest_path}")"
+  rm -rf "${dest_path}"
+  cp -a "${source_path}" "${dest_path}"
+}
+
 persist_profile_state() {
   local profile_name="$1"
   local scenario_dir="$2"
@@ -1035,9 +1049,46 @@ persist_profile_state() {
   log "INFO" "Persisted profile state: ${state_path}"
 }
 
+persist_profile_runtime_state() {
+  local profile_name="$1"
+  local scenario_dir="$2"
+  local runtime_dir opentofu_dir
+  runtime_dir="$(profile_runtime_state_dir "${profile_name}")"
+  rm -rf "${runtime_dir}"
+  mkdir -p "${runtime_dir}"
+
+  copy_if_exists "${scenario_dir}/generated" "${runtime_dir}/generated"
+  opentofu_dir="${scenario_dir}/opentofu"
+  if [[ -d "${opentofu_dir}" ]]; then
+    mkdir -p "${runtime_dir}/opentofu"
+    copy_if_exists "${opentofu_dir}/.terraform" "${runtime_dir}/opentofu/.terraform"
+    copy_if_exists "${opentofu_dir}/terraform.tfstate" "${runtime_dir}/opentofu/terraform.tfstate"
+    copy_if_exists "${opentofu_dir}/terraform.tfstate.backup" "${runtime_dir}/opentofu/terraform.tfstate.backup"
+  fi
+  log "INFO" "Persisted profile runtime state: ${runtime_dir}"
+}
+
+restore_profile_runtime_state() {
+  local profile_name="$1"
+  local scenario_dir="$2"
+  local runtime_dir opentofu_dir
+  runtime_dir="$(profile_runtime_state_dir "${profile_name}")"
+  [[ -d "${runtime_dir}" ]] || return 0
+
+  copy_if_exists "${runtime_dir}/generated" "${scenario_dir}/generated"
+  opentofu_dir="${scenario_dir}/opentofu"
+  if [[ -d "${opentofu_dir}" || -d "${runtime_dir}/opentofu" ]]; then
+    mkdir -p "${opentofu_dir}"
+    copy_if_exists "${runtime_dir}/opentofu/.terraform" "${opentofu_dir}/.terraform"
+    copy_if_exists "${runtime_dir}/opentofu/terraform.tfstate" "${opentofu_dir}/terraform.tfstate"
+    copy_if_exists "${runtime_dir}/opentofu/terraform.tfstate.backup" "${opentofu_dir}/terraform.tfstate.backup"
+  fi
+}
+
 remove_profile_state() {
   local profile_name="$1"
   rm -f "$(profile_state_path "${profile_name}")"
+  rm -rf "$(profile_runtime_state_dir "${profile_name}")"
 }
 
 run_packaged_profile_make() {
@@ -1102,6 +1153,7 @@ run_install_profile_package() {
     return "${rc}"
   }
   install_path="${manifest_dir}/${install_script}"
+  restore_profile_runtime_state "${profile_name}" "${scenario_dir}"
 
   case "${action}" in
     install|apply)
@@ -1122,6 +1174,7 @@ run_install_profile_package() {
         bash "${install_path}"
       )
       persist_profile_state "${profile_name}" "${scenario_dir}"
+      persist_profile_runtime_state "${profile_name}" "${scenario_dir}"
       ;;
     status)
       validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
@@ -1129,6 +1182,7 @@ run_install_profile_package() {
       log "INFO" "Executing packaged profile status via scenario make target"
       run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "status"
       persist_profile_state "${profile_name}" "${scenario_dir}"
+      persist_profile_runtime_state "${profile_name}" "${scenario_dir}"
       ;;
     destroy)
       target="$(command_to_target "destroy" "${scenario_type}")" || {
@@ -1148,6 +1202,7 @@ run_install_profile_package() {
           warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
           log "INFO" "Executing packaged profile plan through embedded OpenTofu scenario"
           run_opentofu_plan "${scenario_dir}"
+          persist_profile_runtime_state "${profile_name}" "${scenario_dir}"
           ;;
         ansible|shell)
           target="$(command_to_target "apply" "${scenario_type}")" || {
