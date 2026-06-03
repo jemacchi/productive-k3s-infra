@@ -1049,10 +1049,32 @@ persist_profile_state() {
   log "INFO" "Persisted profile state: ${state_path}"
 }
 
+rewrite_profile_state_ssh_key_path() {
+  local profile_name="$1"
+  local stable_key_path="$2"
+  local state_path tmp_state
+  state_path="$(profile_state_path "${profile_name}")"
+  [[ -f "${state_path}" ]] || return 0
+  tmp_state="$(mktemp)"
+  jq --arg key_path "${stable_key_path}" '.ssh.key_path = $key_path' "${state_path}" > "${tmp_state}"
+  mv "${tmp_state}" "${state_path}"
+}
+
+rewrite_runtime_cluster_ssh_key_path() {
+  local runtime_dir="$1"
+  local stable_key_path="$2"
+  local cluster_json tmp_state
+  cluster_json="${runtime_dir}/generated/cluster.json"
+  [[ -f "${cluster_json}" ]] || return 0
+  tmp_state="$(mktemp)"
+  jq --arg key_path "${stable_key_path}" '.ssh.key_path = $key_path' "${cluster_json}" > "${tmp_state}"
+  mv "${tmp_state}" "${cluster_json}"
+}
+
 persist_profile_runtime_state() {
   local profile_name="$1"
   local scenario_dir="$2"
-  local runtime_dir opentofu_dir
+  local runtime_dir opentofu_dir stable_key_path
   runtime_dir="$(profile_runtime_state_dir "${profile_name}")"
   rm -rf "${runtime_dir}"
   mkdir -p "${runtime_dir}"
@@ -1064,6 +1086,11 @@ persist_profile_runtime_state() {
     copy_if_exists "${opentofu_dir}/.terraform" "${runtime_dir}/opentofu/.terraform"
     copy_if_exists "${opentofu_dir}/terraform.tfstate" "${runtime_dir}/opentofu/terraform.tfstate"
     copy_if_exists "${opentofu_dir}/terraform.tfstate.backup" "${runtime_dir}/opentofu/terraform.tfstate.backup"
+  fi
+  stable_key_path="${runtime_dir}/generated/ssh/id_ed25519"
+  if [[ -f "${stable_key_path}" ]]; then
+    rewrite_runtime_cluster_ssh_key_path "${runtime_dir}" "${stable_key_path}"
+    rewrite_profile_state_ssh_key_path "${profile_name}" "${stable_key_path}"
   fi
   log "INFO" "Persisted profile runtime state: ${runtime_dir}"
 }

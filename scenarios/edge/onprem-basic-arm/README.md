@@ -132,7 +132,7 @@ make -C scenarios/edge/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote
 Pin a specific remote `productive-k3s-core` release:
 
 ```bash
-make -C scenarios/edge/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.3
+make -C scenarios/edge/onprem-basic-arm up PRODUCTIVE_K3S_SOURCE=remote PRODUCTIVE_K3S_VERSION=0.9.4
 ```
 
 Inspect the resolved metadata:
