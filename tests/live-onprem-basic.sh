@@ -19,6 +19,19 @@ MULTIPASS_LAUNCH_RETRIES="${MULTIPASS_LAUNCH_RETRIES:-5}"
 MULTIPASS_LAUNCH_RETRY_DELAY_SECONDS="${MULTIPASS_LAUNCH_RETRY_DELAY_SECONDS:-5}"
 MULTIPASS_DELETE_TIMEOUT_SECONDS="${MULTIPASS_DELETE_TIMEOUT_SECONDS:-120}"
 
+resolve_productive_k3s_source() {
+  if [[ -n "${PRODUCTIVE_K3S_SOURCE:-}" ]]; then
+    printf '%s\n' "${PRODUCTIVE_K3S_SOURCE}"
+    return 0
+  fi
+
+  if [[ -n "${PRODUCTIVE_K3S_REPO:-}" && -d "${PRODUCTIVE_K3S_REPO}" ]]; then
+    printf 'local\n'
+  else
+    printf 'remote\n'
+  fi
+}
+
 fail() {
   printf '[FAIL] %s\n' "$1" >&2
   exit 1
@@ -190,7 +203,7 @@ ONPREM_CLUSTER_NAME=productive-k3s-core-test-onprem
 ONPREM_BASE_DOMAIN=k3s.lab.internal
 ONPREM_RANCHER_HOST=rancher.k3s.lab.internal
 ONPREM_REGISTRY_HOST=registry.k3s.lab.internal
-PRODUCTIVE_K3S_SOURCE=local
+PRODUCTIVE_K3S_SOURCE=$(resolve_productive_k3s_source)
 EOF
 
 make -C "${SCENARIO_DIR}" ONPREM_ENV_FILE="${ENV_FILE}" TELEMETRY_ENABLED=false up
