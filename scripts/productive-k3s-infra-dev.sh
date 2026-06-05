@@ -61,7 +61,6 @@ prepare_profiles_repo_checkout() {
     mkdir -p "${TEMP_PROFILES_CLONE_DIR}/productive-k3s-profiles"
     cp -a "${PRODUCTIVE_K3S_PROFILES_REPO_DIR}/." \
       "${TEMP_PROFILES_CLONE_DIR}/productive-k3s-profiles/"
-    rm -rf "${TEMP_PROFILES_CLONE_DIR}/productive-k3s-profiles/.git"
   else
     if [[ -z "${PRODUCTIVE_K3S_PROFILES_REPO_URL:-}" ]]; then
       printf 'tests that use productive-k3s-profiles require PRODUCTIVE_K3S_PROFILES_REPO_DIR or PRODUCTIVE_K3S_PROFILES_REPO_URL\n' >&2
