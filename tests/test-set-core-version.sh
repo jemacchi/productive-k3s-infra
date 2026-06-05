@@ -8,6 +8,7 @@ WORKTREE="${WORKSPACE}/productive-k3s-infra"
 PROFILES_WORKTREE="${WORKSPACE}/productive-k3s-profiles"
 CORE_REMOTE="${TMP_DIR}/core-remote.git"
 TARGET_VERSION="9.8.7"
+PROFILES_SOURCE_DIR="${PRODUCTIVE_K3S_PROFILES_REPO_DIR:-${ROOT_DIR}/../productive-k3s-profiles}"
 
 cleanup() {
   rm -rf "${TMP_DIR}"
@@ -38,7 +39,8 @@ assert_make_target() {
 
 mkdir -p "${WORKSPACE}"
 cp -a "${ROOT_DIR}/." "${WORKTREE}"
-cp -a "${ROOT_DIR}/../productive-k3s-profiles/." "${PROFILES_WORKTREE}"
+[[ -d "${PROFILES_SOURCE_DIR}/profiles" && -d "${PROFILES_SOURCE_DIR}/scenarios" ]] || fail "productive-k3s-profiles checkout not found at ${PROFILES_SOURCE_DIR}"
+cp -a "${PROFILES_SOURCE_DIR}/." "${PROFILES_WORKTREE}"
 git init --bare "${CORE_REMOTE}" >/dev/null
 
 core_seed="${TMP_DIR}/core-seed"

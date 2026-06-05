@@ -7,6 +7,8 @@ HELPERS_DIR="${ROOT_DIR}/tests/helpers"
 source "${HELPERS_DIR}/profiles-source.sh"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
+FAKE_CORE_REPO="${TMP_DIR}/productive-k3s-core"
+mkdir -p "${FAKE_CORE_REPO}"
 
 fail() {
   printf '[FAIL] %s\n' "$1" >&2
@@ -219,7 +221,7 @@ EOF
 chmod +x "${TMP_DIR}/bin/k3sup"
 
 export PATH="${TMP_DIR}/bin:${PATH}"
-export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s-core"
+export PRODUCTIVE_K3S_REPO="${FAKE_CORE_REPO}"
 export PRODUCTIVE_K3S_ENGINE="k3sup"
 
 multipass_repo="${TMP_DIR}/multipass-repo"

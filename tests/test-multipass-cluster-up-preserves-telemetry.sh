@@ -9,6 +9,8 @@ export PRODUCTIVE_K3S_PROFILES_REPO_DIR="${PRODUCTIVE_K3S_PROFILES_REPO_DIR:-${R
 SOURCE_DIR="$(profiles_scenario_dir multipass)"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
+FAKE_CORE_REPO="${TMP_DIR}/productive-k3s-core"
+mkdir -p "${FAKE_CORE_REPO}"
 
 TEST_REPO_DIR="${TMP_DIR}/repo"
 TEST_SCENARIO_DIR="${TEST_REPO_DIR}/scenarios/local/multipass"
@@ -112,7 +114,7 @@ chmod +x "${TMP_DIR}/bin/multipass"
 export CAPTURE_FILE="${TMP_DIR}/cluster-up-env.json"
 export PATH="${TMP_DIR}/bin:${PATH}"
 export SCENARIO_DIR="${TEST_SCENARIO_DIR}"
-export PRODUCTIVE_K3S_REPO="${ROOT_DIR}/../productive-k3s-core"
+export PRODUCTIVE_K3S_REPO="${FAKE_CORE_REPO}"
 export TELEMETRY_ENABLED="false"
 export TELEMETRY_ENDPOINT=""
 export TELEMETRY_MAX_RETRIES="3"
