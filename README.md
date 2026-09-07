@@ -49,6 +49,14 @@ For source-oriented workflows, Infra first normalizes the selected profile into 
 
 Telemetry consent is only relevant for mutating public CLI flows such as `profile install`, `apply`, and `destroy`. Read-only commands like `help`, `version`, `bundle info --json`, `bom --json`, and source-surface listing/validation commands do not prompt for telemetry and do not emit command-level telemetry events.
 
+For local UI and automation integrations, the public CLI also supports an operation event stream:
+
+```bash
+./productive-k3s-infra.sh --events ndjson profile install --tgz ./aws-single-node-basic.tgz --env-file ./aws.env >events.ndjson 2>human.log
+```
+
+This stream is local process output, not telemetry. With `--events ndjson`, stdout is reserved for newline-delimited JSON operation events and human-readable logs are written to stderr. Without `--events`, command output behaves as before.
+
 Release tags are composite:
 
 - `X.Y.Z`: version of `productive-k3s-infra`

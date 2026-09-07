@@ -223,6 +223,71 @@ EOF
     The output should include '"server_url": "https://10.0.0.10:6443"'
   End
 
+  It 'emits profile install operation events without mixing human logs into stdout'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    marker="${work_dir}/installed.txt"
+    state_dir="${work_dir}/state"
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=onprem-basic
+PK3S_INFRA_ENGINE=ansible
+ONPREM_SERVER_IP=10.0.0.10
+ONPREM_SSH_USER=ubuntu
+ONPREM_SSH_KEY_PATH=/tmp/id_ed25519
+EOF
+    mkdir -p "${pkg_dir}/scenarios/edge/onprem-basic/generated"
+    cat >"${pkg_dir}/scenarios/edge/onprem-basic/generated/cluster.json" <<'EOF'
+{
+  "server_url": "https://10.0.0.10:6443"
+}
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: onprem-basic
+  engine:
+    type: ansible
+  execution:
+    installScript: scripts/install.sh
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<EOF
+#!/usr/bin/env bash
+printf 'installer human stdout\n'
+printf 'installed\n' >"${marker}"
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PK3S_PROFILE_STATE_DIR="$3" "$1" --events ndjson profile install --tgz "$2"' bash "$SCRIPT" "$archive" "$state_dir"
+    The status should equal 0
+    The output should include '"schema_version":"productive-k3s-operation-event/v1"'
+    The output should include '"component":"infra"'
+    The output should include '"operation":"profile.install"'
+    The output should include '"step":"operation.started"'
+    The output should include '"step":"profile.package.extract"'
+    The output should include '"step":"profile.install.run"'
+    The output should include '"step":"profile.state.persist"'
+    The output should include '"step":"operation.completed"'
+    The output should include '"subject":"demo"'
+    The output should not include 'installer human stdout'
+    The stderr should include 'installer human stdout'
+    The stderr should include "Executing packaged profile installer"
+  End
+
+  It 'rejects unsupported operation event formats'
+    When run bash -lc '"$1" --events json version' bash "$SCRIPT"
+    The status should equal 2
+    The stderr should include 'unsupported --events format: json; supported format: ndjson'
+  End
+
   It 'lets a local env file override packaged profile env values'
     work_dir="$(mktemp -d)"
     pkg_dir="${work_dir}/pkg"
