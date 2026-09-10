@@ -577,7 +577,8 @@ resolve_scenario() {
       printf 'aws-single-node\n'
       ;;
     *)
-      return 1
+      scenario_rel_dir "$1" >/dev/null 2>&1 || return 1
+      printf '%s\n' "$1"
       ;;
   esac
 }
@@ -597,6 +598,16 @@ scenario_rel_dir() {
       printf 'scenarios/cloud/aws-single-node\n'
       ;;
     *)
+      local source_repo="${PROFILES_SOURCE_REPO_DIR:-}" rel_dir
+      if [[ -n "${source_repo}" && -d "${source_repo}/scenarios" ]]; then
+        rel_dir="$(
+          cd "${source_repo}" && \
+          find scenarios -mindepth 2 -maxdepth 2 -type d -name "$1" | sort | head -n1
+        )"
+        [[ -n "${rel_dir}" ]] || return 1
+        printf '%s\n' "${rel_dir}"
+        return 0
+      fi
       return 1
       ;;
   esac
@@ -628,7 +639,12 @@ profile_category() {
       printf 'cloud\n'
       ;;
     *)
-      return 1
+      local rel_dir category
+      rel_dir="$(scenario_rel_dir "$1")" || return 1
+      category="${rel_dir#scenarios/}"
+      category="${category%%/*}"
+      [[ -n "${category}" ]] || return 1
+      printf '%s\n' "${category}"
       ;;
   esac
 }
@@ -653,6 +669,18 @@ command_to_target() {
           ;;
         onprem-basic|onprem-basic-arm)
           return 1
+          ;;
+        *)
+          local rel_dir
+          rel_dir="$(scenario_rel_dir "${scenario}")" || return 1
+          case "${rel_dir}" in
+            scenarios/local/*|scenarios/cloud/*)
+              printf 'down\n'
+              ;;
+            *)
+              return 1
+              ;;
+          esac
           ;;
       esac
       ;;
@@ -975,16 +1003,22 @@ profile_yaml_get() {
   local file="$1"
   local key="$2"
   awk -v key="${key}" '
-    /^metadata:/ { section="metadata"; subsection=""; next }
-    /^spec:/ { section="spec"; subsection=""; next }
-    section == "spec" && /^  scenario:/ { subsection="scenario"; next }
-    section == "spec" && /^  engine:/ { subsection="engine"; next }
-    section == "spec" && /^  execution:/ { subsection="execution"; next }
+    /^metadata:/ { section="metadata"; subsection=""; nested=""; next }
+    /^spec:/ { section="spec"; subsection=""; nested=""; next }
+    section == "spec" && /^  scenario:/ { subsection="scenario"; nested=""; next }
+    section == "spec" && /^  engine:/ { subsection="engine"; nested=""; next }
+    section == "spec" && /^  execution:/ { subsection="execution"; nested=""; next }
+    section == "spec" && subsection == "execution" && /^    targets:/ { nested="targets"; next }
+    section == "spec" && /^  [a-zA-Z]/ { subsection=""; nested="" }
     section == "metadata" && key == "metadata.name" && /^  name:/ { print; exit }
     section == "metadata" && key == "metadata.version" && /^  version:/ { print; exit }
     section == "spec" && subsection == "scenario" && key == "spec.scenario.type" && /^    type:/ { print; exit }
+    section == "spec" && subsection == "scenario" && key == "spec.scenario.path" && /^    path:/ { print; exit }
     section == "spec" && subsection == "engine" && key == "spec.engine.type" && /^    type:/ { print; exit }
     section == "spec" && subsection == "execution" && key == "spec.execution.installScript" && /^    installScript:/ { print; exit }
+    section == "spec" && subsection == "execution" && nested == "targets" && key == "spec.execution.targets.apply" && /^      apply:/ { print; exit }
+    section == "spec" && subsection == "execution" && nested == "targets" && key == "spec.execution.targets.status" && /^      status:/ { print; exit }
+    section == "spec" && subsection == "execution" && nested == "targets" && key == "spec.execution.targets.destroy" && /^      destroy:/ { print; exit }
   ' "${file}"
 }
 
@@ -1078,8 +1112,9 @@ write_source_profile_manifest() {
   local target_path="$1"
   local profile_name="$2"
   local scenario_type="$3"
-  local engine_type="$4"
-  local package_metadata="$5"
+  local scenario_path="$4"
+  local engine_type="$5"
+  local package_metadata="$6"
 
   {
     printf 'apiVersion: infra.productive-k3s.io/v1\n'
@@ -1091,10 +1126,17 @@ write_source_profile_manifest() {
     printf 'spec:\n'
     printf '  scenario:\n'
     printf '    type: %s\n' "${scenario_type}"
+    printf '    path: %s\n' "${scenario_path}"
     printf '  engine:\n'
     printf '    type: %s\n' "${engine_type}"
     printf '  execution:\n'
     printf '    installScript: scripts/install.sh\n'
+    printf '    targets:\n'
+    printf '      apply: up\n'
+    printf '      status: status\n'
+    if [[ "${engine_type}" == "opentofu" ]]; then
+      printf '      destroy: down\n'
+    fi
     copy_profile_package_inputs_block "${package_metadata}" /dev/stdout
   } > "${target_path}"
 }
@@ -1127,7 +1169,7 @@ create_source_profile_tgz() {
       cp -R "${REPO_DIR}/ansible/roles/remote_cluster/files" "${package_root}/ansible/roles/remote_cluster/"
       ;;
   esac
-  write_source_profile_manifest "${package_root}/profile.yaml" "${profile_name}" "${scenario_type}" "${engine_type}" "${package_metadata}"
+  write_source_profile_manifest "${package_root}/profile.yaml" "${profile_name}" "${scenario_type}" "${scenario_dir_rel}" "${engine_type}" "${package_metadata}"
   write_source_profile_install_wrapper "${package_root}/scripts/install.sh" "${scenario_type}" "${scenario_dir_rel}"
   tar -czf "${output_tgz}" -C "${package_root}" .
   rm -rf "${package_root}"
@@ -1248,6 +1290,29 @@ validate_profile_input_metadata() {
   done < <(profile_input_records "${manifest}")
 }
 
+validate_profile_package_relative_path() {
+  local field="$1"
+  local value="$2"
+  [[ -n "${value}" ]] || return 0
+  [[ "${value}" != /* ]] || die 4 "profile package ${field} must be a relative path: ${value}"
+  case "${value}" in
+    *..*|.*)
+      die 4 "profile package ${field} must not contain relative traversal: ${value}"
+      ;;
+  esac
+}
+
+validate_profile_package_target() {
+  local field="$1"
+  local value="$2"
+  [[ -n "${value}" ]] || return 0
+  case "${value}" in
+    *[!A-Za-z0-9_.:-]*)
+      die 4 "profile package ${field} has invalid make target: ${value}"
+      ;;
+  esac
+}
+
 env_file_var_has_value() {
   local env_file="$1"
   local var_name="$2"
@@ -1310,16 +1375,25 @@ resolve_profile_manifest() {
 
 validate_profile_package() {
   local manifest="$1"
-  local profile_name scenario_type engine_type install_script
+  local profile_name scenario_type scenario_path engine_type install_script apply_target status_target destroy_target
   profile_name="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "metadata.name")")"
   scenario_type="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.scenario.type")")"
+  scenario_path="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.scenario.path")")"
   engine_type="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.engine.type")")"
   install_script="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.execution.installScript")")"
+  apply_target="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.execution.targets.apply")")"
+  status_target="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.execution.targets.status")")"
+  destroy_target="$(trim_yaml_value "$(profile_yaml_get "${manifest}" "spec.execution.targets.destroy")")"
 
   [[ -n "${profile_name}" ]] || die 4 "profile package metadata.name is required"
   [[ -n "${scenario_type}" ]] || die 4 "profile package spec.scenario.type is required"
   [[ -n "${engine_type}" ]] || die 4 "profile package spec.engine.type is required"
   [[ -n "${install_script}" ]] || die 4 "profile package spec.execution.installScript is required"
+  validate_profile_package_relative_path "spec.scenario.path" "${scenario_path}"
+  validate_profile_package_relative_path "spec.execution.installScript" "${install_script}"
+  validate_profile_package_target "spec.execution.targets.apply" "${apply_target}"
+  validate_profile_package_target "spec.execution.targets.status" "${status_target}"
+  validate_profile_package_target "spec.execution.targets.destroy" "${destroy_target}"
 
   case "${engine_type}" in
     opentofu|ansible|shell) ;;
@@ -1328,12 +1402,12 @@ validate_profile_package() {
 
   validate_profile_input_metadata "${manifest}"
 
-  printf '%s\n%s\n%s\n%s\n' "${profile_name}" "${scenario_type}" "${engine_type}" "${install_script}"
+  printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' "${profile_name}" "${scenario_type}" "${engine_type}" "${install_script}" "${scenario_path}" "${apply_target}" "${status_target}" "${destroy_target}"
 }
 
 run_validate_profile_package() {
   local tgz_path="$1"
-  local tmp_dir manifest metadata profile_name scenario_type engine_type install_script
+  local tmp_dir manifest metadata profile_name scenario_type engine_type install_script scenario_path
   emit_operation_event "profile.validate" "profile.package.extract" "running" "Extracting profile package" "${tgz_path}"
   tmp_dir="$(extract_tgz_to_temp "${tgz_path}")" || {
     local rc=$?
@@ -1360,10 +1434,14 @@ run_validate_profile_package() {
   scenario_type="$(printf '%s\n' "${metadata}" | sed -n '2p')"
   engine_type="$(printf '%s\n' "${metadata}" | sed -n '3p')"
   install_script="$(printf '%s\n' "${metadata}" | sed -n '4p')"
+  scenario_path="$(printf '%s\n' "${metadata}" | sed -n '5p')"
   OPERATION_SUBJECT="${profile_name}"
 
   log "INFO" "Profile package: ${profile_name}"
   log "INFO" "Scenario: ${scenario_type}"
+  if [[ -n "${scenario_path}" ]]; then
+    log "INFO" "Scenario path: ${scenario_path}"
+  fi
   log "INFO" "Engine: ${engine_type}"
   log "INFO" "Install script: ${install_script}"
   log "OK" "Profile package validation passed"
@@ -1429,10 +1507,50 @@ warn_if_packaged_profile_uses_embedded_env_only() {
 packaged_profile_scenario_dir() {
   local package_root="$1"
   local scenario_type="$2"
+  local scenario_path="${3:-}"
   local rel_dir
-  rel_dir="$(scenario_rel_dir "${scenario_type}")" || die 4 "unsupported packaged profile scenario: ${scenario_type}"
+  if [[ -n "${scenario_path}" ]]; then
+    rel_dir="${scenario_path}"
+  else
+    rel_dir="$(scenario_rel_dir "${scenario_type}")" || die 4 "unsupported packaged profile scenario: ${scenario_type}"
+  fi
   [[ -d "${package_root}/${rel_dir}" ]] || die 4 "profile package scenario directory not found: ${rel_dir}"
   printf '%s\n' "${package_root}/${rel_dir}"
+}
+
+packaged_profile_target() {
+  local action="$1"
+  local scenario_type="$2"
+  local apply_target="${3:-}"
+  local status_target="${4:-}"
+  local destroy_target="${5:-}"
+
+  case "${action}" in
+    install|apply)
+      if [[ -n "${apply_target}" ]]; then
+        printf '%s\n' "${apply_target}"
+      else
+        command_to_target "apply" "${scenario_type}"
+      fi
+      ;;
+    status)
+      if [[ -n "${status_target}" ]]; then
+        printf '%s\n' "${status_target}"
+      else
+        command_to_target "status" "${scenario_type}"
+      fi
+      ;;
+    destroy)
+      if [[ -n "${destroy_target}" ]]; then
+        printf '%s\n' "${destroy_target}"
+      else
+        command_to_target "destroy" "${scenario_type}"
+      fi
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 profile_state_dir() {
@@ -1684,7 +1802,8 @@ run_install_profile_package() {
   local tgz_path="$1"
   local action="${2:-install}"
   local tmp_dir manifest metadata install_script install_path manifest_dir package_root
-  local profile_name scenario_type engine_type scenario_dir profile_env target cleanup_env=0
+  local profile_name scenario_type scenario_path engine_type scenario_dir profile_env target cleanup_env=0
+  local apply_target status_target destroy_target
   local operation="profile.${action}"
   emit_operation_event "${operation}" "profile.package.extract" "running" "Extracting profile package" "${tgz_path}"
   tmp_dir="$(extract_tgz_to_temp "${tgz_path}")" || {
@@ -1713,6 +1832,10 @@ run_install_profile_package() {
   scenario_type="$(printf '%s\n' "${metadata}" | sed -n '2p')"
   engine_type="$(printf '%s\n' "${metadata}" | sed -n '3p')"
   install_script="$(printf '%s\n' "${metadata}" | sed -n '4p')"
+  scenario_path="$(printf '%s\n' "${metadata}" | sed -n '5p')"
+  apply_target="$(printf '%s\n' "${metadata}" | sed -n '6p')"
+  status_target="$(printf '%s\n' "${metadata}" | sed -n '7p')"
+  destroy_target="$(printf '%s\n' "${metadata}" | sed -n '8p')"
   OPERATION_SUBJECT="${profile_name}"
   emit_operation_event "${operation}" "profile.package.validate" "success" "Profile package validation passed" "${profile_name}"
   manifest_dir="$(dirname "${manifest}")"
@@ -1728,7 +1851,7 @@ run_install_profile_package() {
     cp "${profile_env}" "${package_root}/profile.env"
     profile_env="${package_root}/profile.env"
   fi
-  scenario_dir="$(packaged_profile_scenario_dir "${package_root}" "${scenario_type}")" || {
+  scenario_dir="$(packaged_profile_scenario_dir "${package_root}" "${scenario_type}" "${scenario_path}")" || {
     local rc=$?
     emit_operation_event "${operation}" "profile.env.prepare" "failed" "Profile scenario directory could not be resolved" "${profile_name}"
     if [[ "${cleanup_env}" -eq 1 ]]; then rm -f "${profile_env}"; fi
@@ -1788,9 +1911,13 @@ run_install_profile_package() {
       validate_profile_runtime_inputs "${manifest}" "${profile_env}" "${OVERRIDE_ENV_PATH}"
       emit_operation_event "${operation}" "profile.inputs.validate" "success" "Profile runtime inputs validated" "${profile_name}"
       warn_if_packaged_profile_uses_embedded_env_only "${profile_name}" "${scenario_type}" "${OVERRIDE_ENV_PATH}" "${manifest}"
+      target="$(packaged_profile_target "status" "${scenario_type}" "${apply_target}" "${status_target}" "${destroy_target}")" || {
+        rm -rf "${tmp_dir}"
+        die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
+      }
       log "INFO" "Executing packaged profile status via scenario make target"
       emit_operation_event "${operation}" "profile.status.run" "running" "Executing packaged profile status" "${profile_name}"
-      run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "status" || {
+      run_packaged_profile_make "${package_root}" "${profile_env}" "${scenario_dir}" "${target}" || {
         local rc=$?
         emit_operation_event "${operation}" "profile.status.run" "failed" "Packaged profile status failed" "${profile_name}"
         if [[ "${cleanup_env}" -eq 1 ]]; then rm -f "${profile_env}"; fi
@@ -1804,7 +1931,7 @@ run_install_profile_package() {
       emit_operation_event "${operation}" "profile.state.persist" "success" "Profile state persisted" "${profile_name}"
       ;;
     destroy)
-      target="$(command_to_target "destroy" "${scenario_type}")" || {
+      target="$(packaged_profile_target "destroy" "${scenario_type}" "${apply_target}" "${status_target}" "${destroy_target}")" || {
         rm -rf "${tmp_dir}"
         die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
       }
@@ -1848,7 +1975,7 @@ run_install_profile_package() {
           emit_operation_event "${operation}" "profile.runtime.persist" "success" "Profile runtime state persisted" "${profile_name}"
           ;;
         ansible|shell)
-          target="$(command_to_target "apply" "${scenario_type}")" || {
+          target="$(packaged_profile_target "apply" "${scenario_type}" "${apply_target}" "${status_target}" "${destroy_target}")" || {
             rm -rf "${tmp_dir}"
             die 2 "unsupported packaged profile command '${action}' for scenario '${scenario_type}'"
           }

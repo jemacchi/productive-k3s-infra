@@ -725,6 +725,55 @@ EOF
     The output should include 'status'
   End
 
+  It 'executes declarative packaged scenario paths without built-in scenario mapping'
+    work_dir="$(mktemp -d)"
+    pkg_dir="${work_dir}/pkg"
+    archive="${work_dir}/demo-profile.tgz"
+    mock_bin="$(mktemp -d)"
+    log_file="$(mktemp)"
+    mkdir -p "${pkg_dir}/scenarios/custom/future-profile" "${pkg_dir}/scripts"
+    cat >"${pkg_dir}/profile.env" <<'EOF'
+PK3S_INFRA_PROFILE_NAME=demo
+PK3S_INFRA_SCENARIO=future-profile
+PK3S_INFRA_ENGINE=shell
+EOF
+    cat >"${pkg_dir}/profile.yaml" <<'EOF'
+apiVersion: infra.productive-k3s.io/v1
+kind: Profile
+metadata:
+  name: demo
+  version: 0.1.0
+spec:
+  scenario:
+    type: future-profile
+    path: scenarios/custom/future-profile
+  engine:
+    type: shell
+  execution:
+    installScript: scripts/install.sh
+    targets:
+      status: inspect
+EOF
+    cat >"${pkg_dir}/scripts/install.sh" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "${pkg_dir}/scripts/install.sh"
+    cat >"${mock_bin}/make" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${MOCK_MAKE_LOG}"
+exit 0
+EOF
+    chmod +x "${mock_bin}/make"
+    tar -czf "${archive}" -C "${pkg_dir}" .
+
+    When run bash -lc 'PATH="$1:$PATH" MOCK_MAKE_LOG="$2" "$3" profile status --tgz "$4"; printf "\n__MAKE__\n"; cat "$2"' bash "$mock_bin" "$log_file" "$SCRIPT" "$archive"
+    The status should equal 0
+    The output should include '__MAKE__'
+    The output should include 'scenarios/custom/future-profile'
+    The output should include 'inspect'
+  End
+
   It 'restores persisted runtime state before packaged multipass status'
     work_dir="$(mktemp -d)"
     pkg_dir="${work_dir}/pkg"
